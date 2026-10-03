@@ -86,7 +86,9 @@ export async function render({ query }) {
       const n = inscs.filter((i) => i.classId === c.id).length;
       return h('article', { class: 'panel clase-panel' },
         h('header', { class: 'clase-panel__cab', style: { '--c': c.color || '#6C4CF5' } }, h('div', {}, h('h2', {}, c.nombre), h('small', { class: 'suave' }, `${c.grado}.º${c.grupo ? ` · ${c.grupo}` : ''} · ${n} estudiante${n === 1 ? '' : 's'}`)),
-          h('button', { class: 'codigo', type: 'button', title: 'Compartir código, enlace y QR', onclick: () => modalCompartir(c) }, c.codigo, icono('qr', { tam: 14 }))),
+          h('div', { class: 'codigos' },
+            c.claveAlumnos ? h('div', { class: 'codigos__item' }, h('small', {}, 'Ingreso por lista (2.º)'), h('button', { class: 'codigo codigo--acceso', type: 'button', title: 'Los niños escriben este código y tocan su nombre', onclick: async () => { try { await navigator.clipboard.writeText(c.claveAlumnos); toast(`Código ${c.claveAlumnos} copiado`); } catch { toast(`Código: ${c.claveAlumnos}`, { tipo: 'info' }); } } }, c.claveAlumnos, icono('copy', { tam: 14 }))) : null,
+            h('div', { class: 'codigos__item' }, h('small', {}, 'Con cuenta de Google'), h('button', { class: 'codigo', type: 'button', title: 'Compartir código, enlace y QR', onclick: () => modalCompartir(c) }, c.codigo, icono('qr', { tam: 14 }))))),
         h('div', { class: 'fila fila--envuelve' },
           h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => modalAlumnos({ clase: c, alTerminar: refrescar }) }, icono('users', { tam: 16 }), 'Agregar estudiantes'),
           h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => modalClase({ clase: c, alGuardar: refrescar }) }, icono('edit', { tam: 16 }), 'Editar'),

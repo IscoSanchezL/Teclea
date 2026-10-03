@@ -68,3 +68,8 @@
 .marca__vista img { max-width: 100%; max-height: 9rem; object-fit: contain; }
 .marca__vista--hero img { width: 100%; max-height: 10rem; object-fit: cover; }
 .marca__vista + .fila input[type=file] { max-width: 100%; }
+
+.codigos { display: flex; flex-wrap: wrap; gap: .5rem .9rem; justify-content: flex-end; }
+.codigos__item { display: flex; flex-direction: column; align-items: flex-end; gap: .15rem; }
+.codigos__item small { font-size: .68rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+.codigo--acceso { border-style: solid; border-color: var(--primario); color: var(--primario); }
