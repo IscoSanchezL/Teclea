@@ -28,6 +28,9 @@ export async function render({ query }) {
     h('label', { for: 'consentimiento' }, 'Mi colegio y mis acudientes autorizaron el uso de esta plataforma. Leí el ',
       h('a', { href: '#/privacidad', target: '_blank', rel: 'noopener' }, 'aviso de privacidad'), '.'));
 
+  // Versión de la app en este dispositivo (sirve para saber si hay una copia vieja guardada)
+  const versionApp = h('p', { class: 'suave pequeno', style: { opacity: .6 } }, '');
+  fetch('precache.json', { cache: 'no-store' }).then((r) => r.json()).then((j) => { versionApp.textContent = `Versión ${String(j.version).slice(0, 8)}`; }).catch(() => {});
   const mensaje = h('p', { class: 'mensaje-error', role: 'alert', hidden: true });
   const mostrarError = (t) => { mensaje.textContent = t; mensaje.hidden = !t; };
 
@@ -100,7 +103,8 @@ export async function render({ query }) {
     try {
       const clave = fCodigo.input.value;
       const lista = await listaPorClave(clave);
-      if (!lista?.estudiantes?.length) { mostrarError('No encontré esa clase. Revisa el código con tu profe.'); return; }
+      if (!lista) { mostrarError('No existe ninguna lista con ese código. Revisa que lo escribiste igual que tu profe. (Si tu profe ya lo creó, debe pulsar “Publicar lista” en su panel.)'); return; }
+      if (!lista.estudiantes?.length) { mostrarError('La clase existe, pero todavía no tiene estudiantes en la lista. Avísale a tu profe.'); return; }
       mostrarNombres(clave, lista.estudiantes);
     } catch (err) { console.error(err); mostrarError(mensajeError(err)); }
     finally { carga(false, btnCodigo); }
@@ -137,5 +141,5 @@ export async function render({ query }) {
     h('div', { class: 'login__panel' },
       h('div', { class: 'login__form' }, h('h1', {}, `Bienvenido a ${marca.nombre}`), h('p', { class: 'login__sub' }, 'Elige cómo quieres entrar.'), tabs),
       panelCodigo, panelGoogle, panelDocente,
-      h('div', { class: 'login__form' }, bloqueConsent, mensaje, demo, h('p', { class: 'suave pequeno' }, 'Solo guardamos lo necesario para tu progreso. Sin anuncios ni rastreadores.'))));
+      h('div', { class: 'login__form' }, bloqueConsent, mensaje, demo, h('p', { class: 'suave pequeno' }, 'Solo guardamos lo necesario para tu progreso. Sin anuncios ni rastreadores.'), versionApp)));
 }
