@@ -61,9 +61,18 @@ export function vincularEntrada({ motor, teclado, zona, alPausar = () => {}, alF
     [ta, 'blur', onBlur], [ta, 'focus', onFocus], [zona, 'pointerdown', () => setTimeout(() => ta.focus(), 0)]];
   L.forEach(([n, ev, fn]) => n.addEventListener(ev, fn));
 
+  // Si el foco se pierde (clic en otro lado, cambio de pantalla…), la primera tecla lo recupera para que no haya que refrescar.
+  const recuperarFoco = (e) => {
+    const a = document.activeElement;
+    if (a === ta || e.ctrlKey || e.metaKey || motor.pausado || motor.terminado || /^(INPUT|TEXTAREA|SELECT)$/.test(a?.tagName || '')) return;
+    if (e.key === 'Escape' || e.key === 'Tab') return;
+    ta.focus({ preventScroll: true });
+  };
+  document.addEventListener('keydown', recuperarFoco, true);
+
   return {
     enfocar: () => ta.focus({ preventScroll: true }),
-    destruir() { L.forEach(([n, ev, fn]) => n.removeEventListener(ev, fn)); ta.remove(); },
+    destruir() { L.forEach(([n, ev, fn]) => n.removeEventListener(ev, fn)); document.removeEventListener('keydown', recuperarFoco, true); ta.remove(); },
     campo: ta,
   };
 }

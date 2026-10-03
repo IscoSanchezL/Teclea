@@ -9,7 +9,7 @@ import { perfilDeGrado } from '../../core/grados.js';
 import { cargarLeccion, cargarIndice, siguienteDe, estadoLecciones, textoParaGrado, segundosParaGrado, calcularEstrellas } from '../../lessons/curriculo.js';
 import { crearEjercicio } from '../../lessons/ejercicio-ui.js';
 import { crearTeclado } from '../../lessons/teclado-virtual.js';
-import { DEDOS, dedoDeCaracter } from '../../lessons/teclado-datos.js';
+import { DEDOS, dedoDeCaracter, pasosPara } from '../../lessons/teclado-datos.js';
 import { cargarProgreso, registrarActividad } from '../../db/progreso.js';
 import { mascota } from '../art.js';
 import { icono } from '../icons.js';
@@ -90,6 +90,7 @@ export async function render({ query }) {
     detenerDemo = kb.demo(chars);
     if (bloqueado) {
       let saltar = null;
+      const permitidas = new Set(chars.flatMap((c) => pasosPara(c, state.prefs.tecladoIdioma).map((p) => p.code)));
       const habilitar = () => {
         if (!boton.disabled) return;
         boton.disabled = false; boton.classList.remove('btn--esperando'); boton.classList.add('btn--listo');
@@ -98,7 +99,8 @@ export async function render({ query }) {
       const alTecla = (e) => {
         if (e.ctrlKey || e.metaKey || e.altKey && e.key !== 'AltGraph') return;
         kb.presionar(e.code, true); setTimeout(() => kb.presionar(e.code, false), 160);
-        if (boton.disabled) { if (kb.codigosIluminados().includes(e.code)) habilitar(); }
+        // Basta con pulsar CUALQUIERA de las teclas de la demostración (el brillo cambia cada segundo y el niño puede tardar)
+        if (boton.disabled) { if (permitidas.has(e.code) || kb.codigosIluminados().includes(e.code) || chars.includes(String(e.key).toLowerCase())) habilitar(); }
         else if (e.key === 'Enter') { e.preventDefault(); boton.click(); }
       };
       document.addEventListener('keydown', alTecla);
