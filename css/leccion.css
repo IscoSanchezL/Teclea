@@ -60,24 +60,29 @@
 /* ───────── Teclado virtual ───────── */
 .kv { container-type: inline-size; display: flex; flex-direction: column; align-items: center; gap: .6rem; width: 100%; }
 .kv[data-modo="oculto"] { display: none; }
-.kv__teclado { --k: calc(100cqw / 15.5); width: 100%; max-width: 880px; display: flex; flex-direction: column; gap: calc(var(--k) * .1); padding: calc(var(--k) * .25); border-radius: calc(var(--k) * .5);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--superficie) 70%, transparent), var(--superficie-2)); border: 1px solid var(--borde); box-shadow: var(--sombra-2); }
+.kv__teclado { --k: calc(100cqw / 15.5); width: 100%; max-width: 880px; display: flex; flex-direction: column; gap: calc(var(--k) * .1); padding: calc(var(--k) * .28); border-radius: calc(var(--k) * .5);
+  background: linear-gradient(165deg, color-mix(in srgb, var(--superficie) 82%, #fff), var(--superficie-2) 60%, color-mix(in srgb, var(--superficie-2) 80%, #000));
+  border: 1px solid var(--borde);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .35), inset 0 calc(var(--k) * -.12) calc(var(--k) * .25) rgba(0, 0, 0, .12), 0 calc(var(--k) * .22) 0 color-mix(in srgb, var(--superficie-2) 60%, #000), 0 calc(var(--k) * .5) calc(var(--k) * .6) calc(var(--k) * -.2) rgba(10, 6, 50, .45);
+  transform: perspective(1400px) rotateX(5deg); transform-origin: 50% 100%; }
 .kv__fila { display: flex; gap: calc(var(--k) * .1); }
 .kv__k { position: relative; flex: var(--w) 1 0; min-width: 0; height: calc(var(--k) * .92); display: grid; place-items: center; border-radius: calc(var(--k) * .2);
-  background: color-mix(in srgb, var(--dedo) 20%, var(--superficie)); color: var(--texto); font: 700 calc(var(--k) * .36) var(--fuente-titulo);
-  box-shadow: 0 calc(var(--k) * .07) 0 color-mix(in srgb, var(--dedo) 38%, var(--borde)); transition: transform .08s, box-shadow .08s, background .12s; user-select: none; }
-.kv__k:not([data-dedo]) { --dedo: var(--texto-suave); background: var(--superficie-2); color: var(--texto-suave); box-shadow: 0 calc(var(--k) * .07) 0 var(--borde); font-size: calc(var(--k) * .26); }
+  background: linear-gradient(180deg, color-mix(in srgb, var(--dedo) 30%, #fff 12%) 0%, color-mix(in srgb, var(--dedo) 26%, var(--superficie)) 55%, color-mix(in srgb, var(--dedo) 36%, var(--superficie)) 100%);
+  color: var(--texto); font: 700 calc(var(--k) * .36) var(--fuente-titulo); text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
+  box-shadow: inset 0 calc(var(--k) * .035) 0 rgba(255, 255, 255, .55), inset 0 calc(var(--k) * -.05) calc(var(--k) * .05) rgba(0, 0, 0, .13), 0 calc(var(--k) * .09) 0 color-mix(in srgb, var(--dedo) 55%, #1B1250), 0 calc(var(--k) * .15) calc(var(--k) * .1) rgba(10, 6, 50, .3);
+  transition: transform .08s, box-shadow .08s, background .12s; user-select: none; }
+.kv__k:not([data-dedo]) { --dedo: var(--texto-suave); background: linear-gradient(180deg, color-mix(in srgb, var(--superficie-2) 80%, #fff), var(--superficie-2)); color: var(--texto-suave); box-shadow: inset 0 calc(var(--k) * .035) 0 rgba(255, 255, 255, .4), 0 calc(var(--k) * .08) 0 color-mix(in srgb, var(--superficie-2) 55%, #1B1250), 0 calc(var(--k) * .13) calc(var(--k) * .08) rgba(10, 6, 50, .25); font-size: calc(var(--k) * .26); }
 .kv__k--relleno { visibility: hidden; }
 .kv__sup { position: absolute; top: 7%; left: 11%; font-size: .55em; opacity: .65; font-weight: 700; }
 .kv__etq { line-height: 1; }
 .kv__k[data-code="KeyF"]::after, .kv__k[data-code="KeyJ"]::after { content: ''; position: absolute; bottom: 14%; width: 34%; height: 5%; border-radius: 4px; background: currentColor; opacity: .55; }
 .kv__k--muerta .kv__etq { color: var(--primario); }
 .kv__k--sig { background: linear-gradient(160deg, color-mix(in srgb, var(--dedo) 55%, #fff), var(--dedo)) !important; color: #1D1A3A !important; transform: translateY(calc(var(--k) * -.06)) scale(1.07); z-index: 2;
-  box-shadow: 0 0 0 3px #fff, 0 0 calc(var(--k) * .7) var(--dedo), 0 calc(var(--k) * .1) 0 color-mix(in srgb, var(--dedo) 60%, #000) !important; animation: kv-late 1s ease-in-out infinite; }
+  box-shadow: inset 0 calc(var(--k) * .05) 0 rgba(255, 255, 255, .7), 0 0 0 3px #fff, 0 0 calc(var(--k) * .8) var(--dedo), 0 calc(var(--k) * .12) 0 color-mix(in srgb, var(--dedo) 60%, #000), 0 calc(var(--k) * .2) calc(var(--k) * .15) rgba(10, 6, 50, .4) !important; animation: kv-late 1s ease-in-out infinite; }
 @keyframes kv-late { 50% { transform: translateY(calc(var(--k) * -.1)) scale(1.1); } }
 .kv__k--paso2 { filter: saturate(1.3); }
 .kv__k--mod { outline: 3px dashed var(--dedo); outline-offset: 2px; background: color-mix(in srgb, var(--dedo) 45%, var(--superficie)); animation: kv-late 1s ease-in-out infinite; }
-.kv__k--presionada { transform: translateY(calc(var(--k) * .06)); box-shadow: 0 0 0 transparent; filter: brightness(.92); }
+.kv__k--presionada { transform: translateY(calc(var(--k) * .07)); box-shadow: inset 0 calc(var(--k) * .03) calc(var(--k) * .05) rgba(0, 0, 0, .25), 0 calc(var(--k) * .02) 0 color-mix(in srgb, var(--dedo) 55%, #1B1250); filter: brightness(.94); }
 .kv__k--mal { animation: kv-mal .36s; }
 @keyframes kv-mal { 0%, 100% { transform: none; } 25% { transform: translateX(-4px); background: var(--mal-fondo); } 75% { transform: translateX(4px); background: var(--mal-fondo); box-shadow: 0 0 0 3px var(--mal); } }
 .kv__ayuda { margin: 0; min-height: 1.5em; font-weight: 800; color: var(--primario); text-align: center; }
@@ -163,7 +168,6 @@
 
 /* Estilos por grado */
 [data-estilo="ludico"] .t--act { box-shadow: 0 4px 10px -3px var(--sombra-color); }
-[data-estilo="ludico"] .kv__k { border: 1.5px solid var(--borde-suave); }
 [data-estilo="staff"] .t--act { box-shadow: 0 2px 0 var(--primario); }
 
 .tutorial { display: flex; align-items: center; gap: var(--e4); flex-wrap: wrap; border: 2px dashed var(--primario); }
