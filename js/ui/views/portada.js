@@ -69,7 +69,7 @@ export async function render() {
     h('div', { class: 'encabezado-seccion encabezado-seccion--centro' },
       h('h2', { id: 'titulo-demo' }, 'Cada dedo tiene su color'),
       h('p', { class: 'suave' }, 'Mira cómo se teclea: cada tecla se escribe con el dedo de su mismo color.')),
-    h('div', { class: 'demo-pantalla card' },
+    h('div', { class: 'demo-pantalla card', 'data-tilt': '' },
       h('div', { class: 'demo-pantalla__barra', 'aria-hidden': 'true' }, h('i'), h('i'), h('i'), h('span', {}, 'mi-primera-leccion')),
       h('p', { class: 'demo-pantalla__linea', 'aria-label': FRASES[1] }, texto, h('span', { class: 'demo-pantalla__cursor', 'aria-hidden': 'true' })),
       kb.el,

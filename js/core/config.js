@@ -38,6 +38,9 @@ export const CONFIG = {
     messagingSenderId: 'REEMPLAZA',
     appId: 'REEMPLAZA',
   },
+  // App Check (recomendado): clave pública de reCAPTCHA v3 registrada en Firebase → App Check.
+  // Evita que otros sitios o scripts usen tu proyecto. Déjala '' hasta registrarla (ver docs/CONFIABILIDAD.md).
+  appCheckSiteKey: '',
   firebaseSdk: '10.14.1', // versión del SDK modular cargado por CDN
 
   version: '0.1.0',

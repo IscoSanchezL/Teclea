@@ -36,6 +36,14 @@ export function aplicarPrefs(prefs = state.prefs) {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', oscuro ? '#13112A' : '#6C4CF5');
 }
 
+/** Estilo según quién entra: personal docente/administrativo → "staff" (sobrio); estudiantes → por grado. */
+export function aplicarEstiloUsuario(u) {
+  const staff = u && (u.rol === 'docente' || u.rol === 'admin');
+  document.documentElement.dataset.estilo = staff ? 'staff' : u?.grado ? estiloPorGrado(u.grado) : 'medio';
+  aplicarPrefs();
+}
+
+/** Vista previa del estilo de un grado (pantalla de bienvenida). */
 export function aplicarEstiloGrado(grado) {
   document.documentElement.dataset.estilo = grado ? estiloPorGrado(grado) : 'medio';
   aplicarPrefs(); // el tema "automático" depende del estilo

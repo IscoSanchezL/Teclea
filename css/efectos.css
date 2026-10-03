@@ -1,0 +1,96 @@
+/* ============================================================
+   TECLEA · Efectos "vivos": luz que sigue al puntero, bordes de gradiente giratorio,
+   aurora, grano, revelado por scroll, inclinación 3D, estado de red y paleta de comandos.
+   (Todo se anula con movimiento reducido y en la interfaz "staff".)
+   ============================================================ */
+
+@property --ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+@keyframes ang-gira { to { --ang: 360deg; } }
+
+:root { --luz: rgba(108, 76, 245, .12); }
+[data-theme="dark"] { --luz: rgba(255, 255, 255, .08); }
+
+/* ── Foco de luz bajo el puntero ── */
+.card, .tile, .modulo, .grado-card, .mundo-mini, .paso { position: relative; }
+.card::after, .tile::after, .modulo::after, .grado-card::after, .mundo-mini::after, .paso::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), var(--luz), transparent 55%);
+}
+.card:hover::after, .tile:hover::after, .modulo:hover::after, .grado-card:hover::after, .mundo-mini:hover::after, .paso:hover::after { opacity: 1; }
+
+/* ── Borde de gradiente giratorio (hero, módulo actual, entrenador) ── */
+.card--hero::before, .modulo--actual::before, .coach::before {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 2px; pointer-events: none;
+  background: conic-gradient(from var(--ang), #8A70FA, #FF6B5B, #FFD04A, #3DDBB0, #4FB6FF, #8A70FA);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: ang-gira 7s linear infinite; opacity: .9;
+}
+.modulo--actual { border-color: transparent !important; }
+
+/* ── Aurora de fondo (solo estilo medio y portada) ── */
+.fondo__malla::after {
+  content: ''; position: absolute; inset: 8% 12%;
+  background: conic-gradient(from var(--ang), rgba(108,76,245,.55), rgba(255,107,91,.45), rgba(255,208,74,.4), rgba(61,219,176,.45), rgba(79,182,255,.5), rgba(108,76,245,.55));
+  filter: blur(90px); opacity: .32; border-radius: 50%; animation: ang-gira 48s linear infinite;
+}
+[data-theme="dark"] .fondo__malla::after { opacity: .22; }
+[data-estilo="ludico"] .fondo__malla::after, [data-estilo="pro"] .fondo__malla::after, [data-estilo="staff"] .fondo__malla::after { display: none; }
+
+/* ── Grano de película (textura) ── */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 3000; pointer-events: none; opacity: .045; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+[data-theme="dark"] body::after { opacity: .07; }
+
+/* ── Inclinación 3D ── */
+[data-tilt] { transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .3s var(--suave); will-change: transform; }
+
+/* ── Brillo que cruza los botones principales ── */
+.btn--primary, .btn--sun { overflow: hidden; isolation: isolate; }
+.btn--primary::before, .btn--sun::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; transform: translateX(-120%) skewX(-20deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent); transition: transform .7s var(--suave);
+}
+.btn--primary:hover::before, .btn--sun:hover::before { transform: translateX(120%) skewX(-20deg); }
+[data-estilo="staff"] .btn::before { display: none; }
+
+/* ── Revelado al hacer scroll (navegadores con scroll-driven animations) ── */
+@supports (animation-timeline: view()) {
+  .portada > section:not(.hero), .portada > .cta-final {
+    animation: aparece linear both; animation-timeline: view(); animation-range: entry 0% cover 24%;
+  }
+}
+
+/* ── Entrenador de Tecli ── */
+.coach { display: flex; flex-direction: column; gap: .7rem; border: 0; overflow: hidden;
+  background: linear-gradient(160deg, color-mix(in srgb, var(--superficie) 94%, #8A70FA), var(--superficie)); }
+.coach__cab { display: flex; align-items: center; gap: .7rem; }
+.coach__cab strong { font: 600 1.1rem var(--fuente-titulo); display: block; line-height: 1.1; }
+.coach__cab small { color: var(--texto-suave); font-weight: 700; }
+.coach__ic { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 14px; color: #fff; background: linear-gradient(135deg, #8A70FA, #FF6B5B); box-shadow: 0 0 22px rgba(138, 112, 250, .55); animation: ic-brilla 3s ease-in-out infinite; }
+@keyframes ic-brilla { 50% { box-shadow: 0 0 34px rgba(255, 107, 91, .6); transform: rotate(8deg) scale(1.05); } }
+.coach__texto { margin: 0; min-height: 4.2em; font-weight: 700; }
+.coach__texto::after { content: ''; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -.12em; background: var(--primario); animation: cursor 1s steps(1) infinite; }
+.coach__plan { display: flex; flex-direction: column; gap: .4rem; counter-reset: p; }
+.coach__plan li { counter-increment: p; display: flex; gap: .6rem; align-items: center; padding: .5rem .7rem; border-radius: 12px; background: var(--superficie-2); font-size: .9rem; font-weight: 700; }
+.coach__plan li::before { content: counter(p); display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--primario); color: var(--primario-tinta); font-size: .78rem; flex: none; }
+
+/* ── Estado de conexión ── */
+.red { position: fixed; z-index: 1600; left: 50%; top: .7rem; translate: -50% -220%; visibility: hidden; display: flex; align-items: center; gap: .5rem; max-width: min(94vw, 560px);
+  padding: .55rem 1rem; border-radius: 99px; font-weight: 700; font-size: .88rem; box-shadow: var(--sombra-3); transition: translate .45s var(--resorte), visibility .45s; pointer-events: none; }
+.red--visible { translate: -50% 0; visibility: visible; }
+.red--off { background: #FEF3C7; color: #78350F; } .red--on { background: #DCFCE7; color: #14532D; }
+
+/* ── Paleta de comandos ── */
+.capa:has(.capa__panel--paleta) { align-items: flex-start; padding: 12vh 1rem 1rem; }
+.capa__panel--paleta { width: min(100%, 620px); border-radius: var(--r-xl); padding: .75rem; }
+.capa__panel--paleta .capa__cabecera { display: none; }
+.paleta__input { width: 100%; padding: .9rem 1rem; border: 0; border-bottom: 1px solid var(--borde); background: transparent; font-size: 1.05rem; outline: none; }
+.paleta__lista { display: flex; flex-direction: column; gap: 2px; max-height: 50vh; overflow: auto; padding-top: .5rem; }
+.paleta__item { display: flex; align-items: center; gap: .75rem; padding: .65rem .8rem; border-radius: var(--r-md); cursor: pointer; font-weight: 650; }
+.paleta__item span:not(.icono) { flex: 1; }
+.paleta__item--on { background: color-mix(in srgb, var(--primario) 14%, transparent); }
+.paleta__item .icono { color: var(--primario); }
+.paleta__vacio { padding: 1rem; text-align: center; color: var(--texto-suave); }

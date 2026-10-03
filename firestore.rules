@@ -31,8 +31,8 @@ service cloud.firestore {
     // Correo verificado de Google (las cuentas PIN usan un correo falso NO verificado).
     function emailOk() {
       return signedIn()
-        && request.auth.token.email != null
-        && request.auth.token.email_verified == true;
+        && request.auth.token.get('email', null) != null
+        && request.auth.token.get('email_verified', false) == true;
     }
 
     // ⚠️ CAMBIA ESTE CORREO por el del primer administrador.

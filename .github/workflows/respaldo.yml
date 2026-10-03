@@ -1,0 +1,52 @@
+name: Respaldo diario de Firestore
+
+# Corre todos los días a las 03:30 hora de Colombia (08:30 UTC) y también a demanda.
+# NOTA: GitHub desactiva los flujos programados si el repositorio no tiene actividad en 60 días;
+# si eso pasa, actívalo de nuevo en la pestaña Actions (o haz cualquier commit).
+on:
+  schedule:
+    - cron: '30 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      BACKUP_REPO_TOKEN: ${{ secrets.BACKUP_REPO_TOKEN }}
+      BACKUP_REPO: ${{ vars.BACKUP_REPO }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Instalar herramientas
+        run: npm install --prefix tools --no-audit --no-fund
+      - name: Exigir cifrado y credenciales
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT" || { echo "Falta el secreto FIREBASE_SERVICE_ACCOUNT"; exit 1; }
+          test -n "$BACKUP_PASSPHRASE" || { echo "Falta el secreto BACKUP_PASSPHRASE (el respaldo debe ir cifrado)"; exit 1; }
+      - name: Exportar Firestore (cifrado)
+        run: node tools/backup-firestore.mjs respaldos
+      # Opción recomendada: guardar en un repositorio PRIVADO aparte (variable BACKUP_REPO = usuario/teclea-respaldos)
+      - name: Copiar a repositorio privado de respaldos
+        if: ${{ env.BACKUP_REPO_TOKEN != '' && env.BACKUP_REPO != '' }}
+        run: |
+          git clone "https://x-access-token:${BACKUP_REPO_TOKEN}@github.com/${BACKUP_REPO}.git" destino
+          mkdir -p destino/respaldos && cp respaldos/* destino/respaldos/
+          cd destino
+          git config user.name "teclea-respaldos" && git config user.email "respaldos@users.noreply.github.com"
+          git add respaldos && git commit -m "Respaldo $(date -u +%F)" && git push
+      # Si el repositorio es PÚBLICO, el artefacto cifrado sería descargable por cualquiera: úsalo solo en repos privados.
+      - name: Guardar como artefacto (90 días)
+        if: ${{ github.event.repository.private }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: respaldo-firestore
+          path: respaldos/*
+          retention-days: 90
+          if-no-files-found: error

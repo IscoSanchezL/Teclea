@@ -13,7 +13,7 @@ import { state, setState } from '../core/state.js';
 import { slugUsuario } from '../core/utils.js';
 import { obtenerFirebase } from '../db/firebase.js';
 import { leerPerfil, crearPerfil, perfilNuevo, rolSolicitado, actualizarPerfil, demo } from '../db/users.js';
-import { aplicarEstiloGrado, cambiarPrefs } from '../ui/theme.js';
+import { aplicarEstiloUsuario, cambiarPrefs } from '../ui/theme.js';
 
 /** Mensajes amables para los errores de Firebase. */
 const ERRORES = {
@@ -32,7 +32,7 @@ export const mensajeError = (e) => ERRORES[e?.code] || 'Algo salió mal. Intént
 /** Aplica el perfil cargado: estado, estilo por grado y preferencias guardadas en la nube. */
 function activarPerfil(perfil) {
   setState({ user: perfil });
-  aplicarEstiloGrado(perfil?.grado);
+  aplicarEstiloUsuario(perfil);
   if (perfil?.prefs && Object.keys(perfil.prefs).length) cambiarPrefs(perfil.prefs);
 }
 
@@ -71,7 +71,7 @@ export async function iniciarAuth() {
       fb.au.onAuthStateChanged(fb.auth, async (fbUser) => {
         try {
           if (fbUser) activarPerfil(await perfilDesdeFirebase(fbUser));
-          else { setState({ user: null }); aplicarEstiloGrado(null); }
+          else { setState({ user: null }); aplicarEstiloUsuario(null); }
         } catch (e) {
           console.error('[auth] no se pudo cargar el perfil', e);
           setState({ user: null });
@@ -118,7 +118,7 @@ export async function cerrarSesion() {
   if (state.modo === 'demo') {
     demo.borrar();
     setState({ user: null });
-    aplicarEstiloGrado(null);
+    aplicarEstiloUsuario(null);
     return;
   }
   const fb = await obtenerFirebase();
@@ -131,5 +131,5 @@ export async function guardarPerfil(parche) {
   await actualizarPerfil(uid, parche);
   const user = { ...state.user, ...parche };
   setState({ user });
-  if ('grado' in parche) aplicarEstiloGrado(user.grado);
+  if ('grado' in parche) aplicarEstiloUsuario(user);
 }

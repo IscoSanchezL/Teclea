@@ -24,6 +24,14 @@ async function iniciar() {
   ]);
 
   const miApp = app.initializeApp(CONFIG.firebase);
+
+  // App Check: solo peticiones que vengan de TU app (reCAPTCHA v3, invisible y sin rastreo publicitario).
+  if (CONFIG.appCheckSiteKey) {
+    try {
+      const ac = await import(`${base}/firebase-app-check.js`);
+      ac.initializeAppCheck(miApp, { provider: new ac.ReCaptchaV3Provider(CONFIG.appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+    } catch (e) { console.warn('[firebase] App Check no se pudo iniciar', e); }
+  }
   const auth = au.getAuth(miApp);
   auth.languageCode = 'es';
 

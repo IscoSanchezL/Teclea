@@ -6,10 +6,13 @@
 import { CONFIG } from './core/config.js';
 import { state } from './core/state.js';
 import { iniciarRouter } from './core/router.js';
-import { iniciarTema, aplicarEstiloGrado } from './ui/theme.js';
+import { iniciarTema, aplicarEstiloUsuario } from './ui/theme.js';
 import { cargarManifiestoAssets } from './ui/art.js';
 import { iniciarNav, marcarRutaActiva } from './ui/nav.js';
 import { iniciarAuth } from './auth/auth.js';
+import { iniciarConexion, registrarServiceWorker } from './ui/conexion.js';
+import { iniciarEfectos } from './ui/efectos.js';
+import { iniciarPaleta } from './ui/paleta.js';
 
 async function arrancar() {
   document.title = `${CONFIG.appName} · ${CONFIG.lema}`;
@@ -21,7 +24,7 @@ async function arrancar() {
     console.error('[main] arranque con errores', e);
   }
 
-  aplicarEstiloGrado(state.user?.grado);
+  aplicarEstiloUsuario(state.user);
   iniciarNav();
   iniciarRouter({ onRuta: (ruta) => marcarRutaActiva(ruta.path) });
 
@@ -29,7 +32,10 @@ async function arrancar() {
   const splash = document.getElementById('splash');
   splash.classList.add('splash--fuera');
   setTimeout(() => splash.remove(), 500);
-  // El service worker (PWA offline) se registra en la Fase 6.
+  iniciarConexion();
+  iniciarEfectos();
+  iniciarPaleta();
+  registrarServiceWorker();
 }
 
 arrancar();

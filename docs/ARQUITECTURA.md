@@ -23,7 +23,10 @@
 │  ├─ componentes.css          Botones-tecla, tarjetas, formularios, toasts, capas, mascota
 │  ├─ layout.css               Barra lateral flotante / inferior / superior
 │  ├─ vistas.css               Estilos por pantalla
-│  └─ animaciones.css          Keyframes y View Transitions
+│  ├─ animaciones.css          Keyframes y View Transitions
+│  ├─ estilos.css              Identidad por grado: lúdico (2.º–3.º), medio (4.º), pro (5.º–6.º)
+│  ├─ staff.css                Interfaz sobria de docentes y administración
+│  └─ efectos.css              Luz de puntero, bordes vivos, aurora, grano, paleta de comandos
 ├─ js/
 │  ├─ main.js                  Arranque
 │  ├─ core/                    config, state, router, routes, utils, levels, grados
@@ -39,7 +42,9 @@
 │  ├─ img/{tecli,worlds,badges,shop,ui}/   Ilustraciones finales
 │  ├─ lottie/  sounds/
 ├─ data/                       worlds.json (+ lessons/texts/badges en fases siguientes)
-├─ tools/generar-manifest-assets.mjs
+├─ sw.js · precache.json       Modo sin conexión (se regenera en cada despliegue)
+├─ tools/                      Manifiestos, respaldo y restauración de Firestore
+├─ tests/                      Reglas (emulador), carga y modo sin conexión
 ├─ docs/                       Esta documentación
 └─ .github/workflows/pages.yml Despliegue automático
 ```

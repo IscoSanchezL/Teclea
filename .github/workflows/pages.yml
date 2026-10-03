@@ -28,6 +28,9 @@ jobs:
       # Registra las ilustraciones que subiste a assets/img (reemplazan los placeholders solas)
       - name: Generar manifiesto de ilustraciones
         run: node tools/generar-manifest-assets.mjs
+      # Lista de archivos para el modo sin conexión (service worker) + versión para actualizar los dispositivos
+      - name: Generar precaché (modo sin conexión)
+        run: node tools/generar-precache.mjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

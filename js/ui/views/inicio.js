@@ -5,7 +5,7 @@
  * (El progreso real llega en la Fase 3: por ahora el mundo 1 está abierto y el resto bloqueado.)
  */
 import { state } from '../../core/state.js';
-import { h } from '../../core/utils.js';
+import { h, movimientoReducido } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
 import { nivelPorXP } from '../../core/levels.js';
 import { perfilDeGrado } from '../../core/grados.js';
@@ -108,7 +108,7 @@ export async function render() {
   const anilloNivel = anillo({ valor: nivel.progreso, tam: 168, grosor: 14, color: 'var(--sol-400)', etiqueta: `Nivel ${nivel.nivel}, ${Math.round(nivel.progreso * 100)} % hacia el siguiente` },
     mascota('anima', { tam: 'md', animada: true }));
 
-  const hero = h('section', { class: 'card card--hero inicio__hero' },
+  const hero = h('section', { class: 'card card--hero inicio__hero', 'data-tilt': '' },
     h('div', { class: 'inicio__hero-texto' },
       h('span', { class: 'etiqueta' }, `Nivel ${nivel.nivel} · ${nivel.nombre}`),
       h('h1', {}, (SALUDOS[estilo] || SALUDOS.medio)(u.apodo)),
@@ -116,6 +116,14 @@ export async function render() {
       h('p', { class: 'suave' }, nivel.siguiente ? `${nivel.siguiente.xp - u.xp} XP para “${nivel.siguiente.nombre}”` : '¡Nivel máximo!'),
       h('a', { class: 'btn btn--sun btn--lg', href: '#/aprende' }, icono('play', { tam: 20 }), 'Continuar aventura')),
     h('div', { class: 'inicio__hero-anillo' }, anilloNivel));
+
+  const coach = h('section', { class: 'card coach', 'aria-label': 'Entrenador de Tecli' },
+    h('header', { class: 'coach__cab' }, h('span', { class: 'coach__ic' }, icono('sparkle', { tam: 22 })),
+      h('div', {}, h('strong', {}, 'Entrenador de Tecli'), h('small', {}, 'Tu plan de hoy'))),
+    h('p', { class: 'coach__texto', 'aria-live': 'polite' }),
+    h('ol', { class: 'coach__plan' }, ['Calentamiento: fila base (2 min)', 'Práctica guiada del mundo actual (5 min)', 'Reto relámpago de precisión (1 min)'].map((t) => h('li', {}, t))),
+    h('a', { class: 'btn btn--primary btn--sm', href: '#/aprende' }, 'Empezar mi plan'));
+  coach.dataset.mensaje = `Cuando termines tus primeras prácticas, aquí te diré qué teclas reforzar. Hoy empezamos por la fila base, ${u.apodo}.`;
 
   const retos = h('section', { class: 'card' },
     h('h2', { class: 'seccion__titulo' }, 'Retos de hoy'),
@@ -142,14 +150,25 @@ export async function render() {
     estadisticas(u, meta),
     h('div', { class: 'inicio__cuerpo' },
       principal,
-      h('aside', { class: 'inicio__lateral', 'aria-label': 'Resumen' }, retos, comparar)));
+      h('aside', { class: 'inicio__lateral', 'aria-label': 'Resumen' }, coach, retos, comparar)));
 }
 
 /* ── Camino punteado que une los nodos (solo en el mapa en zigzag) ── */
 let observador = null;
 const SVG = 'http://www.w3.org/2000/svg';
 
+let tecleo = null;
+function escribirCoach(raiz) {
+  const caja = raiz.querySelector('.coach'), p = raiz.querySelector('.coach__texto');
+  if (!caja || !p) return;
+  const msg = caja.dataset.mensaje;
+  if (movimientoReducido()) { p.textContent = msg; return; }
+  let i = 0;
+  tecleo = setInterval(() => { p.textContent = msg.slice(0, ++i); if (i >= msg.length) clearInterval(tecleo); }, 28);
+}
+
 export function despues(raiz) {
+  escribirCoach(raiz);
   const mapa = raiz.querySelector('.mapa');
   if (!mapa) return;
   const svg = document.createElementNS(SVG, 'svg');
@@ -182,4 +201,4 @@ export function despues(raiz) {
   observador.observe(mapa);
 }
 
-export function destroy() { observador?.disconnect(); observador = null; }
+export function destroy() { observador?.disconnect(); observador = null; clearInterval(tecleo); }

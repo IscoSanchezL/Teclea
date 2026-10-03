@@ -16,7 +16,8 @@ Detén el servidor con `Ctrl+C`. Alternativa: `npx serve .`
 | Fase | Contenido | Estado |
 |---|---|---|
 | 0 | Arquitectura, esquema Firestore, reglas, guía Firebase | ✅ |
-| 1 | Sistema de diseño, layout, navegación, portada, acceso, perfil/ajustes | ✅ |
+| 1 | Sistema de diseño (3 estilos por grado + estilo sobrio para docentes), navegación, portada, acceso, perfil/ajustes, paleta Ctrl+K | ✅ |
+| 1b | Modo sin conexión (service worker), reglas probadas (53 pruebas), respaldo automático cifrado, guía de confiabilidad | ✅ |
 | 2 | Motor de escritura + teclado virtual con manos + lección demo | ⏳ |
 | 3 | Currículo de 10 mundos, mapa real y progreso | ⏳ |
 | 4 | Gamificación y minijuegos | ⏳ |
@@ -27,6 +28,7 @@ Detén el servidor con `Ctrl+C`. Alternativa: `npx serve .`
 - [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — estructura, decisiones, seguridad
 - [`docs/FIRESTORE_SCHEMA.md`](docs/FIRESTORE_SCHEMA.md) — colecciones, campos, consultas
 - [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md) — crear Firebase y publicar en GitHub Pages
+- [`docs/CONFIABILIDAD.md`](docs/CONFIABILIDAD.md) — capacidad, modo sin conexión, seguridad, respaldos y plan de contingencia
 - [`firestore.rules`](firestore.rules) · [`firestore.indexes.json`](firestore.indexes.json)
 - [`ASSETS_PROMPTS.md`](ASSETS_PROMPTS.md) — prompts para generar toda la ilustración
 

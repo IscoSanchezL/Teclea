@@ -3,52 +3,56 @@
  * así la portada pesa poco y el resto se descarga solo cuando se visita.
  *
  *  acceso: 'publica' | 'sesion' | ['docente','admin'] (roles permitidos)
- *  nav:    si aparece en la barra lateral / inferior (orden y grupo)
+ *  nav:    cómo aparece en el menú: { icono, etiqueta, orden, movil, grupo }
+ *          `staff` sobrescribe esos campos para docentes/administración (null = no se muestra)
+ *          `solo: 'estudiante'` oculta la ruta del menú del personal.
  */
 import { state } from './state.js';
 
 const placeholder = (clave) => () =>
   import('../ui/views/proximamente.js').then((m) => ({ render: (ctx) => m.render({ ...ctx, clave }) }));
 
+const esStaff = (u) => u && (u.rol === 'docente' || u.rol === 'admin');
+
 export const RUTAS = [
   {
     path: '/', acceso: 'publica', titulo: 'Inicio',
-    load: () => (state.user ? import('../ui/views/inicio.js') : import('../ui/views/portada.js')),
-    nav: { icono: 'home', etiqueta: 'Inicio', orden: 1, movil: true },
+    load: () => (!state.user ? import('../ui/views/portada.js') : esStaff(state.user) ? import('../ui/views/panel.js') : import('../ui/views/inicio.js')),
+    nav: { icono: 'home', etiqueta: 'Inicio', orden: 1, movil: true, staff: { icono: 'chart', etiqueta: 'Resumen', grupo: 'General' } },
   },
   { path: '/entrar', acceso: 'publica', titulo: 'Entrar', load: () => import('../ui/views/entrar.js') },
-  { path: '/bienvenida', acceso: 'sesion', titulo: 'Bienvenida', load: () => import('../ui/views/bienvenida.js'), sinNav: true },
+  { path: '/bienvenida', acceso: 'sesion', titulo: 'Bienvenida', load: () => import('../ui/views/bienvenida.js') },
   {
-    path: '/aprende', acceso: 'sesion', titulo: 'Aprende a teclear', load: placeholder('aprende'),
+    path: '/aprende', acceso: 'sesion', solo: 'estudiante', titulo: 'Aprende a teclear', load: placeholder('aprende'),
     nav: { icono: 'keyboard', etiqueta: 'Aprende', orden: 2, movil: true },
   },
   {
-    path: '/practica', acceso: 'sesion', titulo: 'Práctica libre', load: placeholder('practica'),
+    path: '/practica', acceso: 'sesion', solo: 'estudiante', titulo: 'Práctica libre', load: placeholder('practica'),
     nav: { icono: 'target', etiqueta: 'Práctica', orden: 3, movil: false },
   },
   {
-    path: '/juegos', acceso: 'sesion', titulo: 'Juegos', load: placeholder('juegos'),
+    path: '/juegos', acceso: 'sesion', solo: 'estudiante', titulo: 'Juegos', load: placeholder('juegos'),
     nav: { icono: 'gamepad', etiqueta: 'Juegos', orden: 4, movil: true },
   },
   {
-    path: '/logros', acceso: 'sesion', titulo: 'Mis logros', load: placeholder('logros'),
+    path: '/logros', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis logros', load: placeholder('logros'),
     nav: { icono: 'trophy', etiqueta: 'Logros', orden: 5, movil: true },
   },
   {
-    path: '/clases', acceso: 'sesion', titulo: 'Mis clases', load: placeholder('clases'),
+    path: '/clases', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis clases', load: placeholder('clases'),
     nav: { icono: 'users', etiqueta: 'Mis clases', orden: 6, movil: false },
   },
   {
-    path: '/docente', acceso: ['docente', 'admin'], titulo: 'Panel docente', load: placeholder('docente'),
-    nav: { icono: 'chart', etiqueta: 'Docente', orden: 7, movil: false },
+    path: '/docente', acceso: ['docente', 'admin'], titulo: 'Clases y estudiantes', load: () => import('../ui/views/docente.js'),
+    nav: { icono: 'users', etiqueta: 'Clases', orden: 7, movil: true, staff: { icono: 'users', etiqueta: 'Clases y estudiantes', grupo: 'General' } },
   },
   {
-    path: '/admin', acceso: ['admin'], titulo: 'Panel admin', load: placeholder('admin'),
-    nav: { icono: 'shield', etiqueta: 'Admin', orden: 8, movil: false },
+    path: '/admin', acceso: ['admin'], titulo: 'Administración', load: () => import('../ui/views/admin.js'),
+    nav: { icono: 'shield', etiqueta: 'Admin', orden: 8, movil: true, staff: { icono: 'shield', etiqueta: 'Administración', grupo: 'Sistema' } },
   },
   {
     path: '/perfil', acceso: 'sesion', titulo: 'Perfil y ajustes', load: () => import('../ui/views/perfil.js'),
-    nav: { icono: 'user', etiqueta: 'Perfil', orden: 9, movil: true },
+    nav: { icono: 'user', etiqueta: 'Perfil', orden: 9, movil: true, staff: { icono: 'user', etiqueta: 'Cuenta y ajustes', grupo: 'Sistema' } },
   },
   { path: '/privacidad', acceso: 'publica', titulo: 'Aviso de privacidad', load: () => import('../ui/views/privacidad.js') },
 ];
@@ -59,11 +63,16 @@ export const RUTA_404 = {
 
 export const buscarRuta = (path) => RUTAS.find((r) => r.path === path) || RUTA_404;
 
-/** ¿El usuario actual puede ver este ítem de navegación? */
-export function visibleParaUsuario(ruta) {
-  if (!ruta.nav) return false;
-  if (ruta.acceso === 'publica') return true;
-  if (!state.user) return false;
-  if (ruta.acceso === 'sesion') return true;
-  return ruta.acceso.includes(state.user.rol);
+/** Devuelve cómo se muestra la ruta en el menú para el usuario actual, o null si no debe verse. */
+export function itemNav(ruta, u = state.user) {
+  if (!ruta.nav || !u) return null;
+  const staff = esStaff(u);
+  if (Array.isArray(ruta.acceso) && !ruta.acceso.includes(u.rol)) return null;
+  if (staff && ruta.solo === 'estudiante') return null;
+  if (!staff && ruta.path === '/admin') return null;
+  const { staff: extra, ...base } = ruta.nav;
+  return staff ? { ...base, ...(extra || {}) } : base;
 }
+
+export const rutasVisibles = (u = state.user) =>
+  RUTAS.map((r) => ({ ruta: r, item: itemNav(r, u) })).filter((x) => x.item).sort((a, b) => a.item.orden - b.item.orden);

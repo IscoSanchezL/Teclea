@@ -49,7 +49,19 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 > Probar en local: `python3 -m http.server 8000` y abre <http://localhost:8000>. Los módulos ES **no** funcionan abriendo `index.html` con doble clic (`file://`).
 
-## 7. Antes de usarlo con estudiantes (Ley 1581 de 2012)
+## 6b. (Recomendado) Segunda copia en Firebase Hosting
+```bash
+npm i -g firebase-tools && firebase login
+firebase use --add            # elige tu proyecto
+node tools/generar-manifest-assets.mjs && node tools/generar-precache.mjs
+firebase deploy --only hosting
+```
+Hosting agrega cabeceras de seguridad (HSTS, CSP…), CDN global y reversión de versiones. Autoriza también `TU-PROYECTO.web.app` en Authentication.
+
+## 7. Seguridad y garantía de servicio
+Sigue **[`CONFIABILIDAD.md`](CONFIABILIDAD.md)**: App Check, MFA, restricción de la clave, respaldos automáticos cifrados, monitoreo y plan de contingencia.
+
+## 7b. Antes de usarlo con estudiantes (Ley 1581 de 2012)
 - [ ] Revisar `#/privacidad` con el área jurídica del colegio y completar responsable/contacto en `config.js`.
 - [ ] Obtener la **autorización de acudientes** (circular o formulario del colegio). La plataforma guarda la versión del aviso aceptado en `users.consentimiento`.
 - [ ] Confirmar que Analytics está **desactivado** y que no se añadieron scripts de terceros.
