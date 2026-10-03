@@ -32,8 +32,14 @@ jobs:
       - name: Generar precaché (modo sin conexión)
         run: node tools/generar-precache.mjs
       - uses: actions/configure-pages@v5
+      # Solo se publica lo que la web necesita (sin pruebas, herramientas ni documentos)
+      - name: Preparar carpeta de publicación
+        run: |
+          mkdir _site
+          cp -r index.html configurar.html manifest.webmanifest sw.js precache.json css js data assets _site/
+          cp -r docs _site/docs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
