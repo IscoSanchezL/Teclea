@@ -25,7 +25,9 @@ export function estiloPorGrado(grado) {
 
 export function aplicarPrefs(prefs = state.prefs) {
   const r = document.documentElement;
-  const oscuro = prefs.tema === 'oscuro' || (prefs.tema === 'auto' && mqOscuro.matches);
+  // En 5.º–6.º ("pro") el modo automático arranca oscuro; el estudiante puede elegir claro en Ajustes.
+  const pro = r.dataset.estilo === 'pro';
+  const oscuro = prefs.tema === 'oscuro' || (prefs.tema === 'auto' && (pro || mqOscuro.matches));
   r.dataset.theme = oscuro ? 'dark' : 'light';
   r.dataset.textsize = prefs.texto;
   r.dataset.font = prefs.fuente;
@@ -36,6 +38,7 @@ export function aplicarPrefs(prefs = state.prefs) {
 
 export function aplicarEstiloGrado(grado) {
   document.documentElement.dataset.estilo = grado ? estiloPorGrado(grado) : 'medio';
+  aplicarPrefs(); // el tema "automático" depende del estilo
 }
 
 /** Carga preferencias guardadas en este dispositivo. */
