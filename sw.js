@@ -71,6 +71,8 @@ self.addEventListener('fetch', (evento) => {
   const url = new URL(req.url);
 
   if (url.origin === self.location.origin) {
+    // Páginas independientes (asistente de configuración y documentos) no pasan por la app
+    if (req.mode === 'navigate' && /\/(configurar\.html|docs\/)/.test(url.pathname)) return;
     if (req.mode === 'navigate') {
       evento.respondWith(redPrimero(new Request('index.html')).catch(async () => (await caches.match('./')) || Response.error()));
     } else if (MEDIOS.test(url.pathname)) {
