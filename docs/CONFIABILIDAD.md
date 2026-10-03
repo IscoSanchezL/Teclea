@@ -133,7 +133,7 @@ Crea un monitor gratuito (UptimeRobot, Better Stack o similar) que consulte tu U
    - `BACKUP_PASSPHRASE` = una frase larga y única (**guárdala también en tu gestor de contraseñas: sin ella el respaldo no se puede abrir**).
 4. **Dónde se guarda el respaldo (elige uno):**
    - **Recomendado:** crea un repositorio **privado** vacío (`teclea-respaldos`), un token con permiso de escritura solo a ese repo, y define
-     el secreto `BACKUP_REPO_TOKEN` y la variable `BACKUP_REPO` (`usuario/teclea-respaldos`). Cada día se agrega un archivo cifrado.
+     el secreto `BACKUP_REPO_TOKEN` y la variable `BACKUP_REPO` (`usuario/teclea-respaldos`). Cada día se agrega un archivo cifrado y se limpian solos los viejos: se conservan los últimos 60 días y, de los más antiguos, solo el del día 1 de cada mes.
    - Si **este** repositorio es privado, el flujo lo guarda como artefacto (90 días). Si es público, **no** se guarda como artefacto (evita exponerlo).
 5. Pestaña **Actions → Respaldo diario de Firestore → Run workflow**. Debe terminar en verde y producir un `.json.gz.enc`.
 6. GitHub te avisa por correo si un respaldo falla.
