@@ -84,7 +84,7 @@ export async function sembrarEjemplo(docente, clase) {
 }
 
 /** Sesiones de los últimos `dias` días de los estudiantes del docente. Igualdad + "in" (sin índice compuesto). */
-export async function sesionesDocente(docente, dias = 14) {
+export async function sesionesDocente(docente, dias = 7) {
   const fechas = Array.from({ length: Math.min(30, dias) }, (_, k) => hoyISO(new Date(Date.now() - k * DIA)));
   const lista = await store.consultar('sessions', { donde: [['docenteId', '==', docente.uid], ['dia', 'in', fechas]] }).catch(() => []);
   return lista.sort((a, b) => (b.creadoEn || 0) - (a.creadoEn || 0));

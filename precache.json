@@ -1,8 +1,9 @@
 {
-  "version": "6fa86acd70b9",
+  "version": "1d4880223d0b",
   "archivos": [
     "assets/assets.json",
     "assets/img/favicon.svg",
+    "assets/marca/portada-gi-school.jpg",
     "css/animaciones.css",
     "css/base.css",
     "css/clases.css",

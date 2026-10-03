@@ -27,13 +27,13 @@ Cuentas de la cuota gratuita (plan **Spark**, límites diarios de Firestore: 50 
 
 | Concepto | Cálculo | Resultado |
 |---|---|---|
-| Escrituras por ejercicio | sesión + perfil + inscripción + progreso | 4 |
-| 30 estudiantes × 20 ejercicios/día | 30 × 20 × 4 | **2 400** (12 % del límite) |
+| Escrituras por ejercicio | sesión, progreso, perfil, inscripción, ranking, aporte de clase, teclas y contadores | ≈ 8 |
+| 30 estudiantes × 20 ejercicios/día | 30 × 20 × 8 | **4 800** (24 % del límite) |
 | Lecturas (inicio de sesión, progreso con caché) | ≈ 100 por estudiante | **3 000** (6 %) |
 | Panel docente (30 inscripciones, 10 cargas) | 1 lectura por estudiante | 300 |
 | Colegio de 300 estudiantes | 10× lo anterior | 24 000 escrituras → **supera Spark** |
 
-- **Hasta ~250 estudiantes activos** cabe en Spark. Para más, pasa a **Blaze** (pago por uso) con tope de presupuesto: el costo
+- **Hasta ~100 estudiantes activos el mismo día** cabe en Spark. Para 11 grupos de 25 (≈ 275) pasa a **Blaze** (pago por uso) con tope de presupuesto: el costo
   esperado es de centavos al día (las primeras 20 000 escrituras/día siguen siendo gratis también en Blaze).
 - **Sin cuellos de botella por documento:** cada estudiante escribe solo sus propios documentos (el límite sostenido de ~1 escritura por
   segundo por documento no se acerca). Las sesiones son documentos nuevos (sin contención).
