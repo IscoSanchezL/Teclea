@@ -143,12 +143,12 @@ export async function render({ query }) {
 
   /* ═════ Marco ═════ */
   async function pintar() {
-    raiz.replaceChildren(
+    raiz.replaceChildren(...[
       h('header', { class: 'pagina__cab' }, h('div', {}, h('h1', {}, 'Administración'), h('p', { class: 'suave' }, 'Docentes, marca, ajustes y respaldo')),
         h('a', { class: 'btn btn--suave btn--sm', href: 'configurar.html' }, icono('settings', { tam: 16 }), 'Asistente de configuración')),
       !nube ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, 'Modo demostración: los cambios se guardan solo en este navegador. Conecta Firebase con el asistente de configuración.')) : null,
       h('div', { class: 'tabs tabs--5 tabs--staff', role: 'tablist' }, TABS.map(([id, t]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, t))),
-      cargando);
+      cargando].filter(Boolean));
     const cont = tab === 'resumen' ? await resumen() : tab === 'docentes' ? await docentes() : tab === 'marca' ? marcaTab() : tab === 'ajustes' ? await ajustesTab() : await datosTab();
     cargando.replaceWith(...[].concat(cont).filter(Boolean));
   }

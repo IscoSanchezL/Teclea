@@ -130,7 +130,7 @@ export async function render({ query }) {
 
   async function pintar() {
     const contenido = tab === 'tareas' ? await vistaTareas() : tab === 'clases' ? vistaClases() : vistaEstudiantes();
-    raiz.replaceChildren(cabecera(), state.modo === 'demo' ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, 'Modo demostración: los datos viven solo en este navegador. Con Firebase configurado se guardan en la nube.')) : null, tabs(), contenido);
+    raiz.replaceChildren(...[cabecera(), state.modo === 'demo' ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, 'Modo demostración: los datos viven solo en este navegador. Con Firebase configurado se guardan en la nube.')) : null, tabs(), contenido].filter(Boolean));
   }
   await cargar(); await pintar();
   return raiz;
