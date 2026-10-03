@@ -121,3 +121,8 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 .jg__barra .btn svg { transform: scaleX(-1); }
 .juego-tarjeta--sol, .juego-tarjeta[style*="#FFD04A"] { color: #2a1e00; }
 .juego-tarjeta[style*="#FFD04A"] .juego-tarjeta__ic { background: rgba(0,0,0,.12); }
+
+/* Campo de juego con contraste claro (palabras bien visibles en cualquier tema) */
+.jg__campo { background: radial-gradient(90% 70% at 50% 0%, #4B3AC7 0%, transparent 70%), linear-gradient(180deg, #1B1745, #2E2A78); border-color: rgba(255,255,255,.18); }
+.jg__palabra { color: #fff; background: linear-gradient(135deg, #8A70FA, #4F6BFF); border: 2px solid rgba(255,255,255,.35); box-shadow: 0 6px 18px -6px rgba(0,0,0,.5); }
+.jg__palabra--sel { background: linear-gradient(135deg, #FFD04A, #FF8A3D); color: #2A1E00; border-color: #fff; }
