@@ -168,3 +168,12 @@
 
 .tutorial { display: flex; align-items: center; gap: var(--e4); flex-wrap: wrap; border: 2px dashed var(--primario); }
 .tutorial > div { flex: 1; min-width: 14rem; }
+
+/* Introducción: botón en espera hasta presionar la tecla que brilla */
+.intro__pista { margin: .6rem 0 0; font-weight: 800; color: var(--primario); min-height: 1.4em; }
+.intro__pista--oculta { display: none; }
+.btn--esperando { opacity: .55; cursor: not-allowed; filter: grayscale(.4); }
+.btn--listo { animation: listo-pop .45s var(--resorte, ease-out), listo-late 1.4s .45s ease-in-out infinite; }
+@keyframes listo-pop { from { transform: scale(.9); } 60% { transform: scale(1.08); } to { transform: scale(1); } }
+@keyframes listo-late { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--primario) 55%, transparent); } 50% { box-shadow: 0 0 0 12px color-mix(in srgb, var(--primario) 0%, transparent); } }
+[data-motion="reducido"] .btn--listo { animation: none; }

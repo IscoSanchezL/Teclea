@@ -91,6 +91,10 @@ export function crearTeclado({ idioma = 'es-LA', manos = true } = {}) {
       return () => clearInterval(id);
     },
     pasosActuales: () => pasos,
+    /** Código físico de la tecla iluminada ahora (y, si hay dos pasos, la del paso actual). */
+    codigoIluminado: () => pasos[paso]?.code ?? null,
+    /** Todas las teclas que cuentan como "la tecla que brilla" (incluye el modificador iluminado). */
+    codigosIluminados: () => [pasos[paso]?.code, pasos[paso]?.modificador].filter(Boolean),
   };
   return api;
 }

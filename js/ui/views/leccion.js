@@ -19,6 +19,7 @@ import { sonido } from '../sonido.js';
 
 let actual = null;     // ejercicio activo (para limpiar al salir)
 let detenerDemo = null;
+let quitarEscucha = null;
 
 const ETAPAS = [['intro', 'Introducción'], ['guiado', 'Guiado'], ['libre', 'Sin ayuda'], ['prueba', 'Prueba']];
 const MENSAJE_TIPO = {
@@ -44,7 +45,7 @@ export async function render({ query }) {
   const cont = h('div', { class: 'leccion' });
   let acumTeclas = {};
   const mezclarTeclas = (pt) => { for (const [c, v] of Object.entries(pt || {})) { const a = (acumTeclas[c] ||= { ok: 0, err: 0 }); a.ok += v.ok; a.err += v.err; } };
-  const limpiar = () => { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; };
+  const limpiar = () => { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; quitarEscucha?.(); quitarEscucha = null; };
 
   const pasos = (activo) => h('ol', { class: 'pasos-ej', 'aria-label': 'Etapas de la lección' },
     ETAPAS.map(([k, t], i) => h('li', { class: `pasos-ej__p ${k === activo ? 'pasos-ej__p--on' : ETAPAS.findIndex(([x]) => x === activo) > i ? 'pasos-ej__p--ok' : ''}`, 'aria-current': k === activo ? 'step' : null }, h('span', {}, String(i + 1)), t)));
@@ -71,6 +72,11 @@ export async function render({ query }) {
       const d = dedoDeCaracter(c, state.prefs.tecladoIdioma) || 'indice-der';
       return h('li', { class: `tecla-chip dedo-${DEDOS[d].color}` }, h('kbd', {}, c.toUpperCase()), h('span', {}, DEDOS[d].nombre));
     });
+    // Primera vez (y con teclado físico): se activa al presionar la tecla que brilla. Ya jugada o en pantalla táctil: libre.
+    const conTeclado = !window.matchMedia('(pointer: coarse)').matches;
+    const bloqueado = !mejor && conTeclado;
+    const boton = h('button', { class: `btn btn--primary btn--lg ${bloqueado ? 'btn--esperando' : ''}`, type: 'button', disabled: bloqueado || null, onclick: () => ejercicio(0), autofocus: !bloqueado }, icono('play', { tam: 20 }), '¡Empezar!');
+    const pista = h('p', { class: `intro__pista ${bloqueado ? '' : 'intro__pista--oculta'}`, 'aria-live': 'polite' }, bloqueado ? '👆 Presiona la tecla que brilla para empezar' : '');
     montar(cabecera('intro'),
       h('div', { class: 'intro' },
         h('section', { class: 'intro__info card' },
@@ -79,9 +85,27 @@ export async function render({ query }) {
           chips.length ? h('ul', { class: 'tecla-chips', 'aria-label': 'Teclas nuevas' }, chips) : null,
           leccion.tip ? h('p', { class: 'intro__tip' }, icono('bulb', { tam: 20 }), leccion.tip) : null,
           mejor ? h('p', { class: 'suave' }, `Tu mejor resultado: ${'★'.repeat(mejor.estrellas)}${'☆'.repeat(3 - mejor.estrellas)} · ${mejor.mejorWpm} PPM · ${mejor.mejorPrecision} %`) : null,
-          h('button', { class: 'btn btn--primary btn--lg', type: 'button', onclick: () => ejercicio(0), autofocus: true }, icono('play', { tam: 20 }), '¡Empezar!')),
+          boton, pista),
         h('section', { class: 'intro__demo card' }, h('h2', {}, 'Así se hace'), h('p', { class: 'suave' }, 'La tecla iluminada y el dedo que sube te muestran cómo escribirla.'), kb.el)));
     detenerDemo = kb.demo(chars);
+    if (bloqueado) {
+      let saltar = null;
+      const habilitar = () => {
+        if (!boton.disabled) return;
+        boton.disabled = false; boton.classList.remove('btn--esperando'); boton.classList.add('btn--listo');
+        pista.textContent = '¡Muy bien! Ya puedes empezar (pulsa Enter o el botón).'; sonido.acierto(); clearTimeout(saltar); boton.focus({ preventScroll: true });
+      };
+      const alTecla = (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey && e.key !== 'AltGraph') return;
+        kb.presionar(e.code, true); setTimeout(() => kb.presionar(e.code, false), 160);
+        if (boton.disabled) { if (kb.codigosIluminados().includes(e.code)) habilitar(); }
+        else if (e.key === 'Enter') { e.preventDefault(); boton.click(); }
+      };
+      document.addEventListener('keydown', alTecla);
+      quitarEscucha = () => { document.removeEventListener('keydown', alTecla); clearTimeout(saltar); };
+      // Por si el teclado no responde: a los 12 s se ofrece continuar igual
+      saltar = setTimeout(() => { if (boton.disabled) { boton.disabled = false; boton.classList.remove('btn--esperando'); pista.textContent = '¿No funciona el teclado? Igual puedes empezar.'; } }, 12000);
+    }
   }
 
   /* ── Ejercicios ── */
@@ -150,4 +174,4 @@ export async function render({ query }) {
   return cont;
 }
 
-export function destroy() { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; }
+export function destroy() { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; quitarEscucha?.(); quitarEscucha = null; }
