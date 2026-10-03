@@ -24,7 +24,7 @@ export async function render() {
 
   const info = h('p', { class: 'suave info-grado', 'aria-live': 'polite' });
   const botonesGrado = GRADOS.map((g) => h('button', {
-    type: 'button', class: 'opcion-grado', 'aria-pressed': String(g === grado),
+    type: 'button', class: 'opcion-grado', 'aria-pressed': String(g === grado), disabled: Boolean(u.grado) || null,
     onclick: () => elegirGrado(g),
   }, h('strong', {}, `${g}.º`), h('span', {}, 'grado')));
 

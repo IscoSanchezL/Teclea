@@ -61,7 +61,7 @@ export function modalClase({ clase = null, alGuardar }) {
 
 /* ═════════════ Compartir clase (código + enlace + QR) ═════════════ */
 export async function modalCompartir(clase) {
-  const enlace = `${location.origin}${location.pathname}#/clases?codigo=${clase.codigo}`;
+  const enlace = `${location.origin}${location.pathname}#/unirse?codigo=${clase.codigo}`;
   const qr = h('div', { class: 'compartir__qr' });
   qrSVG(enlace, { tam: 176 }).then((s) => { if (s) qr.append(s); });
   abrirCapa({ titulo: `Unirse a ${clase.nombre}`, tipo: 'dialogo', contenido: h('div', { class: 'compartir' },

@@ -22,6 +22,7 @@ export const RUTAS = [
   },
   { path: '/pendiente', acceso: 'sesion', titulo: 'Solicitud en revisión', load: () => import('../ui/views/pendiente.js') },
   { path: '/entrar', acceso: 'publica', titulo: 'Entrar', load: () => import('../ui/views/entrar.js') },
+  { path: '/unirse', acceso: 'sesion', solo: 'estudiante', titulo: 'Unirme a mi clase', load: () => import('../ui/views/unirse.js') },
   { path: '/bienvenida', acceso: 'sesion', titulo: 'Bienvenida', load: () => import('../ui/views/bienvenida.js') },
   { path: '/leccion', acceso: 'sesion', solo: 'estudiante', titulo: 'Lección', load: () => import('../ui/views/leccion.js'), padre: '/aprende' },
   { path: '/introduccion', acceso: 'sesion', solo: 'estudiante', titulo: 'Postura y manos', load: () => import('../ui/views/introduccion.js'), padre: '/aprende' },

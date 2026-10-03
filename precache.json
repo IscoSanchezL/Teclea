@@ -1,5 +1,5 @@
 {
-  "version": "415526cdf4ae",
+  "version": "d423af3676c2",
   "archivos": [
     "assets/assets.json",
     "assets/img/favicon.svg",
@@ -113,6 +113,7 @@
     "js/ui/views/privacidad.js",
     "js/ui/views/proximamente.js",
     "js/ui/views/tienda.js",
+    "js/ui/views/unirse.js",
     "js/vendor/qrcode.js",
     "manifest.webmanifest"
   ]

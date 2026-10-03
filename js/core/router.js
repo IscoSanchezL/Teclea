@@ -47,19 +47,32 @@ function aplicarGuardas(ruta, query) {
   if (u && (u.rol === 'pendiente' || u.rol === 'rechazado') && !['/pendiente', '/privacidad'].includes(ruta.path)) {
     return { redirigir: '/pendiente' };
   }
-  // Estudiante sin grado → primero la bienvenida.
-  if (u && u.rol === 'estudiante' && !u.grado && ruta.path !== '/bienvenida' && ruta.acceso === 'sesion') {
+  // Estudiante sin grado → primero la bienvenida (si ya tiene clase; si no, antes pide el código de clase).
+  if (u && u.rol === 'estudiante' && !u.grado && !['/bienvenida', '/unirse'].includes(ruta.path) && ruta.acceso === 'sesion') {
     return { redirigir: '/bienvenida' };
   }
   if (u && ruta.path === '/entrar') return { redirigir: query.volver || '/' };
   return null;
 }
 
+/**
+ * Estudiante con cuenta de Google que aún no está en ninguna clase: debe escribir el código de su clase.
+ * Si no se puede comprobar (sin red, error), no se bloquea.
+ */
+async function sinClase(ruta) {
+  const u = state.user;
+  if (!u || u.rol !== 'estudiante' || u.authTipo !== 'google' || state.modo !== 'firebase') return false;
+  if (ruta.acceso !== 'sesion' || ['/unirse', '/privacidad'].includes(ruta.path)) return false;
+  try { const { cargarInscripciones } = await import('../db/progreso.js'); return (await cargarInscripciones(u.uid)).length === 0; } catch { return false; }
+}
+
 async function resolver() {
   const miToken = ++token;
   const { path, query } = parsearHash();
   const ruta = buscarRuta(path);
-  const guarda = aplicarGuardas(ruta, query);
+  let guarda = aplicarGuardas(ruta, query);
+  if (!guarda && await sinClase(ruta)) guarda = { redirigir: '/unirse' };
+  if (miToken !== token) return;
   if (guarda) {
     if (guarda.aviso) import('../ui/overlay.js').then((m) => m.toast(guarda.aviso, { tipo: 'info' }));
     return navegar(guarda.redirigir, { reemplazar: true });

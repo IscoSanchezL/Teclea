@@ -22,6 +22,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
   await fs.setDoc(fs.doc(db, 'users/prof2'), base('prof2', { rol: 'docente' }));
   await fs.setDoc(fs.doc(db, 'users/est1'), base('est1'));
   await fs.setDoc(fs.doc(db, 'users/est2'), base('est2'));
+  await fs.setDoc(fs.doc(db, 'users/est3'), base('est3', { grado: null, authTipo: 'google' }));
 });
 const usar = (uid) => { store._inyectarFirebase({ fs, db: env.authenticatedContext(uid).firestore() }); P._reiniciarCache(); };
 state.modo = 'firebase';
@@ -61,6 +62,15 @@ t('un estudiante NO puede ponerse un PIN al unirse', true);
 const opc = await C.opcionesDeClases(est);
 t('opciones de la clase (mundo 3 cerrado)', opc.mundosBloqueados.includes(3));
 
+console.log('\nEstudiante de Google sin grado: el código de clase le fija el grado');
+usar('est3');
+const nuevo3 = { uid: 'est3', apodo: 'est3', grado: null, avatar: { emoji: '🦊' } };
+try { await C.unirse(nuevo3, clase.codigo); t('se une a la clase aunque aún no tenga grado', true); } catch (e) { t('se une a la clase aunque aún no tenga grado', false, e.message); }
+const claseDe3 = await store.leer(`classes/${clase.id}`);
+t('el estudiante puede leer su clase al estar inscrito', claseDe3?.grado === 4);
+try { await store.actualizar('users/est3', { grado: claseDe3.grado }); t('el grado de la clase se guarda en su perfil', (await store.leer('users/est3')).grado === 4); } catch (e) { t('el grado de la clase se guarda en su perfil', false, e.message); }
+try { await store.actualizar('users/est3', { grado: 6 }); t('ya no puede cambiarse el grado', false); } catch { t('ya no puede cambiarse el grado', true); }
+
 console.log('\nTareas');
 usar('prof1');
 const tarea = await C.crearTarea(prof, clase, { titulo: 'Fila base', tipo: 'leccion', refId: 'm1-l01', instrucciones: 'Con calma', vence: Date.now() + 86400000 });
@@ -96,7 +106,7 @@ t('estadísticas visibles al docente', e1.stats.sesiones === 1 && e1.stats.mejor
 const sesDoc = await sesionesDocente({ uid: 'prof1' });
 t('el docente lee las sesiones de su clase', sesDoc.length >= 1);
 const resumen = resumenClase(inscs, sesDoc);
-t('resumen de clase', resumen.total === 2 && resumen.activos === 1 && resumen.minutosSemana.length === 7);
+t('resumen de clase', resumen.total === 3 && resumen.activos === 1 && resumen.minutosSemana.length === 7);
 t('estado: con actividad hoy = ok/atrasado/destacado; sin actividad = nuevo', ['ok', 'atrasado', 'destacado'].includes(estadoDe(e1)) && estadoDe(inscs.find((i) => i.uid === 'pin1')) === 'nuevo');
 const subs = await C.entregasDeTarea(prof, tarea);
 t('el docente ve las entregas', subs.length === 1);

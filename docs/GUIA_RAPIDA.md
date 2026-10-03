@@ -60,7 +60,7 @@ Sigue la sección **6** de [`CONFIABILIDAD.md`](CONFIABILIDAD.md). Es copiar dos
 ## Cómo usan TECLEA los profes y los niños
 
 **Profe:** entra con Google → **Clases y estudiantes → Nueva clase**. Le da un **código de 6 letras** (y un QR para proyectar).
-- Niños **con** cuenta de Google: escriben el código en **Mis clases**.
+- Niños **con** cuenta de Google: la primera vez que entran, la plataforma les pide el **código de la clase**. Al escribirlo quedan en el grupo correcto y su grado se toma de la clase. Sin código no pueden ver las lecciones.
 - Niños **sin** cuenta: en la pestaña **Clases → Agregar estudiantes** escribes los nombres (uno por línea); la plataforma crea **usuario + PIN** y te deja **imprimir las tarjetas de acceso**. El niño entra con **código de clase + usuario + PIN**.
 - Pestaña **Tareas**: asigna una lección, un texto tuyo o un juego, con fecha límite. Las entregas llegan solas.
 
