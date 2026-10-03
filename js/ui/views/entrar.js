@@ -73,9 +73,7 @@ export async function render({ query }) {
     h('div', { class: 'demo__titulo' }, icono('info', { tam: 20 }), h('strong', {}, 'Modo demostración')),
     h('p', { class: 'suave' }, 'Firebase aún no está configurado (edita js/core/config.js). Mientras tanto puedes explorar con datos de prueba guardados solo en este navegador.'),
     h('div', { class: 'fila fila--envuelve' },
-      h('button', { class: 'btn btn--mint btn--sm', type: 'button', onclick: () => alDemo('estudiante', 2) }, 'Estudiante 2.º'),
-      h('button', { class: 'btn btn--mint btn--sm', type: 'button', onclick: () => alDemo('estudiante', 4) }, 'Estudiante 4.º'),
-      h('button', { class: 'btn btn--mint btn--sm', type: 'button', onclick: () => alDemo('estudiante', 6) }, 'Estudiante 6.º'),
+      [2, 3, 4, 5, 6].map((g) => h('button', { class: 'btn btn--mint btn--sm', type: 'button', onclick: () => alDemo('estudiante', g) }, `Estudiante ${g}.º`)),
       h('button', { class: 'btn btn--sun btn--sm', type: 'button', onclick: () => alDemo('docente') }, 'Docente'),
       h('button', { class: 'btn btn--coral btn--sm', type: 'button', onclick: () => alDemo('admin') }, 'Admin')));
 

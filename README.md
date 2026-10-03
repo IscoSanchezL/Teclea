@@ -7,9 +7,10 @@ clases y paneles para docentes. HTML + CSS + JavaScript ES Modules + Firebase, *
 
 ## Probar ya (modo demo, sin Firebase)
 ```bash
-python3 -m http.server 8000      # o: npx serve .
-# abre http://localhost:8000 → Entrar → "Estudiante / Docente / Admin" (modo demostración)
+python3 -m http.server 8000
 ```
+Luego abre http://localhost:8000 → **Entrar** → botones de "Modo demostración" (Estudiante 2.º–6.º, Docente, Admin).
+Detén el servidor con `Ctrl+C`. Alternativa: `npx serve .`
 
 ## Estado del proyecto
 | Fase | Contenido | Estado |
