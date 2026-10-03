@@ -179,7 +179,7 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
       salida.push({ nombre, alias, usuario, emoji, ok: false, error: e?.code === 'auth/email-already-in-use' ? 'Ya existe' : (e?.code || e?.message || 'Error') });
     }
   }
-  await publicarLista(docente, clase).catch((e) => console.warn('[lista] no se pudo publicar', e?.code || e));
+  try { await publicarLista(docente, clase); } catch (e) { console.warn('[lista] no se pudo publicar', e?.code || e); salida.errorLista = e?.code === 'permission-denied' ? 'permiso' : (e?.code || 'error'); }
   return salida;
 }
 

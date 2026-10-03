@@ -101,6 +101,7 @@ export function modalAlumnos({ clase, alTerminar }) {
     alTerminar?.();
     const ok = lista.filter((a) => a.ok), mal = lista.filter((a) => !a.ok);
     cont.replaceChildren(h('p', {}, `${ok.length} cuentas creadas${mal.length ? `, ${mal.length} con problemas` : ''}.`),
+      lista.errorLista ? h('p', { class: 'mensaje-error', role: 'alert' }, lista.errorLista === 'permiso' ? '⚠ Las cuentas se crearon, pero la lista de la clase NO se pudo publicar: faltan las reglas de seguridad nuevas en Firebase. El administrador debe pegarlas en Firestore → Reglas → Publicar. Después pulsa “Publicar lista” en la tarjeta de la clase.' : `⚠ Las cuentas se crearon, pero no se pudo publicar la lista (${lista.errorLista}). Revisa la conexión e inténtalo de nuevo.`) : h('p', { class: 'suave' }, `✔ Lista publicada. Los niños escriben ${clase.claveAlumnos} y tocan su nombre.`),
       h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, ['Estudiante', 'Aparece como', '', ''].map((t) => h('th', { scope: 'col' }, t)))),
         h('tbody', {}, lista.map((a) => h('tr', {}, h('th', { scope: 'row' }, a.nombre), h('td', {}, a.ok ? `${a.emoji} ${a.alias}` : '—'), h('td', {}, ''), h('td', { class: a.ok ? '' : 'mensaje-error' }, a.ok ? '' : a.error)))))),
       h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary', type: 'button', onclick: () => imprimir(tarjetasAcceso(clase, lista)) }, icono('printer', { tam: 16 }), 'Imprimir tarjetas')));
