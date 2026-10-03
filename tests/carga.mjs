@@ -16,7 +16,7 @@ async function estudiante(i) {
   p.on('console', (m) => { if (m.type() === 'error' && !m.text().includes('Failed to load resource')) errores.push(`#${i} ${m.text()}`); });
   const t0 = Date.now();
   await p.goto(URL + '#/entrar');
-  await p.click(`button:has-text("Estudiante ${2 + (i % 5)}.º")`);
+  await p.click('summary:has-text("Modo demostración")'); await p.click(`button:has-text("Estudiante ${2 + (i % 5)}.º")`);
   await p.waitForSelector('.tiles, .mapa, .modulos', { timeout: 20000 });
   const tInicio = Date.now() - t0;
   await p.click('a[href="#/perfil"].nav-item, a[href="#/perfil"].avatar-mini');

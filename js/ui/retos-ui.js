@@ -27,7 +27,7 @@ export async function tarjetaRetos({ hoy, titulo = 'Retos de hoy', alReclamar } 
     return h('li', { class: `reto ${hecho ? 'reto--hecho' : ''} ${listo ? 'reto--listo' : ''}` },
       h('span', { class: 'reto__ic', 'aria-hidden': 'true' }, icono(hecho ? 'check' : r.icono, { tam: 20 })),
       h('div', { class: 'reto__cuerpo' }, h('span', { class: 'reto__tit' }, r.titulo),
-        h('span', { class: 'reto__barra', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': r.meta, 'aria-valuenow': p }, h('i', { style: { width: `${Math.round((hecho ? 1 : p / r.meta) * 100)}%` } })),
+        h('span', { class: 'reto__barra', role: 'progressbar', 'aria-label': r.titulo, 'aria-valuemin': 0, 'aria-valuemax': r.meta, 'aria-valuenow': p }, h('i', { style: { width: `${Math.round((hecho ? 1 : p / r.meta) * 100)}%` } })),
         h('small', { class: 'suave' }, hecho ? '¡Reclamado!' : `${Math.floor(p)} / ${r.meta} · +${r.xp} XP · +${r.monedas} monedas`)),
       btn);
   }));

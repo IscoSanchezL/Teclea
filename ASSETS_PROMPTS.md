@@ -67,7 +67,8 @@ Cada una sirve de **nodo del mapa** y de tarjeta. Composición: una isla/diorama
 | `fondo-grado-6.webp` | Minimal clay futuristic city skyline at dusk, violet/coral gradient, subtle, empty center |
 | `portada-hero.webp` | Wide scene: Tecli and friends around a giant clay keyboard on a hill, 1600×1000 |
 
-## 4. Medallas (42) — carpeta `assets/img/badges/` — 512×512 WebP transparente
+## 4. Medallas (49) — carpeta `assets/img/badges/` — 512×512 WebP transparente
+> Las medallas ya se dibujan en SVG dentro de la app (`js/ui/medallas.js`): este apartado es **opcional** para reemplazarlas por ilustraciones propias.
 **Prompt base:** `STYLE. A shiny 3D clay medal badge, circular, [DISEÑO]. Glossy metallic rim ([COLOR]), soft glow, ribbon at the top, no text.`
 Archivo = `medalla-<clave>.webp`.
 

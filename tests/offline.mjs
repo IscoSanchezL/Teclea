@@ -12,16 +12,16 @@ p.on('pageerror', (e) => errores.push(e.message));
 await p.goto(URL + '#/entrar');
 await p.evaluate(() => navigator.serviceWorker.ready);
 await p.waitForFunction(() => navigator.serviceWorker.controller || true);
-await p.reload(); await p.waitForSelector('.entrar__tarjeta');
+await p.reload(); await p.waitForSelector('summary:has-text("Modo demostración")');
 await p.waitForTimeout(2500); // deja terminar el precaché
 const guardados = await p.evaluate(async () => { let n = 0; for (const k of await caches.keys()) n += (await (await caches.open(k)).keys()).length; return n; });
 console.log(`Archivos en caché: ${guardados}`);
 
 await ctx.setOffline(true);
 await p.reload();
-await p.waitForSelector('.entrar__tarjeta', { timeout: 10000 });
+await p.waitForSelector('summary:has-text("Modo demostración")', { timeout: 10000 });
 console.log('✓ Recarga SIN internet: la pantalla de entrada carga');
-await p.click('button:has-text("Estudiante 4.º")');
+await p.click('summary:has-text("Modo demostración")'); await p.click('button:has-text("Estudiante 4.º")');
 await p.waitForSelector('.tiles', { timeout: 10000 });
 console.log('✓ Navegación y entrada en modo demo SIN internet');
 await p.click('a[href="#/perfil"].avatar-mini'); await p.waitForSelector('.perfil');

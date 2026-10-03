@@ -1,5 +1,5 @@
 {
-  "version": "128b1aebb1af",
+  "version": "5fe5284b6290",
   "archivos": [
     "assets/assets.json",
     "assets/img/favicon.svg",
@@ -43,6 +43,7 @@
     "js/core/routes.js",
     "js/core/state.js",
     "js/core/utils.js",
+    "js/db/admin.js",
     "js/db/analitica.js",
     "js/db/clases.js",
     "js/db/firebase.js",

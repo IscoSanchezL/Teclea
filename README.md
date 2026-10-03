@@ -13,18 +13,20 @@ Luego abre http://localhost:8000 → **Entrar** → botones de "Modo demostraci�
 Detén el servidor con `Ctrl+C`. Alternativa: `npx serve .`
 
 ## Estado del proyecto
-| Fase | Contenido | Estado |
-|---|---|---|
-| 0 | Arquitectura, esquema Firestore, reglas, guía Firebase | ✅ |
-| 1 | Sistema de diseño (3 estilos por grado + estilo sobrio para docentes), navegación, portada, acceso, perfil/ajustes, paleta Ctrl+K | ✅ |
-| 1b | Modo sin conexión (service worker), reglas probadas (53 pruebas), respaldo automático cifrado, guía de confiabilidad | ✅ |
-| 2 | Motor de escritura + teclado virtual con manos + lección demo | ⏳ |
-| 3 | Currículo de 10 mundos, mapa real y progreso | ⏳ |
-| 4 | Gamificación y minijuegos | ⏳ |
-| 5 | Clases, panel docente, tareas y reportes | ⏳ |
-| 6 | Panel admin, PWA offline, certificados PDF, pulido | ⏳ |
+Todas las fases están construidas y probadas (237 comprobaciones automáticas, 0 errores de accesibilidad automática en las vistas principales):
+
+| Área | Contenido |
+|---|---|
+| Estudiante | 144 lecciones en 10 mundos, motor de escritura con teclado virtual y manos, refuerzo adaptativo, práctica libre, 5 minijuegos, XP, monedas, racha, 49 medallas, tienda, retos diarios, avatar o foto |
+| Docente | Clases con código y QR, alumnos con usuario + PIN (tarjetas imprimibles), tareas con entrega automática, resumen real, mapa de calor, CSV, boletín, certificados |
+| Administración | Aprobación de docentes, lista blanca, marca (logo y portada), ajustes, catálogos, respaldo JSON, datos personales, auditoría |
+| Confiabilidad | Sin conexión (service worker + caché Firestore), reglas de seguridad probadas, respaldo diario cifrado |
+
+**Para ponerla en marcha:** [`docs/GUIA_RAPIDA.md`](docs/GUIA_RAPIDA.md) y el asistente `configurar.html`.
 
 ## Documentación
+- [`docs/GUIA_RAPIDA.md`](docs/GUIA_RAPIDA.md) — **empieza aquí**: dejarla funcionando en 30–40 minutos
+- [`docs/PEDAGOGIA.md`](docs/PEDAGOGIA.md) — por qué 144 lecciones desarrollan la memoria muscular
 - [`docs/ARQUITECTURA.md`](docs/ARQUITECTURA.md) — estructura, decisiones, seguridad
 - [`docs/FIRESTORE_SCHEMA.md`](docs/FIRESTORE_SCHEMA.md) — colecciones, campos, consultas
 - [`docs/FIREBASE_SETUP.md`](docs/FIREBASE_SETUP.md) — crear Firebase y publicar en GitHub Pages

@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Asistente de configuración · TECLEA</title>
+  <style>
+    :root { --bg: #F6F4FF; --card: #fff; --txt: #1B1838; --suave: #5B577E; --p: #5B3FE0; --ok: #0E8A5F; --mal: #C42B31; --borde: #DAD6F3; color-scheme: light dark; }
+    @media (prefers-color-scheme: dark) { :root { --bg: #13112A; --card: #1F1C42; --txt: #F2F0FF; --suave: #B4AFDB; --p: #9C85FF; --ok: #3DDBB0; --mal: #FF7B80; --borde: #3A3566; } }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--txt); }
+    main { max-width: 52rem; margin: 0 auto; padding: 1.2rem 16px 4rem; }
+    h1 { font-size: 1.7rem; margin: .4rem 0; } h2 { font-size: 1.15rem; margin: 0 0 .5rem; }
+    .paso { background: var(--card); border: 1px solid var(--borde); border-radius: 16px; padding: 1.1rem 1.2rem; margin: 1rem 0; }
+    .num { display: inline-grid; place-items: center; width: 1.8rem; height: 1.8rem; margin-right: .5rem; border-radius: 50%; background: var(--p); color: #fff; font-weight: 700; }
+    textarea, input[type=text] { width: 100%; padding: .6rem .7rem; border: 1.5px solid var(--borde); border-radius: 10px; background: transparent; color: inherit; font: 14px ui-monospace, Consolas, monospace; }
+    textarea { min-height: 9rem; }
+    button, .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1rem; border: 0; border-radius: 10px; background: var(--p); color: #fff; font: 600 .95rem system-ui, sans-serif; cursor: pointer; text-decoration: none; margin: .3rem .3rem 0 0; }
+    button.sec, .btn.sec { background: transparent; color: var(--p); border: 1.5px solid var(--p); }
+    button:disabled { opacity: .5; cursor: default; }
+    .suave { color: var(--suave); font-size: .9rem; } .ok { color: var(--ok); font-weight: 600; } .mal { color: var(--mal); font-weight: 600; }
+    pre { background: color-mix(in srgb, var(--p) 8%, transparent); padding: .7rem; border-radius: 10px; overflow: auto; font-size: .82rem; max-height: 14rem; }
+    label.chk { display: flex; gap: .6rem; align-items: flex-start; padding: .35rem 0; }
+    label.chk input { margin-top: .3rem; width: 1.1rem; height: 1.1rem; }
+    a { color: var(--p); }
+    #resultado { min-height: 1.5rem; margin-top: .6rem; }
+  </style>
+</head>
+<body>
+<main>
+  <p><a href="./">← Volver a TECLEA</a></p>
+  <h1>Asistente de configuración</h1>
+  <p class="suave">Sigue los 4 pasos en orden. Todo se hace desde el navegador: no necesitas instalar nada. Esta página no envía tus datos a ningún sitio.</p>
+
+  <section class="paso" id="p1">
+    <h2><span class="num">1</span>Pega la configuración de Firebase</h2>
+    <p class="suave">En <a href="https://console.firebase.google.com" target="_blank" rel="noopener">console.firebase.google.com</a> → tu proyecto → ⚙ Configuración del proyecto → <b>Tus apps</b> → app web → “Configuración del SDK” → copia todo lo que está entre llaves <code>{ … }</code> y pégalo aquí.</p>
+    <textarea id="entrada" spellcheck="false" placeholder='const firebaseConfig = {&#10;  apiKey: "AIza...",&#10;  authDomain: "mi-proyecto.firebaseapp.com",&#10;  projectId: "mi-proyecto",&#10;  ...&#10;};'></textarea>
+    <div><button id="generar">Generar archivo config.js</button></div>
+    <div id="resultado" aria-live="polite"></div>
+    <div id="salida" hidden>
+      <p>Descarga el archivo y súbelo a tu repositorio de GitHub reemplazando <b>js/core/config.js</b> (GitHub → carpeta <code>js/core</code> → “Add file” → “Upload files” → “Commit changes”).</p>
+      <button id="descargar">⬇ Descargar config.js</button>
+      <button id="copiar" class="sec">Copiar solo el bloque firebase</button>
+      <pre id="vista"></pre>
+    </div>
+  </section>
+
+  <section class="paso" id="p2">
+    <h2><span class="num">2</span>Activa el acceso y las reglas de seguridad</h2>
+    <label class="chk"><input type="checkbox" data-k="auth-google"><span><b>Authentication → Método de acceso → Google</b>: habilitar y guardar.</span></label>
+    <label class="chk"><input type="checkbox" data-k="auth-correo"><span><b>Authentication → Correo electrónico/contraseña</b>: habilitar (solo el primer interruptor). Lo usan los estudiantes con PIN.</span></label>
+    <label class="chk"><input type="checkbox" data-k="auth-dominio"><span><b>Authentication → Configuración → Dominios autorizados</b>: agrega <code id="dom">tu-usuario.github.io</code>.</span></label>
+    <label class="chk"><input type="checkbox" data-k="firestore"><span><b>Firestore Database → Crear base de datos</b>: modo producción, ubicación <code>southamerica-east1</code>.</span></label>
+    <p>Reglas de seguridad: cópialas y pégalas en <b>Firestore → Reglas → Publicar</b>.</p>
+    <button id="reglas">Copiar reglas de seguridad</button> <span id="reglasEstado" class="suave"></span>
+    <label class="chk"><input type="checkbox" data-k="reglas"><span>Pegué las reglas y pulsé <b>Publicar</b>.</span></label>
+  </section>
+
+  <section class="paso" id="p3">
+    <h2><span class="num">3</span>Prueba la conexión</h2>
+    <p class="suave">Comprueba que tu configuración funciona y que las reglas están publicadas.</p>
+    <button id="probar">Probar conexión</button>
+    <div id="prueba" aria-live="polite" class="suave"></div>
+  </section>
+
+  <section class="paso" id="p4">
+    <h2><span class="num">4</span>Primer ingreso del administrador</h2>
+    <label class="chk"><input type="checkbox" data-k="admin"><span>Entra a TECLEA con <b>Google</b> usando <b>franksanlo@gmail.com</b>. Es el único administrador.</span></label>
+    <label class="chk"><input type="checkbox" data-k="catalogos"><span>En <b>Administración → Resumen</b> verifica que “Catálogos de medallas y tienda” diga <i>Publicados</i> (se publican solos).</span></label>
+    <label class="chk"><input type="checkbox" data-k="marca"><span>En <b>Administración → Marca</b> sube tu logo y escribe el nombre del colegio.</span></label>
+    <label class="chk"><input type="checkbox" data-k="docentes"><span>En <b>Administración → Docentes</b> autoriza los correos de tus profes (o apruébalos cuando se registren).</span></label>
+    <label class="chk"><input type="checkbox" data-k="respaldo"><span>Activa el respaldo diario automático: guía <a href="docs/CONFIABILIDAD.md">docs/CONFIABILIDAD.md</a> (5 minutos, una sola vez).</span></label>
+  </section>
+</main>
+<script type="module">
+const $ = (s) => document.querySelector(s);
+const CLAVES = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+let cfg = null;
+
+// Casillas: se recuerdan en este navegador
+const guardadas = JSON.parse(localStorage.getItem('teclea:config-pasos') || '{}');
+document.querySelectorAll('input[data-k]').forEach((c) => { c.checked = !!guardadas[c.dataset.k]; c.onchange = () => { guardadas[c.dataset.k] = c.checked; localStorage.setItem('teclea:config-pasos', JSON.stringify(guardadas)); }; });
+$('#dom').textContent = location.hostname.endsWith('github.io') ? location.hostname : 'tu-usuario.github.io';
+
+/** Acepta JSON, objeto JS (con o sin comillas), o el bloque completo "const firebaseConfig = {...}". */
+function leerConfig(texto) {
+  const m = texto.match(/\{[\s\S]*\}/); if (!m) throw new Error('No encontré las llaves { … }. Copia todo el bloque.');
+  const out = {};
+  for (const k of CLAVES) {
+    const r = new RegExp(`["']?${k}["']?\\s*:\\s*["']([^"']+)["']`).exec(m[0]);
+    if (r) out[k] = r[1];
+  }
+  const faltan = ['apiKey', 'authDomain', 'projectId', 'appId'].filter((k) => !out[k]);
+  if (faltan.length) throw new Error(`Faltan: ${faltan.join(', ')}. Revisa que copiaste toda la configuración.`);
+  if (out.apiKey.startsWith('REEMPLAZA')) throw new Error('Esa es la plantilla; pega tu configuración real de Firebase.');
+  out.storageBucket ||= `${out.projectId}.appspot.com`; out.messagingSenderId ||= '';
+  return out;
+}
+const bloque = (c) => `  firebase: {\n${CLAVES.map((k) => `    ${k}: '${c[k] ?? ''}',`).join('\n')}\n  },`;
+
+$('#generar').onclick = async () => {
+  const r = $('#resultado'); r.className = ''; r.textContent = '';
+  try {
+    cfg = leerConfig($('#entrada').value);
+    let original = '';
+    try { original = await (await fetch('js/core/config.js', { cache: 'no-store' })).text(); } catch { /* sin red */ }
+    const nuevo = original && /firebase:\s*\{[\s\S]*?\n\s*\},/.test(original) ? original.replace(/ {2}firebase:\s*\{[\s\S]*?\n\s*\},/, bloque(cfg)) : null;
+    $('#vista').textContent = nuevo ? bloque(cfg) : bloque(cfg);
+    window.__nuevoConfig = nuevo;
+    $('#salida').hidden = false; $('#descargar').disabled = !nuevo;
+    r.className = 'ok'; r.textContent = `✔ Configuración válida del proyecto “${cfg.projectId}”.`;
+    if (!nuevo) r.textContent += ' (No pude leer js/core/config.js; copia el bloque y pégalo a mano.)';
+  } catch (e) { r.className = 'mal'; r.textContent = e.message; }
+};
+$('#descargar').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([window.__nuevoConfig], { type: 'text/javascript' })); a.download = 'config.js'; a.click(); };
+$('#copiar').onclick = async () => { await navigator.clipboard.writeText(bloque(cfg)); $('#copiar').textContent = '✔ Copiado'; };
+$('#reglas').onclick = async () => {
+  try { const t = await (await fetch('firestore.rules', { cache: 'no-store' })).text(); await navigator.clipboard.writeText(t); $('#reglasEstado').textContent = '✔ Reglas copiadas. Pégalas en Firestore → Reglas.'; }
+  catch { $('#reglasEstado').innerHTML = 'No pude copiarlas automáticamente: abre <a href="firestore.rules">firestore.rules</a>, selecciona todo y cópialo.'; }
+};
+$('#probar').onclick = async () => {
+  const o = $('#prueba'); o.className = 'suave';
+  try { cfg ||= leerConfig($('#entrada').value); } catch { try { cfg = (await import('./js/core/config.js')).CONFIG.firebase; if (String(cfg.apiKey).startsWith('REEMPLAZA')) throw 0; } catch { o.className = 'mal'; o.textContent = 'Primero pega tu configuración en el paso 1.'; return; } }
+  o.textContent = 'Probando…';
+  try {
+    const base = 'https://www.gstatic.com/firebasejs/10.14.1';
+    const [app, fs] = await Promise.all([import(`${base}/firebase-app.js`), import(`${base}/firebase-firestore.js`)]);
+    const a = app.initializeApp(cfg, 'prueba'); const db = fs.getFirestore(a);
+    const lineas = [];
+    try { await fs.getDoc(fs.doc(db, 'config/branding')); lineas.push('<span class="ok">✔ Firestore responde y la regla de lectura pública de la marca funciona.</span>'); }
+    catch (e) { lineas.push(e.code === 'permission-denied' ? '<span class="mal">✘ Firestore respondió “permiso denegado”: publica las reglas del paso 2.</span>' : `<span class="mal">✘ No se pudo conectar (${e.code || e.message}). Revisa que la base de datos esté creada.</span>`); }
+    try { await fs.getDoc(fs.doc(db, 'users/prueba')); lineas.push('<span class="mal">⚠ Un visitante anónimo pudo leer datos: revisa que pegaste las reglas completas.</span>'); }
+    catch (e) { if (e.code === 'permission-denied') lineas.push('<span class="ok">✔ Las reglas bloquean a visitantes anónimos (correcto).</span>'); }
+    o.innerHTML = lineas.join('<br>');
+  } catch (e) { o.className = 'mal'; o.textContent = `No se pudo cargar Firebase: ${e.message}`; }
+};
+</script>
+</body>
+</html>

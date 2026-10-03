@@ -1,5 +1,7 @@
 # Guía paso a paso: Firebase + GitHub Pages
 
+> ¿Prefieres una versión más corta y con asistente? Mira [`GUIA_RAPIDA.md`](GUIA_RAPIDA.md) y abre `configurar.html` en tu sitio.
+
 Tiempo estimado: 20–30 minutos. Todo funciona en el plan **gratuito (Spark)**.
 
 > Sin hacer nada de esto la app ya corre en **modo demo local** (botones "Estudiante / Docente / Admin" en la pantalla Entrar).
@@ -20,13 +22,13 @@ Tiempo estimado: 20–30 minutos. Todo funciona en el plan **gratuito (Spark)**.
 1. **Google** → Habilitar → correo de asistencia → Guardar.
 2. **Correo electrónico/contraseña** → Habilitar (solo el primer interruptor; **no** "vínculo por correo"). Lo usan los estudiantes con **código de clase + usuario + PIN**.
 3. **Configuración → Dominios autorizados** → **Agregar dominio**: `TU-USUARIO.github.io` (y `localhost` ya viene).
-4. *(Opcional, recomendado)* En **Configuración → Acciones del usuario** desactiva "Permitir que los usuarios se registren" **después** de crear las cuentas iniciales si quieres cerrar el registro por correo; las cuentas PIN las crea el docente desde la app (Fase 5).
+4. *(Opcional, recomendado)* En **Configuración → Acciones del usuario** desactiva "Permitir que los usuarios se registren" **después** de crear las cuentas iniciales si quieres cerrar el registro por correo; las cuentas PIN las crea el docente desde la app (Clases → Agregar estudiantes).
 
 ## 4. Reglas e índices
 Opción A — consola (más fácil):
 1. Edita `firestore.rules` y cambia `franksanlo@gmail.com` por **tu correo de Google** (función `bootstrapAdmin`). Haz lo mismo en `js/core/config.js` → `adminEmail`.
 2. Firestore → pestaña **Reglas** → pega todo el contenido de `firestore.rules` → **Publicar**.
-3. Los **índices** se pueden crear al vuelo: cuando una consulta lo necesite, la consola del navegador muestra un enlace; púlsalo y confirma. O bien usa la opción B.
+3. **No se necesitan índices compuestos**: todas las consultas usan igualdad (por eso `firestore.indexes.json` está vacío).
 
 Opción B — Firebase CLI:
 ```bash
@@ -39,7 +41,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 ## 5. Primer administrador
 1. Publica la app (paso 6) y entra con **Google** usando el correo configurado como `adminEmail`.
 2. La regla `bootstrapAdmin` te permite crear tu perfil con `rol: admin`.
-3. Desde el panel admin (Fase 6) agregarás los correos de docentes a la **lista blanca**. Mientras tanto puedes crear a mano el documento `teacher_whitelist/correo@dominio.com` en la consola (campo `correo`: texto).
+3. Desde **Administración → Docentes** agregas los correos de docentes a la **lista blanca** (o apruebas sus solicitudes).
 
 ## 6. Publicar en GitHub Pages
 1. Sube el código a GitHub (rama `main`).
@@ -65,7 +67,7 @@ Sigue **[`CONFIABILIDAD.md`](CONFIABILIDAD.md)**: App Check, MFA, restricción d
 - [ ] Revisar `#/privacidad` con el área jurídica del colegio y completar responsable/contacto en `config.js`.
 - [ ] Obtener la **autorización de acudientes** (circular o formulario del colegio). La plataforma guarda la versión del aviso aceptado en `users.consentimiento`.
 - [ ] Confirmar que Analytics está **desactivado** y que no se añadieron scripts de terceros.
-- [ ] Definir quién atiende solicitudes de acceso/eliminación (el panel admin las listará en la Fase 6).
+- [ ] Definir quién atiende solicitudes de acceso/eliminación (Administración → Datos y respaldo las lista).
 - [ ] Activar **alertas de presupuesto** en Google Cloud (aunque el uso esperado es gratuito).
 
 ## 8. Cuotas del plan gratuito (referencia)

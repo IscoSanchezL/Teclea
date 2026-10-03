@@ -5,8 +5,7 @@ import { marca } from '../../core/marca.js';
 import { state } from '../../core/state.js';
 import { h } from '../../core/utils.js';
 import * as C from '../../db/clases.js';
-import { consultar } from '../../db/store.js';
-import { resumenClase, estadoDe, textoUltima } from '../../db/analitica.js';
+import { resumenClase, estadoDe, textoUltima, sesionesDocente } from '../../db/analitica.js';
 import { icono } from '../icons.js';
 import { barras, tecladoCalor } from '../graficas.js';
 import { pill } from './_staff.js';
@@ -16,7 +15,7 @@ const kpi = ({ titulo, valor, unidad = '' }) => h('article', { class: 'kpi' }, h
 export async function render() {
   const u = state.user, nombre = u.nombre.split(' ')[0];
   const [clases, inscs, sesiones] = await Promise.all([C.listarClases(u), C.inscripcionesDocente(u),
-    consultar('sessions', { donde: [['docenteId', '==', u.uid]], orden: ['creadoEn', 'desc'], limite: 600 }).catch(() => [])]);
+    sesionesDocente(u)]);
   const cab = h('header', { class: 'pagina__cab' },
     h('div', {}, h('h1', {}, `Buen día, ${nombre}`), h('p', { class: 'suave' }, 'Resumen de tus grupos · últimos 7 días')),
     h('div', { class: 'fila' }, h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => document.dispatchEvent(new CustomEvent('teclea:paleta')) }, icono('search', { tam: 16 }), 'Buscar'),

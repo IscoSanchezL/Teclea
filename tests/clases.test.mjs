@@ -9,7 +9,7 @@ import { state } from '../js/core/state.js';
 import * as store from '../js/db/store.js';
 import * as P from '../js/db/progreso.js';
 import * as C from '../js/db/clases.js';
-import { estadoDe, resumenClase } from '../js/db/analitica.js';
+import { estadoDe, resumenClase, sesionesDocente } from '../js/db/analitica.js';
 import { MotorEscritura } from '../js/lessons/motor.js';
 
 let ok = 0, mal = 0;
@@ -93,7 +93,7 @@ usar('prof1');
 const inscs = await C.inscripcionesDocente(prof);
 const e1 = inscs.find((i) => i.uid === 'est1');
 t('estadísticas visibles al docente', e1.stats.sesiones === 1 && e1.stats.mejorWpm === res.ppm && e1.stats.caracteres > 0 && e1.stats.ppmInicial === res.ppm);
-const sesDoc = await store.consultar('sessions', { donde: [['docenteId', '==', 'prof1']], orden: ['creadoEn', 'desc'], limite: 50 }).catch((e) => { console.log(e.message); return []; });
+const sesDoc = await sesionesDocente({ uid: 'prof1' });
 t('el docente lee las sesiones de su clase', sesDoc.length >= 1);
 const resumen = resumenClase(inscs, sesDoc);
 t('resumen de clase', resumen.total === 2 && resumen.activos === 1 && resumen.minutosSemana.length === 7);
@@ -102,7 +102,7 @@ const subs = await C.entregasDeTarea(prof, tarea);
 t('el docente ve las entregas', subs.length === 1);
 try { await store.actualizar(`submissions/${subs[0].id}`, { nota: 4.5 }); t('el docente pone nota', true); } catch (e) { t('el docente pone nota', false, e.message); }
 usar('prof2');
-t('otro docente NO ve estudiantes ni sesiones ajenas', (await C.inscripcionesDocente({ uid: 'prof2' })).length === 0 && (await store.consultar('sessions', { donde: [['docenteId', '==', 'prof2']] })).length === 0);
+t('otro docente NO ve estudiantes ni sesiones ajenas', (await C.inscripcionesDocente({ uid: 'prof2' })).length === 0 && (await sesionesDocente({ uid: 'prof2' })).length === 0);
 await assertFails(fs.getDoc(fs.doc(env.authenticatedContext('prof2').firestore(), `enrollments/${clase.id}_est1`)));
 t('otro docente NO puede leer una inscripción ajena', true);
 await assertFails(fs.updateDoc(fs.doc(env.authenticatedContext('prof2').firestore(), `classes/${clase.id}`), { nombre: 'robada', grado: 4, grupo: '', color: '#000000', codigo: clase.codigo, config: {}, activa: true, docenteId: 'prof2' }));

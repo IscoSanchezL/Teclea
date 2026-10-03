@@ -4,7 +4,7 @@
 import { state } from '../../core/state.js';
 import { h } from '../../core/utils.js';
 import * as C from '../../db/clases.js';
-import { estadoDe, textoUltima, aCSV, descargar, ETIQUETAS, sembrarEjemplo } from '../../db/analitica.js';
+import { estadoDe, textoUltima, aCSV, descargar, ETIQUETAS, sembrarEjemplo, sesionesDocente } from '../../db/analitica.js';
 import { icono } from '../icons.js';
 import { sparkline } from '../graficas.js';
 import { toast, confirmar } from '../overlay.js';
@@ -23,7 +23,7 @@ export async function render({ query }) {
 
   async function cargar() {
     [clases, inscs] = await Promise.all([C.listarClases(docente), C.inscripcionesDocente(docente)]);
-    sesiones = await import('../../db/store.js').then((s) => s.consultar('sessions', { donde: [['docenteId', '==', docente.uid]], orden: ['creadoEn', 'desc'], limite: 600 })).catch(() => []);
+    sesiones = await sesionesDocente(docente);
     if (!claseTareas || !clases.some((c) => c.id === claseTareas.id)) claseTareas = clases[0] || null;
   }
   const nombreClase = (id) => clases.find((c) => c.id === id)?.nombre || '—';

@@ -121,7 +121,7 @@ export async function render() {
       h('button', { class: 'btn btn--suave btn--peligro-suave', type: 'button', onclick: async () => {
         const ok = await confirmar({ titulo: '¿Pedir que borren mis datos?', mensaje: 'Se enviará una solicitud a tu docente o administración para eliminar tu cuenta y tu progreso. Esto no se puede deshacer.', si: 'Sí, enviar solicitud', peligro: true });
         if (!ok) return;
-        try { await guardarPerfil({ solicitudEliminacion: true }); toast('Solicitud enviada. Tu docente la revisará.', { tipo: 'info' }); }
+        try { await guardarPerfil({ solicitudEliminacion: true }); toast('Solicitud enviada. El administrador la revisará.', { tipo: 'info' }); }
         catch { toast('No se pudo enviar la solicitud', { tipo: 'error' }); }
       } }, icono('trash', { tam: 20 }), 'Pedir eliminar mis datos')),
     h('p', { class: 'pequeno' }, h('a', { href: '#/privacidad' }, 'Leer el aviso de privacidad')));

@@ -61,3 +61,10 @@
 .certificado { text-align: center; border: 6px double #6C4CF5; padding: 16mm 10mm; min-height: 150mm; display: flex; flex-direction: column; justify-content: center; gap: 6mm; }
 .certificado h1 { font: 700 2.4rem Georgia, serif; }
 .certificado__nombre { font: italic 700 2.2rem Georgia, serif; border-bottom: 2px solid #000; display: inline-block; padding: 0 12mm 2mm; align-self: center; }
+
+.tabs--5 { grid-template-columns: repeat(5, 1fr); max-width: 44rem; }
+@media (max-width: 40rem) { .tabs--5 { grid-template-columns: repeat(5, max-content); overflow-x: auto; max-width: 100%; } .tabs--5 .tab { padding-inline: .8rem; white-space: nowrap; } }
+.marca__vista { display: grid; place-items: center; min-height: 6rem; border: 1px dashed var(--borde); border-radius: var(--r-md); overflow: hidden; background: var(--superficie-2); }
+.marca__vista img { max-width: 100%; max-height: 9rem; object-fit: contain; }
+.marca__vista--hero img { width: 100%; max-height: 10rem; object-fit: cover; }
+.marca__vista + .fila input[type=file] { max-width: 100%; }

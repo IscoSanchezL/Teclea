@@ -14,7 +14,7 @@ Primero lo que se midió o probó, luego lo que debes configurar tú, y al final
 | No se cae con 30 usuarios | App estática en CDN (sin servidor propio que saturar) + Firestore/Auth de Google (escalan solos). Con 30 estudiantes se usa ≈ 12 % de la cuota gratuita diaria | ✅ Prueba: 30 navegadores simultáneos, 30/30 sin errores (`tests/carga.mjs`) |
 | Sigue funcionando sin internet | Service worker guarda la app completa; Firestore con caché local persistente | ✅ Prueba: recarga y navegación sin red (`tests/offline.mjs`) |
 | No se pierden datos al desconectarse | Las escrituras de Firestore se encolan en el dispositivo y se sincronizan al volver la red | ✅ Mecanismo del SDK; la cola propia de sesiones llega con la Fase 2 |
-| Nadie puede falsear/robar datos | Reglas de Firestore | ✅ 53 pruebas automáticas en el emulador (`tests/reglas.test.mjs`) |
+| Nadie puede falsear/robar datos | Reglas de Firestore | ✅ 74 pruebas de reglas + 105 de integración (progreso, medallas, clases, administración) en el emulador (`cd tests && npm run test:todo`) |
 | Respaldo automático | Exportación diaria cifrada (GitHub Actions) + respaldos nativos de Google | ✅ Script probado ida y vuelta en el emulador · ⚙️ **tú activas** los secretos |
 | Autenticación protegida | Google + MFA del titular, App Check, dominios autorizados | ⚙️ **tú configuras** (sección 5) |
 
@@ -78,13 +78,13 @@ Cuentas de la cuota gratuita (plan **Spark**, límites diarios de Firestore: 50 
 ### 5.1 Reglas
 1. Cambia `franksanlo@gmail.com` en `firestore.rules` (función `bootstrapAdmin`) y en `js/core/config.js`.
 2. Publica: consola Firebase → Firestore → Reglas → pegar → **Publicar** (o `firebase deploy --only firestore:rules,firestore:indexes`).
-3. *(Opcional)* Ejecuta las pruebas: `cd tests && npm install && npm test` (requiere Java 11+ y descarga el emulador). Deben pasar **53/53**.
+3. *(Opcional)* Ejecuta las pruebas: `cd tests && npm install && npm test` (requiere Java 11+ y descarga el emulador). Deben pasar todas (`npm run test:todo`).
 
 ### 5.2 Cuentas
 - **Verificación en 2 pasos (MFA) obligatoria** en las cuentas Google del **administrador y de los docentes** (Google Workspace Admin →
   Seguridad → Verificación en 2 pasos → Exigir). Es la defensa más efectiva contra robo de cuentas.
 - Mantén la **lista blanca de docentes** corta y revísala cada período.
-- PIN de estudiantes: 4 dígitos + código de clase. Firebase limita intentos; si un estudiante lo olvida, el docente lo restablece.
+- PIN de estudiantes: 4 dígitos + código de clase. Firebase limita intentos; si un estudiante lo olvida, el docente lo ve en el detalle del estudiante (clic en su nombre).
   Para mayor seguridad cambia a 6 dígitos (una constante en `entrar.js`/alta de estudiantes).
 - Consola Firebase → Authentication → Configuración → **Protección contra enumeración de correos**: activar.
 
