@@ -31,12 +31,12 @@ export const CONFIG = {
   // Configuración del proyecto → Tus apps → SDK). Estos valores NO son
   // secretos; la seguridad la dan las reglas de Firestore.
   firebase: {
-    apiKey: 'REEMPLAZA_API_KEY',
-    authDomain: 'REEMPLAZA.firebaseapp.com',
-    projectId: 'REEMPLAZA',
-    storageBucket: 'REEMPLAZA.appspot.com',
-    messagingSenderId: 'REEMPLAZA',
-    appId: 'REEMPLAZA',
+    apiKey: 'AIzaSyBSwy1zjagQp2oiW4sF6XH3bUFgiFg8Yjk',
+    authDomain: 'teclea-colegio.firebaseapp.com',
+    projectId: 'teclea-colegio',
+    storageBucket: 'teclea-colegio.firebasestorage.app',
+    messagingSenderId: '888092917884',
+    appId: '1:888092917884:web:b56ad94dd2e0e27d83c9f9',
   },
   // App Check (recomendado): clave pública de reCAPTCHA v3 registrada en Firebase → App Check.
   // Evita que otros sitios o scripts usen tu proyecto. Déjala '' hasta registrarla (ver docs/CONFIABILIDAD.md).
