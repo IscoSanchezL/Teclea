@@ -1,12 +1,13 @@
 /**
- * Acceso moderno (pantalla dividida): código de clase + usuario + PIN, Google (estudiantes),
+ * Acceso moderno (pantalla dividida): código de clase + usuario + clave, Google (estudiantes),
  * Google para docentes (con aprobación del administrador) y modo demostración.
  */
 import { firebaseConfigurado } from '../../core/config.js';
 import { marca } from '../../core/marca.js';
 import { h } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
-import { entrarConGoogle, entrarConCodigo, entrarDemo, mensajeError } from '../../auth/auth.js';
+import { entrarConGoogle, entrarPorLista, entrarDemo, mensajeError } from '../../auth/auth.js';
+import { listaPorClave } from '../../db/clases.js';
 import { campo } from '../componentes.js';
 import { icono } from '../icons.js';
 import { logo } from '../logo.js';
@@ -31,25 +32,13 @@ export async function render({ query }) {
   const mostrarError = (t) => { mensaje.textContent = t; mensaje.hidden = !t; };
 
   // ── Panel: código de clase ──
-  const fCodigo = campo({ etiqueta: 'Código de clase', ayuda: '6 letras o números, como ABC234', maxlength: 6, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false' });
-  fCodigo.input.addEventListener('input', () => { fCodigo.input.value = fCodigo.input.value.toUpperCase().replace(ALFABETO_CODIGO, ''); actualizar(); });
-  const fUsuario = campo({ etiqueta: 'Mi usuario', ayuda: 'El que te dio tu profe, por ejemplo sofia.m', autocomplete: 'username', autocapitalize: 'none', spellcheck: 'false' });
-  fUsuario.input.addEventListener('input', actualizar);
-  const casillas = Array.from({ length: 4 }, (_, i) => h('input', {
-    class: 'pin__casilla', type: 'password', inputmode: 'numeric', pattern: '[0-9]', maxlength: 1, autocomplete: 'off', 'aria-label': `PIN, dígito ${i + 1} de 4`,
-    oninput: (e) => { e.target.value = e.target.value.replace(/\D/g, '').slice(-1); if (e.target.value && casillas[i + 1]) casillas[i + 1].focus(); actualizar(); },
-    onkeydown: (e) => { if (e.key === 'Backspace' && !e.target.value && casillas[i - 1]) casillas[i - 1].focus(); },
-    onpaste: (e) => {
-      const nums = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
-      if (!nums) return;
-      e.preventDefault(); [...nums].forEach((n, j) => { casillas[j].value = n; }); casillas[Math.min(nums.length, 3)].focus(); actualizar();
-    },
-  }));
-  const pin = () => casillas.map((c) => c.value).join('');
-  const btnCodigo = h('button', { class: 'btn btn--primary btn--lg btn--bloque', type: 'submit' }, 'Entrar', icono('arrow', { tam: 20 }));
-  const panelCodigo = h('form', { class: 'login__form', id: 'panel-codigo', role: 'tabpanel', 'aria-labelledby': 'tab-codigo', novalidate: true, onsubmit: alCodigo },
-    fCodigo.nodo, fUsuario.nodo,
-    h('fieldset', { class: 'pin' }, h('legend', { class: 'campo__etiqueta' }, 'Mi PIN (4 números)'), h('div', { class: 'pin__fila' }, casillas)), btnCodigo);
+  const fCodigo = campo({ etiqueta: 'Código de mi clase', ayuda: 'Lo escribe tu profe en el tablero, por ejemplo TECLA2A', maxlength: 12, autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false' });
+  fCodigo.input.addEventListener('input', () => { fCodigo.input.value = fCodigo.input.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); actualizar(); });
+  const btnCodigo = h('button', { class: 'btn btn--primary btn--lg btn--bloque', type: 'submit' }, 'Ver mi clase', icono('arrow', { tam: 20 }));
+  const pasoCodigo = h('form', { class: 'login__form', novalidate: true, onsubmit: alCodigo }, fCodigo.nodo, btnCodigo);
+  const pasoNombres = h('div', { class: 'login__form', hidden: true });
+  const panelCodigo = h('div', { class: 'login__form', id: 'panel-codigo', role: 'tabpanel', 'aria-labelledby': 'tab-codigo' }, pasoCodigo, pasoNombres);
+  let botonesNombre = [];
 
   // ── Paneles de Google ──
   const btnGoogle = h('button', { class: 'btn btn--google btn--lg btn--bloque', type: 'button', onclick: () => alGoogle(false) }, icono('google', { tam: 22 }), 'Continuar con Google');
@@ -88,10 +77,11 @@ export async function render({ query }) {
     if (enfocar) tabs.querySelector(`#tab-${m}`).focus();
     actualizar();
   }
-  const codigoValido = () => fCodigo.input.value.length === 6 && fUsuario.input.value.trim().length >= 2 && pin().length === 4;
+  const codigoValido = () => fCodigo.input.value.length >= 6;
   function actualizar() {
     btnGoogle.disabled = btnDocente.disabled = !consent.checked || ocupado.v;
     btnCodigo.disabled = !consent.checked || !codigoValido() || ocupado.v;
+    botonesNombre.forEach((b) => { b.disabled = !consent.checked || ocupado.v; });
   }
   const carga = (v, btn) => { ocupado.v = v; btn.classList.toggle('btn--cargando', v); btn.setAttribute('aria-busy', String(v)); actualizar(); };
 
@@ -102,14 +92,38 @@ export async function render({ query }) {
     catch (e) { console.error(e); mostrarError(mensajeError(e)); }
     finally { carga(false, btn); }
   }
+  /** Paso 1: el niño escribe el código de su clase y ve la lista de su salón. */
   async function alCodigo(e) {
     e.preventDefault();
     if (btnCodigo.disabled) return;
     mostrarError(''); carga(true, btnCodigo);
-    try { await entrarConCodigo({ codigo: fCodigo.input.value, usuario: fUsuario.input.value, pin: pin() }); navegar(volver, { reemplazar: true }); }
-    catch (err) { console.error(err); mostrarError(mensajeError(err)); casillas.forEach((c) => { c.value = ''; }); casillas[0].focus(); }
+    try {
+      const clave = fCodigo.input.value;
+      const lista = await listaPorClave(clave);
+      if (!lista?.estudiantes?.length) { mostrarError('No encontré esa clase. Revisa el código con tu profe.'); return; }
+      mostrarNombres(clave, lista.estudiantes);
+    } catch (err) { console.error(err); mostrarError(mensajeError(err)); }
     finally { carga(false, btnCodigo); }
   }
+
+  /** Paso 2: el niño toca su nombre y entra. */
+  function mostrarNombres(clave, estudiantes) {
+    botonesNombre = estudiantes.map((x, i) => h('button', { type: 'button', class: 'nombre-btn', onclick: () => entrarNombre(clave, x, i) },
+      h('span', { class: 'nombre-btn__emoji', 'aria-hidden': 'true' }, x.e || '🦊'), h('span', { class: 'nombre-btn__alias' }, x.a)));
+    pasoCodigo.hidden = true; pasoNombres.hidden = false;
+    pasoNombres.replaceChildren(
+      h('p', { class: 'login__sub' }, h('strong', {}, clave), ' · ¿Quién eres? Toca tu nombre.'),
+      h('div', { class: 'nombres-rejilla' }, botonesNombre),
+      h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => { pasoNombres.hidden = true; pasoCodigo.hidden = false; botonesNombre = []; mostrarError(''); fCodigo.input.focus(); } }, 'Cambiar de clase'));
+    actualizar();
+  }
+  async function entrarNombre(clave, x, i) {
+    mostrarError(''); const btn = botonesNombre[i]; carga(true, btn);
+    try { await entrarPorLista({ clave, usuario: x.u }); navegar(volver, { reemplazar: true }); }
+    catch (err) { console.error(err); mostrarError('No pude entrar. Avísale a tu profe.'); }
+    finally { carga(false, btn); }
+  }
+
   async function alDemo(rol, grado) { await entrarDemo(rol, grado); toast(`Entraste en modo demo (${rol}).`, { tipo: 'info' }); navegar(volver, { reemplazar: true }); }
 
   cambiarModo(modo);

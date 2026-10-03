@@ -58,6 +58,7 @@ export async function regenerarCodigo(clase) {
 
 export async function eliminarClase(clase, inscripciones = []) {
   const ops = [...inscripciones.map((i) => ({ tipo: 'delete', ruta: `enrollments/${i.id}` })),
+    ...(clase.claveAlumnos ? [{ tipo: 'delete', ruta: `class_access/${clase.claveAlumnos}` }] : []),
     { tipo: 'delete', ruta: `class_codes/${clase.codigo}` }, { tipo: 'delete', ruta: `classes/${clase.id}` }];
   for (let i = 0; i < ops.length; i += 400) await store.esperarMax(store.lote(ops.slice(i, i + 400)));
 }
@@ -99,14 +100,44 @@ export async function misClases(user) {
 export const actualizarInscripcion = (insc, parche) => store.esperarMax(store.actualizar(`enrollments/${insc.id}`, parche));
 export const quitarEstudiante = (insc) => store.esperarMax(store.borrar(`enrollments/${insc.id}`));
 
-/* ═════════════ Alumnos con PIN (los crea el docente) ═════════════ */
-const pinAleatorio = () => { const b = new Uint32Array(1); crypto.getRandomValues(b); return String(1000 + (b[0] % 9000)); };
+/* ═════════════ Docente: clases y alumnos (ver más abajo) ═════════════ */
+export const claveValida = (c) => /^[A-Z0-9]{6,12}$/.test(c);
+/** Código de acceso sugerido: TECLA + grado + letra del grupo (p. ej. "2.º A" → TECLA2A). */
+export function claveSugerida(clase) {
+  const letra = (String(clase.nombre).match(/([A-Za-z0-9])\s*$/)?.[1] || String(clase.grupo || 'A').slice(0, 1) || 'A').toUpperCase();
+  return `TECLA${clase.grado}${letra}`;
+}
+const ANIMALES = ['🦊', '🐼', '🐯', '🦁', '🦄', '🐙', '🦖', '🐸', '🐬', '🦉', '🐲', '🐰', '🐻', '🐧', '🦋', '🐢', '🐝', '🦒', '🐘', '🐨', '🦈', '🐞', '🦜', '🐳', '🦔', '🐮', '🐷', '🐵', '🐔', '🦆'];
+/** "Ana María Pérez Gómez" → "Ana P." (primer nombre + inicial del primer apellido). */
+export function nombreCorto(nombre) {
+  const p = String(nombre).trim().split(/\s+/);
+  if (p.length === 1) return p[0].slice(0, 20);
+  const apellido = p.length >= 3 ? p[2] : p[1];
+  return `${p[0].slice(0, 18)} ${apellido[0].toUpperCase()}.`;
+}
+
+/* ═════════════ Alumnos de 2.º: ingreso por lista (código de acceso + tocar el nombre) ═════════════ */
+export const listaPorClave = (clave) => store.leer(`class_access/${String(clave).trim().toUpperCase()}`).catch(() => null);
+
+/** Reconstruye la lista pública del grupo desde las inscripciones con usuario (solo apodo corto y animal). */
+export async function publicarLista(docente, clase) {
+  if (!clase.claveAlumnos) return;
+  const insc = (await inscripcionesDocente(docente)).filter((i) => i.classId === clase.id && i.usuario && i.estado !== 'pausado');
+  const estudiantes = insc.map((i) => ({ u: i.usuario, a: i.alias, e: i.avatar?.emoji || '🦊' })).sort((x, y) => x.a.localeCompare(y.a, 'es'));
+  await store.esperarMax(store.escribir(`class_access/${clase.claveAlumnos}`, { classId: clase.id, docenteId: docente.uid, estudiantes, actualizadoEn: store.ahora() }));
+}
 
 /**
- * Crea cuentas de estudiantes (Auth con instancia secundaria + perfil + inscripción).
- * @returns {Promise<Array<{nombre, usuario, pin, ok, error?}>>}
+ * Crea cuentas de estudiantes (Auth con instancia secundaria + perfil + inscripción) y publica la lista del grupo.
+ * Todas las cuentas del grupo usan como contraseña el código de acceso de la clase (ej. TECLA2A).
+ * @returns {Promise<Array<{nombre, alias, usuario, emoji, ok, error?}>>}
  */
-export async function crearEstudiantes(docente, clase, nombres, { alProgreso = () => {} } = {}) {
+export async function crearEstudiantes(docente, clase, nombres, { alProgreso = () => {}, clave: claveElegida } = {}) {
+  const clave = String(clase.claveAlumnos || claveElegida || claveSugerida(clase)).trim().toUpperCase();
+  if (!claveValida(clave)) throw new Error('El código de acceso debe tener de 6 a 12 letras o números, sin espacios ni tildes.');
+  const ocupada = await store.leer(`class_access/${clave}`).catch(() => null);
+  if (ocupada && ocupada.classId !== clase.id) throw new Error('Ese código de acceso ya lo usa otra clase. Elige otro (por ejemplo, agrega el nombre del colegio).');
+  if (!clase.claveAlumnos) { await actualizarClase(clase, { claveAlumnos: clave }); clase.claveAlumnos = clave; }
   const fb = state.modo === 'firebase' ? await obtenerFirebase() : null;
   let auth2 = null;
   if (fb) {
@@ -114,10 +145,10 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
     try { app2 = fb.appMod.getApp('teclea-secundaria'); } catch { app2 = fb.appMod.initializeApp(CONFIG.firebase, 'teclea-secundaria'); }
     auth2 = fb.au.getAuth(app2);
   }
-  const existentes = new Set((await inscripcionesDocente(docente)).filter((i) => i.classId === clase.id).map((i) => i.usuario).filter(Boolean));
-  const usados = new Set(existentes);
+  const previas = (await inscripcionesDocente(docente)).filter((i) => i.classId === clase.id);
+  const usados = new Set(previas.map((i) => i.usuario).filter(Boolean));
+  let n = 0, indiceAnimal = previas.length;
   const salida = [];
-  let n = 0;
   for (const bruto of nombres) {
     const nombre = bruto.trim().replace(/\s+/g, ' ').slice(0, 80);
     if (!nombre) continue;
@@ -126,27 +157,28 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
     let usuario = base, k = 1;
     while (usados.has(usuario)) usuario = `${base.slice(0, 20)}${++k}`;
     usados.add(usuario);
-    const pin = pinAleatorio();
+    const alias = nombreCorto(nombre), emoji = ANIMALES[indiceAnimal++ % ANIMALES.length];
     try {
       let uid;
       if (auth2) {
-        const correo = `${usuario}.${clase.codigo.toLowerCase()}@${CONFIG.dominioPin}`;
-        const cred = await fb.au.createUserWithEmailAndPassword(auth2, correo, `${pin}${clase.codigo}`);
+        const cred = await fb.au.createUserWithEmailAndPassword(auth2, `${usuario}.${clave.toLowerCase()}@${CONFIG.dominioPin}`, clave);
         uid = cred.user.uid;
         await fb.au.signOut(auth2).catch(() => {});
       } else uid = `demo-${nuevoId()}`;
-      const perfil = { ...perfilNuevo({ uid, nombre, rol: 'estudiante', grado: clase.grado, authTipo: 'pin' }), creadoPor: docente.uid, creadoEn: store.ahora(), consentimiento: { porDocente: true, en: Date.now() } };
+      const perfil = { ...perfilNuevo({ uid, nombre, rol: 'estudiante', grado: clase.grado, authTipo: 'pin' }), apodo: alias, avatar: { emoji, fondo: 'violeta', marco: null, accesorios: [] },
+        creadoPor: docente.uid, creadoEn: store.ahora(), consentimiento: { porDocente: true, en: Date.now() } };
       await store.esperarMax(store.lote([
         { tipo: 'set', ruta: `users/${uid}`, datos: perfil },
         { tipo: 'set', ruta: `enrollments/${clase.id}_${uid}`, datos: {
-          uid, classId: clase.id, docenteId: docente.uid, codigo: clase.codigo, alias: perfil.apodo, avatar: { emoji: '🦊', fondo: 'violeta' }, grado: clase.grado,
-          estado: 'activo', stats: statsVacias(), unidoEn: store.ahora(), ultimaConexion: store.ahora(), pin } },
+          uid, classId: clase.id, docenteId: docente.uid, codigo: clase.codigo, alias, avatar: { emoji, fondo: 'violeta' }, grado: clase.grado,
+          estado: 'activo', stats: statsVacias(), unidoEn: store.ahora(), ultimaConexion: store.ahora(), pin: clave, usuario } },
       ]));
-      salida.push({ nombre, usuario, pin, ok: true });
+      salida.push({ nombre, alias, usuario, emoji, ok: true });
     } catch (e) {
-      salida.push({ nombre, usuario, pin, ok: false, error: e?.code === 'auth/email-already-in-use' ? 'Ese usuario ya existe' : (e?.code || e?.message || 'Error') });
+      salida.push({ nombre, alias, usuario, emoji, ok: false, error: e?.code === 'auth/email-already-in-use' ? 'Ya existe' : (e?.code || e?.message || 'Error') });
     }
   }
+  await publicarLista(docente, clase).catch((e) => console.warn('[lista] no se pudo publicar', e?.code || e));
   return salida;
 }
 

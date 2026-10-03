@@ -49,6 +49,30 @@ try {
 } catch (e) { t('perfil + inscripción con PIN pasan las reglas', false, e.message); }
 t('el docente lista sus inscripciones', (await C.inscripcionesDocente(prof)).length === 1);
 
+console.log('\nIngreso por lista (2.º): código de acceso + tocar el nombre');
+t('claveValida acepta TECLA2A y rechaza cortas/con tildes/espacios', C.claveValida('TECLA2A') && !C.claveValida('AB12') && !C.claveValida('TECLÁ2A') && !C.claveValida('TECLA 2A'));
+t('código sugerido a partir del nombre de la clase', C.claveSugerida({ nombre: '2.º B', grado: 2 }) === 'TECLA2B');
+t('nombre corto: nombre + inicial del apellido', C.nombreCorto('Ana María Pérez Gómez') === 'Ana P.' && C.nombreCorto('Luis Gómez') === 'Luis G.' && C.nombreCorto('Sofía') === 'Sofía');
+await C.actualizarClase(clase, { claveAlumnos: 'TECLA2A' }); clase.claveAlumnos = 'TECLA2A';
+try {
+  await store.lote([{ tipo: 'set', ruta: 'users/pin2', datos: { ...perfilPin, uid: 'pin2', nombre: 'Niña Dos', apodo: 'Niña D.' } },
+    { tipo: 'set', ruta: `enrollments/${clase.id}_pin2`, datos: { uid: 'pin2', classId: clase.id, docenteId: 'prof1', codigo: clase.codigo, alias: 'Niña D.', avatar: { emoji: '🐼', fondo: 'violeta' }, grado: 2, estado: 'activo', pin: 'TECLA2A', usuario: 'nina.dos', stats: { xp: 0, sesiones: 0 }, unidoEn: store.ahora(), ultimaConexion: store.ahora() } }]);
+  t('inscripción con código de acceso y usuario pasa las reglas', true);
+} catch (e) { t('inscripción con código de acceso y usuario pasa las reglas', false, e.message); }
+try { await C.publicarLista(prof, clase); t('el docente publica la lista del grupo', true); } catch (e) { t('el docente publica la lista del grupo', false, e.message); }
+usar('anonimo-sin-sesion');
+store._inyectarFirebase({ fs, db: env.unauthenticatedContext().firestore() });
+const listaPub = await C.listaPorClave('tecla2a');
+t('un niño SIN sesión puede ver la lista con solo el código', listaPub?.estudiantes?.length >= 1 && listaPub.estudiantes.every((x) => Object.keys(x).sort().join() === 'a,e,u'));
+t('la lista solo trae alias corto, animal y usuario (nada más)', JSON.stringify(listaPub).includes('Niña D.') && !JSON.stringify(listaPub).includes('Niña Dos'));
+await assertFails(fs.getDocs(fs.collection(env.unauthenticatedContext().firestore(), 'class_access')));
+t('NO se pueden listar todas las clases (solo consultar por código)', true);
+await assertFails(fs.setDoc(fs.doc(env.unauthenticatedContext().firestore(), 'class_access/HACKEO1'), { classId: 'x', docenteId: 'prof1', estudiantes: [], actualizadoEn: fs.serverTimestamp() }));
+t('un visitante NO puede escribir listas', true);
+await assertFails(fs.setDoc(fs.doc(env.authenticatedContext('prof2').firestore(), 'class_access/TECLA2A'), { classId: clase.id, docenteId: 'prof2', estudiantes: [{ u: 'x', a: 'Falso', e: '🦊' }], actualizadoEn: fs.serverTimestamp() }));
+t('otro docente NO puede pisar la lista de TECLA2A', true);
+usar('prof1');
+
 console.log('\nEstudiante: se une con el código');
 usar('est1');
 const est = { uid: 'est1', apodo: 'est1', grado: 4, avatar: { emoji: '🐼', fondo: 'menta' } };
@@ -106,7 +130,7 @@ t('estadísticas visibles al docente', e1.stats.sesiones === 1 && e1.stats.mejor
 const sesDoc = await sesionesDocente({ uid: 'prof1' });
 t('el docente lee las sesiones de su clase', sesDoc.length >= 1);
 const resumen = resumenClase(inscs, sesDoc);
-t('resumen de clase', resumen.total === 3 && resumen.activos === 1 && resumen.minutosSemana.length === 7);
+t('resumen de clase', resumen.total === 4 && resumen.activos === 1 && resumen.minutosSemana.length === 7);
 t('estado: con actividad hoy = ok/atrasado/destacado; sin actividad = nuevo', ['ok', 'atrasado', 'destacado'].includes(estadoDe(e1)) && estadoDe(inscs.find((i) => i.uid === 'pin1')) === 'nuevo');
 const subs = await C.entregasDeTarea(prof, tarea);
 t('el docente ve las entregas', subs.length === 1);

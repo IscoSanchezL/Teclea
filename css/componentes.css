@@ -291,3 +291,11 @@
 [data-estilo="staff"] .btn--salir { border-width: 1px; border-radius: 8px; }
 @media (max-width: 420px) { .btn--salir__txt { display: none; } .btn--salir { padding-inline: .6rem; } }
 @media (max-width: 480px) { .topbar__saludo { display: none !important; } .topbar { justify-content: flex-end; } }
+
+/* Ingreso por nombre (2.º): botones grandes con animalito */
+.nombres-rejilla { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
+.nombre-btn { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .8rem .5rem; border: 3px solid var(--borde); border-radius: var(--r-lg, 1.2rem); background: var(--superficie); color: var(--texto); cursor: pointer; font: 700 1.05rem var(--fuente-titulo); transition: transform .15s var(--resorte), border-color .15s; }
+.nombre-btn:hover:not(:disabled), .nombre-btn:focus-visible { transform: translateY(-3px); border-color: var(--primario); }
+.nombre-btn:disabled { opacity: .6; cursor: default; }
+.nombre-btn__emoji { font-size: 2.6rem; line-height: 1; }
+.nombre-btn__alias { text-align: center; }

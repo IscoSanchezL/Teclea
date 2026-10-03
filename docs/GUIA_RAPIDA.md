@@ -61,7 +61,7 @@ Sigue la sección **6** de [`CONFIABILIDAD.md`](CONFIABILIDAD.md). Es copiar dos
 
 **Profe:** entra con Google → **Clases y estudiantes → Nueva clase**. Le da un **código de 6 letras** (y un QR para proyectar).
 - Niños **con** cuenta de Google: la primera vez que entran, la plataforma les pide el **código de la clase**. Al escribirlo quedan en el grupo correcto y su grado se toma de la clase. Sin código no pueden ver las lecciones.
-- Niños **sin** cuenta: en la pestaña **Clases → Agregar estudiantes** escribes los nombres (uno por línea); la plataforma crea **usuario + PIN** y te deja **imprimir las tarjetas de acceso**. El niño entra con **código de clase + usuario + PIN**.
+- Niños **sin** cuenta (ideal **2.º**): en la pestaña **Clases → Agregar estudiantes** escribes los nombres (uno por línea) y el **código de acceso** de la clase (por ejemplo `TECLA2A`). Los niños abren la página, pulsan **Código de clase**, escriben `TECLA2A` y **tocan su nombre** en la lista (aparece solo nombre e inicial del apellido, con un animalito). Puedes **imprimir** la hoja con el código y los animalitos.
 - Pestaña **Tareas**: asigna una lección, un texto tuyo o un juego, con fecha límite. Las entregas llegan solas.
 
 **Niño:** entra → empieza en **Aprende** (mundo 1) → gana estrellas, XP, monedas y medallas → puede cambiar su avatar o subir una foto en **Perfil** (la foto solo la ven él y el administrador).
@@ -74,7 +74,7 @@ Sigue la sección **6** de [`CONFIABILIDAD.md`](CONFIABILIDAD.md). Es copiar dos
 | “Permiso denegado” | Paso 5: pega y **Publica** las reglas (el botón azul), luego recarga |
 | La página sigue en “modo demo” | Paso 4: el `config.js` aún tiene la plantilla; vuelve a subirlo y espera el despliegue |
 | No aparecen medallas ni se puede comprar | Entra una vez como administrador (paso 6.2) para publicar los catálogos |
-| Un niño olvidó su PIN | Entra al detalle del estudiante (clic en su nombre): ahí está su PIN |
+| Un niño no encuentra su nombre | Confirma que escribió bien el código de acceso (ej. `TECLA2A`) y que el profe lo agregó en Clases → Agregar estudiantes |
 | Un profe no ve su panel | Admin → Docentes → Aprobar su solicitud |
 | Quiero cambiar el logo o el nombre | Admin → Marca (no necesitas tocar archivos) |
 

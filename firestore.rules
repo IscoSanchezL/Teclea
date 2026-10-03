@@ -215,6 +215,23 @@ service cloud.firestore {
       allow update, delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
     }
 
+    // Lista pública de un grupo para el ingreso por nombre (2.º): se consulta por código (solo "get", no se puede listar).
+    // Contiene SOLO nombre de pila + inicial del apellido y un animal; nunca datos sensibles.
+    match /class_access/{clave} {
+      allow get: if true;
+      allow create: if isTeacher() && clave.matches('^[A-Z0-9]{6,12}$') && validAcceso(request.resource.data);
+      allow update: if isTeacher() && resource.data.docenteId == request.auth.uid && validAcceso(request.resource.data);
+      allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+
+      function validAcceso(d) {
+        return d.keys().hasOnly(['classId','docenteId','estudiantes','actualizadoEn'])
+          && d.docenteId == request.auth.uid
+          && isStr(d.classId, 1, 60)
+          && d.estudiantes is list && d.estudiantes.size() <= 80
+          && get(/databases/$(db)/documents/classes/$(d.classId)).data.docenteId == request.auth.uid;
+      }
+    }
+
     // ═════════════════════════ enrollments (id = classId_uid) ═════════════════════════
     match /enrollments/{id} {
       allow get, list: if signedIn() && (
@@ -231,8 +248,9 @@ service cloud.firestore {
 
       function enrollShapeOk(d) {
         return d.keys().hasOnly(['uid','classId','docenteId','codigo','alias','avatar','grado','estado','stats',
-                                 'metaOverride','notaDocente','unidoEn','ultimaConexion','pin'])
-          && (!('pin' in d) || (d.pin is string && d.pin.size() == 4))
+                                 'metaOverride','notaDocente','unidoEn','ultimaConexion','pin','usuario'])
+          && (!('usuario' in d) || isStr(d.usuario, 1, 30))
+          && (!('pin' in d) || (d.pin is string && d.pin.size() >= 4 && d.pin.size() <= 12))
           && id == d.classId + '_' + d.uid
           && isStr(d.alias, 1, 30)
           && d.stats is map && d.stats.get('xp', 0) == 0;
@@ -240,7 +258,7 @@ service cloud.firestore {
       function studentJoins() {
         let d = request.resource.data;
         let cc = get(/databases/$(db)/documents/class_codes/$(d.codigo)).data;
-        return enrollShapeOk(d) && d.uid == request.auth.uid && !('pin' in d)
+        return enrollShapeOk(d) && d.uid == request.auth.uid && !('pin' in d) && !('usuario' in d)
           && cc.classId == d.classId && cc.docenteId == d.docenteId
           && d.unidoEn == request.time;
       }

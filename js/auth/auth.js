@@ -1,10 +1,10 @@
 /**
  * Autenticación.
  *  1) Google (cuenta personal o institucional Workspace).
- *  2) Código de clase + usuario + PIN de 4 dígitos (para niños sin cuenta Google).
+ *  2) Código de acceso de la clase (ej. TECLA2A) y toque de su nombre en la lista (niños de 2.º, sin cuenta Google).
  *     Internamente es correo/contraseña de Firebase con un correo "inventado":
  *        correo     = usuario.CODIGO@alumnos.teclea.local
- *        contraseña = PIN + CODIGO   (≥ 6 caracteres, que exige Firebase)
+ *        contraseña = CLAVE de la clase (≥ 6 caracteres, la misma para todo el grupo; ej. TECLA2A)
  *     El docente crea estas cuentas (Fase 5) con una instancia secundaria de la app.
  *  3) Modo demo local (si Firebase no está configurado).
  */
@@ -111,11 +111,12 @@ export async function entrarConGoogle({ docente = false } = {}) {
   }
 }
 
-export async function entrarConCodigo({ codigo, usuario, pin }) {
+/** Ingreso de niños (2.º): código de acceso de la clase (ej. TECLA2A) + el nombre que toca el niño en la lista. */
+export async function entrarPorLista({ clave, usuario }) {
   const fb = await obtenerFirebase();
-  const cod = codigo.trim().toUpperCase();
-  const correo = `${slugUsuario(usuario)}.${cod.toLowerCase()}@${CONFIG.dominioPin}`;
-  await fb.au.signInWithEmailAndPassword(fb.auth, correo, `${pin}${cod}`);
+  const k = String(clave).trim().toUpperCase();
+  const correo = `${slugUsuario(usuario)}.${k.toLowerCase()}@${CONFIG.dominioPin}`;
+  await fb.au.signInWithEmailAndPassword(fb.auth, correo, k);
 }
 
 export async function entrarDemo(rol, grado = 3) {

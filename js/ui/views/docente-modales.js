@@ -76,32 +76,38 @@ export async function modalCompartir(clase) {
 
 /* ═════════════ Alumnos con PIN ═════════════ */
 export function tarjetasAcceso(clase, lista) {
-  return h('div', { class: 'hoja' }, h('h1', {}, `${marca.nombre} · ${clase.nombre}`), h('p', {}, 'Tarjetas de acceso. Entrega cada una a su estudiante y guárdalas en un lugar seguro.'),
-    h('div', { class: 'tarjetas-acceso' }, lista.filter((a) => a.ok !== false).map((a) => h('div', { class: 'tarjeta-acceso' },
-      h('strong', {}, a.nombre), h('div', {}, h('small', {}, 'Código de clase'), h('b', {}, clase.codigo)), h('div', {}, h('small', {}, 'Usuario'), h('b', {}, a.usuario)), h('div', {}, h('small', {}, 'PIN'), h('b', {}, a.pin)),
-      h('small', {}, `${location.host}${location.pathname}`)))));
+  const url = `${location.host}${location.pathname}`;
+  return h('div', { class: 'hoja' }, h('h1', {}, `${marca.nombre} · ${clase.nombre}`),
+    h('p', {}, `Entra a ${url} → pulsa “Código de clase” → escribe el código y toca tu nombre.`),
+    h('div', { class: 'compartir__codigo' }, clase.claveAlumnos || ''),
+    h('div', { class: 'tarjetas-acceso' }, lista.filter((a) => a.ok !== false).map((a) => h('div', { class: 'tarjeta-acceso' }, h('span', { style: { fontSize: '2.4rem' } }, a.emoji || '🦊'), h('strong', {}, a.alias || a.nombre), h('small', {}, a.nombre)))));
 }
 
 export function modalAlumnos({ clase, alTerminar }) {
   const area = h('textarea', { class: 'input', rows: 8, placeholder: 'Un nombre por línea:\nSofía Martínez\nJuan David Rojas\n…', 'aria-label': 'Nombres de los estudiantes' });
   const cont = h('div', { class: 'pila' });
+  const fijada = Boolean(clase.claveAlumnos);
+  const clave = campo({ etiqueta: 'Código de acceso de la clase', value: clase.claveAlumnos || C.claveSugerida(clase), maxlength: 12, autocapitalize: 'characters', readonly: fijada || null,
+    ayuda: fijada ? 'Este código ya quedó fijado para el grupo. Los niños lo escriben y tocan su nombre.' : 'Lo escriben los niños para ver la lista de su salón (6 a 12 letras o números, sin espacios). Ej.: TECLA2A. Después de crear los estudiantes no se puede cambiar.' });
+  clave.input.addEventListener('input', () => { clave.input.value = clave.input.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); });
   const boton = h('button', { class: 'btn btn--primary', type: 'button' }, icono('plus', { tam: 16 }), 'Crear cuentas');
   boton.onclick = async () => {
     const nombres = area.value.split('\n').map((x) => x.trim()).filter(Boolean).slice(0, 60);
     if (!nombres.length) return toast('Escribe al menos un nombre.', { tipo: 'error' });
+    if (!C.claveValida(clave.input.value)) return toast('El código debe tener de 6 a 12 letras o números, sin espacios.', { tipo: 'error' });
     boton.disabled = true; area.disabled = true;
     const prog = h('p', { class: 'suave', 'aria-live': 'polite' }, 'Creando cuentas…'); cont.replaceChildren(prog);
-    const lista = await C.crearEstudiantes(state.user, clase, nombres, { alProgreso: (i, t, n) => { prog.textContent = `Creando ${i} de ${t}: ${n}`; } });
+    const lista = await C.crearEstudiantes(state.user, clase, nombres, { clave: clave.input.value, alProgreso: (i, t, n) => { prog.textContent = `Creando ${i} de ${t}: ${n}`; } });
     alTerminar?.();
     const ok = lista.filter((a) => a.ok), mal = lista.filter((a) => !a.ok);
     cont.replaceChildren(h('p', {}, `${ok.length} cuentas creadas${mal.length ? `, ${mal.length} con problemas` : ''}.`),
-      h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, ['Estudiante', 'Usuario', 'PIN', ''].map((t) => h('th', { scope: 'col' }, t)))),
-        h('tbody', {}, lista.map((a) => h('tr', {}, h('th', { scope: 'row' }, a.nombre), h('td', {}, a.usuario), h('td', {}, a.ok ? a.pin : '—'), h('td', { class: a.ok ? '' : 'mensaje-error' }, a.ok ? '' : a.error)))))),
+      h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, ['Estudiante', 'Aparece como', '', ''].map((t) => h('th', { scope: 'col' }, t)))),
+        h('tbody', {}, lista.map((a) => h('tr', {}, h('th', { scope: 'row' }, a.nombre), h('td', {}, a.ok ? `${a.emoji} ${a.alias}` : '—'), h('td', {}, ''), h('td', { class: a.ok ? '' : 'mensaje-error' }, a.ok ? '' : a.error)))))),
       h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary', type: 'button', onclick: () => imprimir(tarjetasAcceso(clase, lista)) }, icono('printer', { tam: 16 }), 'Imprimir tarjetas')));
   };
   abrirCapa({ titulo: `Agregar estudiantes a ${clase.nombre}`, tipo: 'dialogo', contenido: h('div', { class: 'pila' },
-    h('p', { class: 'suave' }, 'Para niños sin cuenta de Google: se crea un usuario y un PIN de 4 dígitos para cada uno. Escriben su usuario, el PIN y el código de clase para entrar. Nunca pedimos correo.'),
-    area, h('div', { class: 'fila fila--fin' }, boton), cont) });
+    h('p', { class: 'suave' }, 'Para niños sin cuenta de Google (ideal 2.º): escribe un nombre por línea. Los niños entran con el código de acceso de la clase y tocan su nombre en la lista (se muestra solo el nombre y la inicial del apellido). Nunca pedimos correo.'),
+    clave.nodo, area, h('div', { class: 'fila fila--fin' }, boton), cont) });
 }
 
 /* ═════════════ Tareas ═════════════ */
@@ -147,13 +153,13 @@ export async function modalEstudiante({ insc, clase, sesiones, alCambiar }) {
     h('p', { class: 'suave' }, `Meta de ${insc.grado || clase?.grado || 4}.º: ${p.ppmMin}–${p.ppmMax} PPM · ${p.precision} % de precisión.`),
     serie.length > 1 ? h('div', {}, h('small', { class: 'suave' }, 'Evolución de PPM (últimas sesiones)'), h('div', {}, sparkline(serie, { ancho: 320, alto: 56, etiqueta: 'PPM' }))) : null,
     Object.keys(calor).length ? h('div', {}, h('small', { class: 'suave' }, 'Teclas con más errores'), tecladoCalor(calor)) : null,
-    insc.pin ? h('p', {}, h('strong', {}, 'Acceso: '), `código ${clase?.codigo || insc.codigo} · PIN ${insc.pin}`) : null,
+    insc.pin ? h('p', {}, h('strong', {}, 'Acceso: '), `código de acceso ${clase?.claveAlumnos || insc.pin}`) : null,
     h('label', { class: 'campo' }, h('span', { class: 'campo__etiqueta' }, 'Nota privada'), nota),
     h('div', { class: 'fila fila--envuelve' },
       h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: async () => { try { await C.actualizarInscripcion(insc, { notaDocente: nota.value.slice(0, 500) }); insc.notaDocente = nota.value; toast('Nota guardada'); } catch { toast('No se pudo guardar.', { tipo: 'error' }); } } }, 'Guardar nota'),
       h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => imprimir(boletin({ insc, clase, mias })) }, icono('printer', { tam: 16 }), 'Boletín'),
-      h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => { const nuevo = insc.estado === 'pausado' ? 'activo' : 'pausado'; await C.actualizarInscripcion(insc, { estado: nuevo }); insc.estado = nuevo; toast(nuevo === 'pausado' ? 'Estudiante pausado' : 'Estudiante reactivado'); alCambiar?.(); } }, insc.estado === 'pausado' ? 'Reactivar' : 'Pausar'),
-      h('button', { class: 'btn btn--peligro btn--sm', type: 'button', onclick: async () => { if (await confirmar({ titulo: `¿Quitar a ${insc.alias}?`, mensaje: 'Dejará de aparecer en esta clase. Su cuenta y progreso no se borran.', si: 'Quitar', peligro: true })) { await C.quitarEstudiante(insc); capa.cerrar(); alCambiar?.(); } } }, 'Quitar de la clase'))) });
+      h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => { const nuevo = insc.estado === 'pausado' ? 'activo' : 'pausado'; await C.actualizarInscripcion(insc, { estado: nuevo }); insc.estado = nuevo; if (clase?.claveAlumnos) await C.publicarLista(state.user, clase).catch(() => {}); toast(nuevo === 'pausado' ? 'Estudiante pausado' : 'Estudiante reactivado'); alCambiar?.(); } }, insc.estado === 'pausado' ? 'Reactivar' : 'Pausar'),
+      h('button', { class: 'btn btn--peligro btn--sm', type: 'button', onclick: async () => { if (await confirmar({ titulo: `¿Quitar a ${insc.alias}?`, mensaje: 'Dejará de aparecer en esta clase. Su cuenta y progreso no se borran.', si: 'Quitar', peligro: true })) { await C.quitarEstudiante(insc); if (clase?.claveAlumnos) await C.publicarLista(state.user, clase).catch(() => {}); capa.cerrar(); alCambiar?.(); } } }, 'Quitar de la clase'))) });
 }
 
 /* ═════════════ Boletín imprimible ═════════════ */
