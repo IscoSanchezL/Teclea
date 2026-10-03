@@ -209,3 +209,18 @@ export const lote = async (...a) => elegir().lote(...a);
 export function enSegundoPlano(promesa, etiqueta = 'escritura') {
   Promise.resolve(promesa).catch((e) => console.warn(`[datos] ${etiqueta} falló`, e?.code || e));
 }
+
+/**
+ * Espera una escritura como máximo `ms`. Si hay un error real (p. ej. permiso denegado) lo lanza; si la red está
+ * caída, Firestore deja la escritura en la cola local y la promesa tarda: seguimos sin esperar (y avisamos por consola).
+ * @returns {Promise<'listo'|'en-cola'>}
+ */
+export function esperarMax(promesa, ms = 2500) {
+  let fin = false;
+  const p = Promise.resolve(promesa);
+  p.then(() => { fin = true; }, () => { fin = true; });
+  return Promise.race([
+    p.then(() => 'listo'),
+    new Promise((r) => setTimeout(() => r('en-cola'), ms)),
+  ]).then((v) => { if (v === 'en-cola' && !fin) p.catch((e) => console.warn('[datos] escritura pendiente falló', e?.code || e)); return v; });
+}

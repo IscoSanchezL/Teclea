@@ -65,3 +65,5 @@
 ::view-transition-old(vista) { animation: vt-sale .22s var(--suave) both; }
 ::view-transition-new(vista) { animation: vt-entra .38s var(--suave) both; }
 ::view-transition-group(root) { animation-duration: 0s; }
+
+.confeti { position: fixed; inset: 0; z-index: 2500; pointer-events: none; width: 100vw; height: 100vh; }

@@ -110,7 +110,7 @@ export async function render({ query }) {
     catch (err) { console.error(err); mostrarError(mensajeError(err)); casillas.forEach((c) => { c.value = ''; }); casillas[0].focus(); }
     finally { carga(false, btnCodigo); }
   }
-  function alDemo(rol, grado) { entrarDemo(rol, grado); toast(`Entraste en modo demo (${rol}).`, { tipo: 'info' }); navegar(volver, { reemplazar: true }); }
+  async function alDemo(rol, grado) { await entrarDemo(rol, grado); toast(`Entraste en modo demo (${rol}).`, { tipo: 'info' }); navegar(volver, { reemplazar: true }); }
 
   cambiarModo(modo);
 

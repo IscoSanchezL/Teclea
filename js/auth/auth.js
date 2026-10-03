@@ -62,7 +62,7 @@ async function perfilDesdeFirebase(fbUser) {
 export async function iniciarAuth() {
   if (!firebaseConfigurado()) {
     setState({ modo: 'demo' });
-    const d = demo.leer();
+    const d = await demo.leer();
     if (d) activarPerfil(d);
     setState({ listo: true });
     return;
@@ -89,7 +89,7 @@ export async function iniciarAuth() {
   } catch (e) {
     console.error('[auth] Firebase no pudo iniciar; sigo en modo demo', e);
     setState({ modo: 'demo' });
-    const d = demo.leer();
+    const d = await demo.leer();
     if (d) activarPerfil(d);
   }
   setState({ listo: true });
@@ -118,8 +118,8 @@ export async function entrarConCodigo({ codigo, usuario, pin }) {
   await fb.au.signInWithEmailAndPassword(fb.auth, correo, `${pin}${cod}`);
 }
 
-export function entrarDemo(rol, grado = 3) {
-  activarPerfil(demo.crear(rol, grado));
+export async function entrarDemo(rol, grado = 3) {
+  activarPerfil(await demo.crear(rol, grado));
 }
 
 export async function cerrarSesion() {

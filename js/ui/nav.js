@@ -137,8 +137,9 @@ function renderTopbar() {
 
 /** Marca el ítem activo (aria-current) y actualiza el título de la barra superior. */
 export function marcarRutaActiva(path) {
+  const activa = buscarRuta(path).padre || path; // /leccion resalta "Aprende"
   document.querySelectorAll('[data-ruta]').forEach((a) => {
-    if (a.dataset.ruta === path) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    if (a.dataset.ruta === activa) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   const t = document.getElementById('topbar-titulo');
   if (t) t.textContent = tituloDe(path);

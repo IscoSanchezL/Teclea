@@ -23,12 +23,14 @@ export const RUTAS = [
   { path: '/pendiente', acceso: 'sesion', titulo: 'Solicitud en revisión', load: () => import('../ui/views/pendiente.js') },
   { path: '/entrar', acceso: 'publica', titulo: 'Entrar', load: () => import('../ui/views/entrar.js') },
   { path: '/bienvenida', acceso: 'sesion', titulo: 'Bienvenida', load: () => import('../ui/views/bienvenida.js') },
+  { path: '/leccion', acceso: 'sesion', solo: 'estudiante', titulo: 'Lección', load: () => import('../ui/views/leccion.js'), padre: '/aprende' },
+  { path: '/introduccion', acceso: 'sesion', solo: 'estudiante', titulo: 'Postura y manos', load: () => import('../ui/views/introduccion.js'), padre: '/aprende' },
   {
-    path: '/aprende', acceso: 'sesion', solo: 'estudiante', titulo: 'Aprende a teclear', load: placeholder('aprende'),
+    path: '/aprende', acceso: 'sesion', solo: 'estudiante', titulo: 'Aprende a teclear', load: () => import('../ui/views/aprende.js'),
     nav: { icono: 'keyboard', etiqueta: 'Aprende', orden: 2, movil: true },
   },
   {
-    path: '/practica', acceso: 'sesion', solo: 'estudiante', titulo: 'Práctica libre', load: placeholder('practica'),
+    path: '/practica', acceso: 'sesion', solo: 'estudiante', titulo: 'Práctica libre', load: () => import('../ui/views/practica.js'),
     nav: { icono: 'target', etiqueta: 'Práctica', orden: 3, movil: false },
   },
   {

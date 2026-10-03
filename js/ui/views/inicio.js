@@ -12,6 +12,8 @@ import { perfilDeGrado } from '../../core/grados.js';
 import { icono } from '../icons.js';
 import { mascota, ilustracion } from '../art.js';
 import { cargarMundos } from '../mundos.js';
+import { cargarIndice, estadoLecciones, resumenMundo } from '../../lessons/curriculo.js';
+import { cargarProgreso, resumenHoy } from '../../db/progreso.js';
 import { anillo } from '../componentes.js';
 import { toast } from '../overlay.js';
 
@@ -21,7 +23,6 @@ const SALUDOS = {
   pro: (n) => `Buen día, ${n}. Tu entrenamiento está listo.`,
 };
 const DIAS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
-const MUNDO_ACTUAL = 1; // Fase 3: se calculará con el progreso real
 
 function semanaRacha(racha) {
   const hoy = (new Date().getDay() + 6) % 7; // lunes = 0
@@ -31,7 +32,7 @@ function semanaRacha(racha) {
   }, h('span', {}, i <= hoy && i > hoy - racha ? icono('flame', { tam: 18 }) : ''), d));
 }
 
-function estadisticas(u, meta) {
+function estadisticas(u, meta, d) {
   const tile = (clase, ...hijos) => h('article', { class: `tile ${clase}` }, ...hijos);
   return h('section', { class: 'tiles', 'aria-label': 'Tus estadísticas' },
     tile('tile--racha',
@@ -40,51 +41,60 @@ function estadisticas(u, meta) {
       h('ul', { class: 'semana' }, semanaRacha(u.racha || 0))),
     tile('tile--ppm',
       h('span', { class: 'tile__tit' }, 'Velocidad'),
-      anillo({ valor: 0, tam: 92, grosor: 10, color: 'var(--menta-400)', etiqueta: 'Velocidad: sin datos todavía' },
-        h('strong', { class: 'tile__medio' }, '—'), h('small', {}, 'PPM')),
+      anillo({ valor: Math.min(1, (d.mejorPpm || 0) / meta.ppmMax), tam: 92, grosor: 10, color: 'var(--menta-400)', etiqueta: d.mejorPpm ? `Mejor velocidad de hoy: ${d.mejorPpm} PPM` : 'Velocidad: sin práctica hoy' },
+        h('strong', { class: 'tile__medio' }, d.mejorPpm ? String(Math.round(d.mejorPpm)) : '—'), h('small', {}, 'PPM')),
       h('span', { class: 'suave tile__pie' }, `Meta ${meta.ppmMin}–${meta.ppmMax}`)),
     tile('tile--pre',
       h('span', { class: 'tile__tit' }, 'Precisión'),
-      anillo({ valor: 0, tam: 92, grosor: 10, color: 'var(--sol-400)', etiqueta: 'Precisión: sin datos todavía' },
-        h('strong', { class: 'tile__medio' }, '—'), h('small', {}, '%')),
+      anillo({ valor: Math.min(1, (d.precision || 0) / 100), tam: 92, grosor: 10, color: 'var(--sol-400)', etiqueta: d.precision ? `Precisión de hoy: ${d.precision} %` : 'Precisión: sin práctica hoy' },
+        h('strong', { class: 'tile__medio' }, d.precision ? String(d.precision) : '—'), h('small', {}, '%')),
       h('span', { class: 'suave tile__pie' }, `Meta ${meta.precision} %`)),
     tile('tile--min',
       h('span', { class: 'tile__tit' }, 'Hoy'),
-      h('strong', { class: 'tile__num' }, '0', h('small', {}, ' min')),
-      h('div', { class: 'mini-barra', role: 'img', 'aria-label': 'Progreso de la meta diaria: 0 de 5 minutos' }, h('i', { style: { '--p': 0 } })),
+      h('strong', { class: 'tile__num' }, String(Math.round(d.minutos || 0)), h('small', {}, ' min')),
+      h('div', { class: 'mini-barra', role: 'img', 'aria-label': `Meta diaria: ${Math.round(d.minutos || 0)} de 5 minutos` }, h('i', { style: { '--p': Math.min(1, (d.minutos || 0) / 5) } })),
       h('span', { class: 'suave tile__pie' }, 'Meta: 5 min')));
 }
 
-function mapaZigzag(mundos) {
+function estadoMundo(indice, estados, progreso, id) {
+  const r = resumenMundo(indice, progreso, id);
+  const primera = indice.find((l) => l.mundo === id);
+  if (r.completo) return { estado: 'completado', r };
+  if (estados[primera.id] === 'bloqueada') return { estado: 'bloqueado', r };
+  return { estado: indice.some((l) => l.mundo === id && estados[l.id] === 'actual') ? 'actual' : 'completado', r };
+}
+
+function mapaZigzag(mundos, indice, estados, progreso) {
   return h('ol', { class: 'mapa', 'aria-label': 'Mapa de mundos' }, mundos.map((m, i) => {
-    const estadoNodo = m.id === MUNDO_ACTUAL ? 'actual' : m.id < MUNDO_ACTUAL ? 'completado' : 'bloqueado';
+    const { estado: estadoNodo, r } = estadoMundo(indice, estados, progreso, m.id);
     const nodo = h('button', {
       class: `nodo nodo--${estadoNodo}`, type: 'button',
       style: { '--g1': m.color[0], '--g2': m.color[1] },
       'aria-disabled': estadoNodo === 'bloqueado' ? 'true' : null,
-      'aria-label': `Mundo ${m.id}: ${m.nombre}. ${estadoNodo === 'bloqueado' ? 'Bloqueado' : estadoNodo === 'actual' ? 'Tu mundo actual' : 'Completado'}`,
+      'aria-label': `Mundo ${m.id}: ${m.nombre}. ${estadoNodo === 'bloqueado' ? 'Bloqueado' : estadoNodo === 'actual' ? 'Tu mundo actual' : 'Completado'}. ${r.hechas} de ${r.total} lecciones`,
       onclick: () => (estadoNodo === 'bloqueado'
         ? toast('¡Aún no! Completa el mundo anterior para abrirlo. 🔒', { tipo: 'info' })
-        : navegar('/aprende')),
+        : navegar(`/aprende?mundo=${m.id}`)),
     }, ilustracion(`mundo-${m.id}-${m.clave}`, { emoji: m.emoji, gradiente: m.color, clase: 'nodo__ilus' }),
        estadoNodo === 'bloqueado' ? h('span', { class: 'nodo__candado' }, icono('lock', { tam: 18 })) : null,
        estadoNodo === 'completado' ? h('span', { class: 'nodo__check' }, icono('check', { tam: 18 })) : null);
     return h('li', { class: 'mapa__paso', style: { '--s': Math.sin(i * 1.05).toFixed(2) } },
       estadoNodo === 'actual' ? h('div', { class: 'mapa__guia' }, mascota('senala', { tam: 'sm' }), h('span', { class: 'burbuja burbuja--corta' }, '¡Aquí estás!')) : null,
       nodo,
-      h('div', { class: 'mapa__texto' }, h('span', { class: 'mapa__num suave' }, `Mundo ${m.id}`), h('strong', {}, m.nombre), h('span', { class: 'suave' }, m.descripcion)));
+      h('div', { class: 'mapa__texto' }, h('span', { class: 'mapa__num suave' }, `Mundo ${m.id} · ${r.hechas}/${r.total}`), h('strong', {}, m.nombre), h('span', { class: 'suave' }, m.descripcion)));
   }));
 }
 
-function modulosPro(mundos) {
+function modulosPro(mundos, indice, estados, progreso) {
   return h('ol', { class: 'modulos', 'aria-label': 'Módulos de entrenamiento' }, mundos.map((m) => {
-    const actual = m.id === MUNDO_ACTUAL, bloqueado = m.id > MUNDO_ACTUAL;
+    const { estado, r } = estadoMundo(indice, estados, progreso, m.id);
+    const actual = estado === 'actual', bloqueado = estado === 'bloqueado';
     return h('li', {},
       h('button', {
         class: `modulo ${actual ? 'modulo--actual' : ''} ${bloqueado ? 'modulo--bloqueado' : ''}`, type: 'button',
         style: { '--g1': m.color[0], '--g2': m.color[1] },
         'aria-disabled': bloqueado ? 'true' : null,
-        onclick: () => (bloqueado ? toast('Módulo bloqueado: completa el anterior.', { tipo: 'info' }) : navegar('/aprende')),
+        onclick: () => (bloqueado ? toast('Módulo bloqueado: completa el anterior.', { tipo: 'info' }) : navegar(`/aprende?mundo=${m.id}`)),
       },
         h('span', { class: 'modulo__cab' },
           h('span', { class: 'modulo__num' }, String(m.id).padStart(2, '0')),
@@ -93,14 +103,18 @@ function modulosPro(mundos) {
         h('strong', { class: 'modulo__nombre' }, m.nombre),
         h('span', { class: 'modulo__desc suave' }, m.descripcion),
         h('span', { class: 'modulo__pie' },
-          h('span', { class: 'mini-barra' }, h('i', { style: { '--p': 0 } })),
-          h('span', { class: 'modulo__estado' }, actual ? 'EN CURSO' : bloqueado ? 'BLOQUEADO' : 'LISTO'))));
+          h('span', { class: 'mini-barra' }, h('i', { style: { '--p': r.hechas / r.total } })),
+          h('span', { class: 'modulo__estado' }, `${r.hechas}/${r.total} · ${actual ? 'EN CURSO' : bloqueado ? 'BLOQUEADO' : 'COMPLETO'}`))));
   }));
 }
 
 export async function render() {
   const u = state.user;
-  const mundos = await cargarMundos();
+  const [mundos, indice, progreso, hoy] = await Promise.all([cargarMundos(), cargarIndice(), cargarProgreso(u.uid), resumenHoy(u.uid).catch(() => ({}))]);
+  const estados = estadoLecciones(indice, progreso);
+  const siguiente = indice.find((l) => estados[l.id] === 'actual');
+  const mejorGlobal = Object.values(progreso).reduce((m, x) => Math.max(m, x.mejorWpm || 0), 0);
+  const hechas = indice.filter((l) => (progreso[l.id]?.estrellas || 0) >= 1).length;
   const estilo = document.documentElement.dataset.estilo || 'medio';
   const nivel = nivelPorXP(u.xp);
   const meta = perfilDeGrado(u.grado || 3);
@@ -112,9 +126,9 @@ export async function render() {
     h('div', { class: 'inicio__hero-texto' },
       h('span', { class: 'etiqueta' }, `Nivel ${nivel.nivel} · ${nivel.nombre}`),
       h('h1', {}, (SALUDOS[estilo] || SALUDOS.medio)(u.apodo)),
-      h('p', {}, 'Tu siguiente aventura: ', h('strong', {}, `Mundo ${MUNDO_ACTUAL} · ${mundos[0].nombre}`)),
+      h('p', {}, siguiente ? 'Tu siguiente lección: ' : '¡Completaste el curso! ', siguiente ? h('strong', {}, `Mundo ${siguiente.mundo} · ${siguiente.titulo}`) : null),
       h('p', { class: 'suave' }, nivel.siguiente ? `${nivel.siguiente.xp - u.xp} XP para “${nivel.siguiente.nombre}”` : '¡Nivel máximo!'),
-      h('a', { class: 'btn btn--sun btn--lg', href: '#/aprende' }, icono('play', { tam: 20 }), 'Continuar aventura')),
+      h('a', { class: 'btn btn--sun btn--lg', href: siguiente ? `#/leccion?id=${siguiente.id}` : '#/practica' }, icono('play', { tam: 20 }), hechas ? 'Continuar aventura' : 'Empezar mi primera lección')),
     h('div', { class: 'inicio__hero-anillo' }, anilloNivel));
 
   const coach = h('section', { class: 'card coach', 'aria-label': 'Entrenador de Tecli' },
@@ -135,19 +149,19 @@ export async function render() {
   const comparar = h('section', { class: 'card' },
     h('h2', { class: 'seccion__titulo' }, 'Hoy vs. mi mejor marca'),
     h('div', { class: 'comparacion' },
-      h('div', {}, h('span', { class: 'suave' }, 'Hoy'), h('strong', { class: 'comparacion__num' }, '— PPM')),
-      h('div', {}, h('span', { class: 'suave' }, 'Mi mejor'), h('strong', { class: 'comparacion__num' }, '— PPM'))),
+      h('div', {}, h('span', { class: 'suave' }, 'Hoy'), h('strong', { class: 'comparacion__num' }, hoy.mejorPpm ? `${Math.round(hoy.mejorPpm)} PPM` : '— PPM')),
+      h('div', {}, h('span', { class: 'suave' }, 'Mi mejor'), h('strong', { class: 'comparacion__num' }, mejorGlobal ? `${Math.round(mejorGlobal)} PPM` : '— PPM'))),
     h('p', { class: 'suave pequeno' }, `Meta de ${u.grado || 3}.º: ${meta.ppmMin}–${meta.ppmMax} PPM · ${meta.precision} % de precisión.`));
 
   const principal = estilo === 'pro'
     ? h('section', { 'aria-labelledby': 'titulo-mapa' },
-        h('h2', { id: 'titulo-mapa', class: 'titulo-mapa' }, 'Módulos de entrenamiento'), modulosPro(mundos))
+        h('h2', { id: 'titulo-mapa', class: 'titulo-mapa' }, 'Módulos de entrenamiento'), modulosPro(mundos, indice, estados, progreso))
     : h('section', { 'aria-labelledby': 'titulo-mapa' },
-        h('h2', { id: 'titulo-mapa', class: 'titulo-mapa' }, 'Mapa de aventura'), mapaZigzag(mundos));
+        h('h2', { id: 'titulo-mapa', class: 'titulo-mapa' }, 'Mapa de aventura'), mapaZigzag(mundos, indice, estados, progreso));
 
   return h('div', { class: `inicio inicio--${estilo}` },
     hero,
-    estadisticas(u, meta),
+    estadisticas(u, meta, hoy),
     h('div', { class: 'inicio__cuerpo' },
       principal,
       h('aside', { class: 'inicio__lateral', 'aria-label': 'Resumen' }, coach, retos, comparar)));

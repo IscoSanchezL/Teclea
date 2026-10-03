@@ -6,6 +6,7 @@
 import { CONFIG } from '../core/config.js';
 import { almacen } from '../core/utils.js';
 import { state } from '../core/state.js';
+import * as store from './store.js';
 import { obtenerFirebase } from './firebase.js';
 
 const CLAVE_DEMO = 'teclea:demo-user';
@@ -78,23 +79,36 @@ export async function actualizarPerfil(uid, parche) {
     await fb.fs.updateDoc(fb.fs.doc(fb.db, 'users', uid), resuelto);
     return;
   }
-  // Modo demo: se guarda en este navegador
-  const guardado = almacen.leer(CLAVE_DEMO);
-  if (guardado) almacen.guardar(CLAVE_DEMO, { ...guardado, ...permitido });
+  // Modo demo: el perfil vive en la misma base local que el resto de los datos
+  await store.escribir(`users/${uid}`, permitido, { fusionar: true });
 }
 
 // ───────────────────────── Demo local ─────────────────────────
 
 export const demo = {
-  leer: () => almacen.leer(CLAVE_DEMO),
-  crear(rol, grado = 3) {
+  /** Perfil demo guardado (la base local es la fuente de verdad; en el navegador solo queda un puntero). */
+  async leer() {
+    const p = almacen.leer(CLAVE_DEMO);
+    return p?.uid ? store.leer(`users/${p.uid}`) : null;
+  },
+  async crear(rol, grado = 3) {
     const nombres = { estudiante: 'Sofía Demo', docente: 'Profe Demo', admin: 'Admin Demo', pendiente: 'Profe Nuevo' };
-    const perfil = {
-      ...perfilNuevo({ uid: `demo-${rol}`, nombre: nombres[rol], rol, grado: rol === 'estudiante' ? grado : null, authTipo: 'demo' }),
+    const uid = `demo-${rol}${rol === 'estudiante' ? `-${grado}` : ''}`;
+    const previo = await store.leer(`users/${uid}`);
+    const perfil = previo || {
+      ...perfilNuevo({ uid, nombre: nombres[rol], rol, grado: rol === 'estudiante' ? grado : null, authTipo: 'demo' }),
       xp: rol === 'estudiante' ? 140 : 0, monedas: rol === 'estudiante' ? 35 : 0, racha: rol === 'estudiante' ? 3 : 0,
+      ultimoDia: rol === 'estudiante' ? hoyAyer() : null, creadoEn: Date.now(),
     };
-    almacen.guardar(CLAVE_DEMO, perfil);
+    if (!previo) await store.escribir(`users/${uid}`, perfil);
+    almacen.guardar(CLAVE_DEMO, { uid });
     return perfil;
   },
   borrar: () => almacen.borrar(CLAVE_DEMO),
 };
+
+/** Fecha de ayer (AAAA-MM-DD): el estudiante demo ya traía una racha de 3 días. */
+function hoyAyer() {
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
