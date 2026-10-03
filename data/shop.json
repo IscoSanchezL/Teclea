@@ -1,0 +1,159 @@
+{
+ "version": 1,
+ "items": [
+  {
+   "id": "acc-0",
+   "categoria": "accesorio",
+   "nombre": "Sombrero de copa",
+   "precio": 60,
+   "emoji": "🎩"
+  },
+  {
+   "id": "acc-1",
+   "categoria": "accesorio",
+   "nombre": "Corona",
+   "precio": 120,
+   "emoji": "👑"
+  },
+  {
+   "id": "acc-2",
+   "categoria": "accesorio",
+   "nombre": "Gafas de sol",
+   "precio": 50,
+   "emoji": "🕶️"
+  },
+  {
+   "id": "acc-3",
+   "categoria": "accesorio",
+   "nombre": "Auriculares",
+   "precio": 70,
+   "emoji": "🎧"
+  },
+  {
+   "id": "acc-4",
+   "categoria": "accesorio",
+   "nombre": "Gorra",
+   "precio": 40,
+   "emoji": "🧢"
+  },
+  {
+   "id": "acc-5",
+   "categoria": "accesorio",
+   "nombre": "Birrete",
+   "precio": 80,
+   "emoji": "🎓"
+  },
+  {
+   "id": "acc-6",
+   "categoria": "accesorio",
+   "nombre": "Capa de héroe",
+   "precio": 100,
+   "emoji": "🦸"
+  },
+  {
+   "id": "acc-7",
+   "categoria": "accesorio",
+   "nombre": "Lentes de sabio",
+   "precio": 45,
+   "emoji": "🤓"
+  },
+  {
+   "id": "acc-8",
+   "categoria": "accesorio",
+   "nombre": "Parche pirata",
+   "precio": 90,
+   "emoji": "🏴‍☠️"
+  },
+  {
+   "id": "acc-9",
+   "categoria": "accesorio",
+   "nombre": "Arcoíris",
+   "precio": 150,
+   "emoji": "🌈"
+  },
+  {
+   "id": "fondo-coral",
+   "categoria": "fondo",
+   "nombre": "Fondo coral",
+   "precio": 25,
+   "fondo": "coral"
+  },
+  {
+   "id": "fondo-menta",
+   "categoria": "fondo",
+   "nombre": "Fondo menta",
+   "precio": 25,
+   "fondo": "menta"
+  },
+  {
+   "id": "fondo-sol",
+   "categoria": "fondo",
+   "nombre": "Fondo sol",
+   "precio": 25,
+   "fondo": "sol"
+  },
+  {
+   "id": "fondo-cielo",
+   "categoria": "fondo",
+   "nombre": "Fondo cielo",
+   "precio": 30,
+   "fondo": "cielo"
+  },
+  {
+   "id": "fondo-noche",
+   "categoria": "fondo",
+   "nombre": "Fondo noche",
+   "precio": 30,
+   "fondo": "noche"
+  },
+  {
+   "id": "marco-oro",
+   "categoria": "marco",
+   "nombre": "Marco dorado",
+   "precio": 90,
+   "marco": "oro"
+  },
+  {
+   "id": "marco-arcoiris",
+   "categoria": "marco",
+   "nombre": "Marco arcoíris",
+   "precio": 130,
+   "marco": "arcoiris"
+  },
+  {
+   "id": "tema-bosque",
+   "categoria": "tema",
+   "nombre": "Tema Bosque",
+   "precio": 120,
+   "tema": "bosque"
+  },
+  {
+   "id": "tema-oceano",
+   "categoria": "tema",
+   "nombre": "Tema Océano",
+   "precio": 120,
+   "tema": "oceano"
+  },
+  {
+   "id": "tema-atardecer",
+   "categoria": "tema",
+   "nombre": "Tema Atardecer",
+   "precio": 120,
+   "tema": "atardecer"
+  },
+  {
+   "id": "tema-neon",
+   "categoria": "tema",
+   "nombre": "Tema Neón",
+   "precio": 200,
+   "tema": "neon"
+  },
+  {
+   "id": "protector-racha",
+   "categoria": "consumible",
+   "nombre": "Protector de racha",
+   "precio": 50,
+   "descripcion": "Cubre un día en el que no practiques (máximo 3)."
+  }
+ ]
+}

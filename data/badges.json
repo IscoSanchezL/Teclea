@@ -1,0 +1,602 @@
+{
+ "version": 1,
+ "insignias": [
+  {
+   "id": "racha-3",
+   "nombre": "Calentando",
+   "descripcion": "Practica 3 días seguidos.",
+   "categoria": "constancia",
+   "nivel": "bronce",
+   "icono": "flame",
+   "cond": {
+    "t": "racha",
+    "n": 3
+   }
+  },
+  {
+   "id": "racha-7",
+   "nombre": "Semana de fuego",
+   "descripcion": "7 días seguidos practicando.",
+   "categoria": "constancia",
+   "nivel": "plata",
+   "icono": "flame",
+   "cond": {
+    "t": "racha",
+    "n": 7
+   }
+  },
+  {
+   "id": "racha-14",
+   "nombre": "Dos semanas imparable",
+   "descripcion": "14 días seguidos.",
+   "categoria": "constancia",
+   "nivel": "oro",
+   "icono": "flame",
+   "cond": {
+    "t": "racha",
+    "n": 14
+   }
+  },
+  {
+   "id": "racha-30",
+   "nombre": "Un mes de constancia",
+   "descripcion": "30 días seguidos: ¡leyenda!",
+   "categoria": "constancia",
+   "nivel": "diamante",
+   "icono": "flame",
+   "cond": {
+    "t": "racha",
+    "n": 30
+   }
+  },
+  {
+   "id": "racha-100",
+   "nombre": "Cien días",
+   "descripcion": "100 días seguidos de práctica.",
+   "categoria": "constancia",
+   "nivel": "arcoiris",
+   "icono": "crown",
+   "cond": {
+    "t": "racha",
+    "n": 100
+   }
+  },
+  {
+   "id": "dias-20",
+   "nombre": "Hábito en marcha",
+   "descripcion": "Practica en 20 días diferentes.",
+   "categoria": "constancia",
+   "nivel": "plata",
+   "icono": "sunrise",
+   "cond": {
+    "t": "contador",
+    "k": "dias",
+    "n": 20
+   }
+  },
+  {
+   "id": "precision-95",
+   "nombre": "Dedos finos",
+   "descripcion": "Una lección con 95 % de precisión o más.",
+   "categoria": "precision",
+   "nivel": "bronce",
+   "icono": "target",
+   "cond": {
+    "t": "precision",
+    "min": 95,
+    "chars": 50
+   }
+  },
+  {
+   "id": "precision-100",
+   "nombre": "Puntería perfecta",
+   "descripcion": "¡Una lección con 100 % de precisión!",
+   "categoria": "precision",
+   "nivel": "oro",
+   "icono": "target",
+   "cond": {
+    "t": "precision",
+    "min": 100,
+    "chars": 60
+   }
+  },
+  {
+   "id": "perfectas-5",
+   "nombre": "Cinco impecables",
+   "descripcion": "5 lecciones con 100 % de precisión.",
+   "categoria": "precision",
+   "nivel": "plata",
+   "icono": "circlecheck",
+   "cond": {
+    "t": "contador",
+    "k": "perfectas",
+    "n": 5
+   }
+  },
+  {
+   "id": "perfectas-20",
+   "nombre": "Precisión pro",
+   "descripcion": "20 lecciones con 100 % de precisión.",
+   "categoria": "precision",
+   "nivel": "diamante",
+   "icono": "shield",
+   "cond": {
+    "t": "contador",
+    "k": "perfectas",
+    "n": 20
+   }
+  },
+  {
+   "id": "precision-estricta",
+   "nombre": "Sin una falla",
+   "descripcion": "Supera con 3 estrellas la lección “Precisión perfecta: 98 %”.",
+   "categoria": "precision",
+   "nivel": "oro",
+   "icono": "bulb",
+   "cond": {
+    "t": "leccion3",
+    "id": "m10-l07"
+   }
+  },
+  {
+   "id": "veloz-1",
+   "nombre": "Motores encendidos",
+   "descripcion": "Alcanza la mitad de la meta de velocidad de tu grado.",
+   "categoria": "velocidad",
+   "nivel": "bronce",
+   "icono": "bolt",
+   "cond": {
+    "t": "ppm_rel",
+    "f": 0.5
+   }
+  },
+  {
+   "id": "veloz-2",
+   "nombre": "Tomando vuelo",
+   "descripcion": "Alcanza el 75 % de la meta de velocidad de tu grado.",
+   "categoria": "velocidad",
+   "nivel": "plata",
+   "icono": "rocket",
+   "cond": {
+    "t": "ppm_rel",
+    "f": 0.75
+   }
+  },
+  {
+   "id": "veloz-3",
+   "nombre": "Meta del grado",
+   "descripcion": "¡Alcanzaste la meta de velocidad de tu grado!",
+   "categoria": "velocidad",
+   "nivel": "oro",
+   "icono": "flag",
+   "cond": {
+    "t": "ppm_rel",
+    "f": 1
+   }
+  },
+  {
+   "id": "veloz-4",
+   "nombre": "Más allá de la meta",
+   "descripcion": "Supera en un 25 % la meta de tu grado.",
+   "categoria": "velocidad",
+   "nivel": "diamante",
+   "icono": "bolt",
+   "cond": {
+    "t": "ppm_rel",
+    "f": 1.25
+   }
+  },
+  {
+   "id": "veloz-5",
+   "nombre": "Supersónico",
+   "descripcion": "Supera en un 50 % la meta de tu grado.",
+   "categoria": "velocidad",
+   "nivel": "arcoiris",
+   "icono": "rocket",
+   "cond": {
+    "t": "ppm_rel",
+    "f": 1.5
+   }
+  },
+  {
+   "id": "tres-estrellas",
+   "nombre": "Estrella brillante",
+   "descripcion": "Consigue tus primeras 3 estrellas.",
+   "categoria": "velocidad",
+   "nivel": "bronce",
+   "icono": "star",
+   "cond": {
+    "t": "tres_estrellas"
+   }
+  },
+  {
+   "id": "mundo-1",
+   "nombre": "Dueño de la fila base",
+   "descripcion": "Completa el mundo 1: Fila base.",
+   "categoria": "exploracion",
+   "nivel": "bronce",
+   "icono": "compass",
+   "cond": {
+    "t": "mundo",
+    "n": 1
+   }
+  },
+  {
+   "id": "mundo-2",
+   "nombre": "Torre superada",
+   "descripcion": "Completa el mundo 2: Fila superior.",
+   "categoria": "exploracion",
+   "nivel": "bronce",
+   "icono": "mountain",
+   "cond": {
+    "t": "mundo",
+    "n": 2
+   }
+  },
+  {
+   "id": "mundo-3",
+   "nombre": "Navegante",
+   "descripcion": "Completa el mundo 3: Fila inferior.",
+   "categoria": "exploracion",
+   "nivel": "bronce",
+   "icono": "compass",
+   "cond": {
+    "t": "mundo",
+    "n": 3
+   }
+  },
+  {
+   "id": "mundo-4",
+   "nombre": "Abecedario completo",
+   "descripcion": "Completa el mundo 4: todas las letras.",
+   "categoria": "exploracion",
+   "nivel": "plata",
+   "icono": "book",
+   "cond": {
+    "t": "mundo",
+    "n": 4
+   }
+  },
+  {
+   "id": "mundo-5",
+   "nombre": "Rey del Shift",
+   "descripcion": "Completa el mundo 5: Mayúsculas.",
+   "categoria": "exploracion",
+   "nivel": "plata",
+   "icono": "crown",
+   "cond": {
+    "t": "mundo",
+    "n": 5
+   }
+  },
+  {
+   "id": "mundo-6",
+   "nombre": "Mago de las tildes",
+   "descripcion": "Completa el mundo 6: Tildes y signos.",
+   "categoria": "exploracion",
+   "nivel": "plata",
+   "icono": "wand",
+   "cond": {
+    "t": "mundo",
+    "n": 6
+   }
+  },
+  {
+   "id": "mundo-7",
+   "nombre": "Genio de los números",
+   "descripcion": "Completa el mundo 7: Números y símbolos.",
+   "categoria": "exploracion",
+   "nivel": "oro",
+   "icono": "bulb",
+   "cond": {
+    "t": "mundo",
+    "n": 7
+   }
+  },
+  {
+   "id": "mundo-8",
+   "nombre": "Maestro de frases",
+   "descripcion": "Completa el mundo 8: Palabras y frases.",
+   "categoria": "exploracion",
+   "nivel": "oro",
+   "icono": "book",
+   "cond": {
+    "t": "mundo",
+    "n": 8
+   }
+  },
+  {
+   "id": "mundo-9",
+   "nombre": "Narrador",
+   "descripcion": "Completa el mundo 9: Párrafos y textos.",
+   "categoria": "exploracion",
+   "nivel": "oro",
+   "icono": "book",
+   "cond": {
+    "t": "mundo",
+    "n": 9
+   }
+  },
+  {
+   "id": "mundo-10",
+   "nombre": "Gran maestro",
+   "descripcion": "Completa el mundo 10: ¡todo el curso!",
+   "categoria": "exploracion",
+   "nivel": "diamante",
+   "icono": "crown",
+   "cond": {
+    "t": "mundo",
+    "n": 10
+   }
+  },
+  {
+   "id": "lecciones-25",
+   "nombre": "25 lecciones",
+   "descripcion": "Completa 25 lecciones.",
+   "categoria": "exploracion",
+   "nivel": "plata",
+   "icono": "medal",
+   "cond": {
+    "t": "lecciones",
+    "n": 25
+   }
+  },
+  {
+   "id": "lecciones-75",
+   "nombre": "75 lecciones",
+   "descripcion": "Completa 75 lecciones.",
+   "categoria": "exploracion",
+   "nivel": "oro",
+   "icono": "medal",
+   "cond": {
+    "t": "lecciones",
+    "n": 75
+   }
+  },
+  {
+   "id": "lecciones-144",
+   "nombre": "Curso completo",
+   "descripcion": "Completa las 144 lecciones.",
+   "categoria": "exploracion",
+   "nivel": "arcoiris",
+   "icono": "crown",
+   "cond": {
+    "t": "lecciones",
+    "n": 144
+   }
+  },
+  {
+   "id": "juego-carrera",
+   "nombre": "Piloto de cohetes",
+   "descripcion": "Juega la Carrera de cohetes.",
+   "categoria": "juegos",
+   "nivel": "bronce",
+   "icono": "rocket",
+   "cond": {
+    "t": "juego",
+    "id": "carrera"
+   }
+  },
+  {
+   "id": "juego-lluvia",
+   "nombre": "Atrapa palabras",
+   "descripcion": "Juega la Lluvia de palabras.",
+   "categoria": "juegos",
+   "nivel": "bronce",
+   "icono": "sparkle",
+   "cond": {
+    "t": "juego",
+    "id": "lluvia"
+   }
+  },
+  {
+   "id": "juego-rescate",
+   "nombre": "Rescatista",
+   "descripcion": "Juega a Rescatar a Tecli.",
+   "categoria": "juegos",
+   "nivel": "bronce",
+   "icono": "heart",
+   "cond": {
+    "t": "juego",
+    "id": "rescate"
+   }
+  },
+  {
+   "id": "juego-blanco",
+   "nombre": "Buena puntería",
+   "descripcion": "Juega al Tiro al blanco de letras.",
+   "categoria": "juegos",
+   "nivel": "bronce",
+   "icono": "target",
+   "cond": {
+    "t": "juego",
+    "id": "blanco"
+   }
+  },
+  {
+   "id": "juego-duelo",
+   "nombre": "Duelista",
+   "descripcion": "Juega el Duelo contra el tiempo.",
+   "categoria": "juegos",
+   "nivel": "bronce",
+   "icono": "clock",
+   "cond": {
+    "t": "juego",
+    "id": "duelo"
+   }
+  },
+  {
+   "id": "juegos-10",
+   "nombre": "Jugador constante",
+   "descripcion": "Juega 10 partidas.",
+   "categoria": "juegos",
+   "nivel": "plata",
+   "icono": "gamepad",
+   "cond": {
+    "t": "contador",
+    "k": "juegos",
+    "n": 10
+   }
+  },
+  {
+   "id": "juegos-50",
+   "nombre": "Campeón de juegos",
+   "descripcion": "Juega 50 partidas.",
+   "categoria": "juegos",
+   "nivel": "oro",
+   "icono": "trophy",
+   "cond": {
+    "t": "contador",
+    "k": "juegos",
+    "n": 50
+   }
+  },
+  {
+   "id": "primera-leccion",
+   "nombre": "Primer paso",
+   "descripcion": "Completa tu primera lección.",
+   "categoria": "primera",
+   "nivel": "bronce",
+   "icono": "sprout",
+   "cond": {
+    "t": "primera",
+    "ev": "leccion"
+   }
+  },
+  {
+   "id": "primera-practica",
+   "nombre": "Práctica libre",
+   "descripcion": "Haz tu primera práctica libre.",
+   "categoria": "primera",
+   "nivel": "bronce",
+   "icono": "keyboard",
+   "cond": {
+    "t": "primera",
+    "ev": "practica"
+   }
+  },
+  {
+   "id": "primer-juego",
+   "nombre": "Primer juego",
+   "descripcion": "Juega tu primera partida.",
+   "categoria": "primera",
+   "nivel": "bronce",
+   "icono": "gamepad",
+   "cond": {
+    "t": "primera",
+    "ev": "juego"
+   }
+  },
+  {
+   "id": "primera-compra",
+   "nombre": "Comprador",
+   "descripcion": "Compra algo en la tienda.",
+   "categoria": "primera",
+   "nivel": "bronce",
+   "icono": "bag",
+   "cond": {
+    "t": "primera",
+    "ev": "compra"
+   }
+  },
+  {
+   "id": "primer-reto",
+   "nombre": "Retador",
+   "descripcion": "Completa tu primer reto diario.",
+   "categoria": "primera",
+   "nivel": "bronce",
+   "icono": "flag",
+   "cond": {
+    "t": "primera",
+    "ev": "reto"
+   }
+  },
+  {
+   "id": "refuerzo",
+   "nombre": "Corrigiendo el rumbo",
+   "descripcion": "Termina un refuerzo de teclas débiles.",
+   "categoria": "primera",
+   "nivel": "plata",
+   "icono": "target",
+   "cond": {
+    "t": "primera",
+    "ev": "refuerzo"
+   }
+  },
+  {
+   "id": "secreta-noctambulo",
+   "nombre": "Noctámbulo",
+   "descripcion": "Practica después de las 9 de la noche.",
+   "categoria": "secretas",
+   "nivel": "plata",
+   "icono": "moon",
+   "cond": {
+    "t": "hora",
+    "despues": 21
+   },
+   "secreta": true
+  },
+  {
+   "id": "secreta-madrugador",
+   "nombre": "Madrugador",
+   "descripcion": "Practica antes de las 7 de la mañana.",
+   "categoria": "secretas",
+   "nivel": "plata",
+   "icono": "sunrise",
+   "cond": {
+    "t": "hora",
+    "antes": 7
+   },
+   "secreta": true
+  },
+  {
+   "id": "secreta-ene",
+   "nombre": "Maestro de la Ñ",
+   "descripcion": "Supera con 3 estrellas la lección de palabras con Ñ.",
+   "categoria": "secretas",
+   "nivel": "oro",
+   "icono": "sparkle",
+   "cond": {
+    "t": "leccion3",
+    "id": "m4-l02"
+   },
+   "secreta": true
+  },
+  {
+   "id": "secreta-fantasma",
+   "nombre": "El fantasma del teclado",
+   "descripcion": "Completa una prueba del mundo 10 con el teclado oculto.",
+   "categoria": "secretas",
+   "nivel": "diamante",
+   "icono": "ghost",
+   "cond": {
+    "t": "oculto"
+   },
+   "secreta": true
+  },
+  {
+   "id": "reto-clase",
+   "nombre": "Equipo imparable",
+   "descripcion": "Aporta al reto colectivo de tu clase.",
+   "categoria": "clase",
+   "nivel": "plata",
+   "icono": "users",
+   "cond": {
+    "t": "evento",
+    "ev": "reto_clase"
+   }
+  },
+  {
+   "id": "top-mejora",
+   "nombre": "Mejor mejora",
+   "descripcion": "Termina en el top de mejora de tu clase.",
+   "categoria": "clase",
+   "nivel": "oro",
+   "icono": "chart",
+   "cond": {
+    "t": "evento",
+    "ev": "top_mejora"
+   }
+  }
+ ]
+}

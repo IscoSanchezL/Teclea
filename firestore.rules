@@ -143,7 +143,8 @@ service cloud.firestore {
           && isInt(n.monedas, 0, 1000000) && n.monedas - o.monedas <= 300 && o.monedas - n.monedas <= 5000
           && isInt(n.racha, 0, 3650)    && n.racha - o.racha <= 1
           && isInt(n.rachaMax, 0, 3650) && n.rachaMax >= o.rachaMax && n.rachaMax - o.rachaMax <= 1
-          && isInt(n.protectores, 0, 3);
+          && isInt(n.protectores, 0, 3)
+          && (n.protectores <= o.protectores || o.monedas - n.monedas >= 50);   // un protector cuesta 50 monedas
       }
       function validTeacherUpdate() {
         return onlyTouch(['grado','apodo','activo']) && (request.resource.data.grado == null || isInt(request.resource.data.grado, 2, 6));
@@ -412,6 +413,15 @@ service cloud.firestore {
       allow create, update: if request.auth.uid == uid
         && request.resource.data.keys().hasOnly(['teclas','actualizadoEn'])
         && request.resource.data.teclas is map && request.resource.data.teclas.size() <= 90;
+      allow delete: if isAdmin();
+    }
+
+    // Contadores para medallas (partidas jugadas, lecciones perfectas…): cada estudiante escribe los suyos
+    match /contadores/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['c','actualizadoEn'])
+        && request.resource.data.c is map && request.resource.data.c.size() <= 40;
       allow delete: if isAdmin();
     }
 

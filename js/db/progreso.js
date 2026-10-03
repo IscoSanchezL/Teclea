@@ -57,8 +57,10 @@ export async function resumenHoy(uid) {
   const ses = await store.consultar('sessions', { donde: [['uid', '==', uid], ['creadoEn', '>=', d.getTime()]] });
   const hoy = ses.filter((x) => (x.creadoEn || 0) >= d.getTime());
   const minutos = hoy.reduce((a, x) => a + (x.duracionSeg || 0), 0) / 60;
+  const porTipo = (t) => hoy.filter((x) => x.tipo === t).length;
   return {
     sesiones: hoy.length, minutos: Math.round(minutos * 10) / 10,
+    lecciones: porTipo('leccion'), practicas: porTipo('practica'), juegos: porTipo('juego'),
     mejorPpm: hoy.reduce((m, x) => Math.max(m, x.wpm || 0), 0),
     precision: hoy.length ? Math.round(hoy.reduce((a, x) => a + (x.precision || 0), 0) / hoy.length) : 0,
   };
