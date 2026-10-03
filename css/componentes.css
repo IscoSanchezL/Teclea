@@ -282,3 +282,12 @@
 .medalla--bloqueada:hover { transform: none; }
 .tabs--3 { grid-template-columns: repeat(3, 1fr); }
 .tabs--3 .tab { font-size: .9rem; padding-inline: .3rem; }
+
+/* Cerrar sesión: siempre visible y reconocible */
+.btn--salir { --b: transparent; --bt: #C42B31; border: 2px solid currentColor; color: #C42B31; background: transparent; box-shadow: none; font-weight: 800; gap: .35rem; }
+.btn--salir:hover { background: #C42B31; color: #fff; }
+[data-theme="dark"] .btn--salir { color: #FF8F94; }
+[data-theme="dark"] .btn--salir:hover { background: #FF8F94; color: #2A0A0C; }
+[data-estilo="staff"] .btn--salir { border-width: 1px; border-radius: 8px; }
+@media (max-width: 420px) { .btn--salir__txt { display: none; } .btn--salir { padding-inline: .6rem; } }
+@media (max-width: 480px) { .topbar__saludo { display: none !important; } .topbar { justify-content: flex-end; } }

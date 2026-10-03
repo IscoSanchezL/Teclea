@@ -38,6 +38,14 @@ function botonTema() {
   }, icono(oscuro ? 'sun' : 'moon', { tam: 22 }));
 }
 
+/** Botón de cerrar sesión siempre visible (equipos compartidos: cada persona debe salir de su perfil). */
+function botonSalir() {
+  return h('button', {
+    class: 'btn btn--salir btn--sm', type: 'button', title: 'Cerrar sesión', 'aria-label': 'Cerrar sesión',
+    onclick: async () => { const { cerrarSesion } = await import('../auth/auth.js'); await cerrarSesion(); location.hash = '#/'; },
+  }, icono('logout', { tam: 18 }), h('span', { class: 'btn--salir__txt' }, 'Salir'));
+}
+
 function botonBuscar() {
   const mac = /Mac|iPhone|iPad/.test(navigator.platform);
   return h('button', { class: 'buscar', type: 'button', 'aria-label': 'Abrir búsqueda rápida', onclick: () => document.dispatchEvent(new CustomEvent('teclea:paleta')) },
@@ -109,8 +117,7 @@ function renderTopbar() {
   if (u.rol === 'pendiente' || u.rol === 'rechazado') {
     raiz.replaceChildren(
       h('a', { class: 'topbar__marca', href: '#/', 'aria-label': 'Inicio' }, logo()),
-      h('div', { class: 'topbar__acciones' }, botonTema(),
-        h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => { const { cerrarSesion } = await import('../auth/auth.js'); await cerrarSesion(); location.hash = '#/'; } }, 'Cerrar sesión')));
+      h('div', { class: 'topbar__acciones' }, botonTema(), botonSalir()));
     return;
   }
   if (esStaff()) {
@@ -119,7 +126,7 @@ function renderTopbar() {
         h('span', { class: 'suave' }, marca.colegio), icono('arrow', { tam: 14 }),
         h('strong', { id: 'topbar-titulo' }, tituloDe(state.ruta))),
       h('div', { class: 'topbar__acciones' }, botonBuscar(), botonTema(),
-        h('span', { class: 'rol-pill' }, ROL[u.rol])));
+        h('span', { class: 'rol-pill' }, ROL[u.rol]), botonSalir()));
     return;
   }
   const nivel = nivelPorXP(u.xp);
@@ -131,7 +138,7 @@ function renderTopbar() {
       chip('chip--racha', 'flame', u.racha || 0, 'Racha de días'),
       chip('chip--moneda', 'coin', u.monedas || 0, 'Monedas'),
       chip('chip--xp', 'star', u.xp || 0, 'Puntos de experiencia'),
-      botonTema(),
+      botonTema(), botonSalir(),
       h('a', { class: 'avatar-mini', href: '#/perfil', 'aria-label': 'Mi perfil' }, avatar(u, { tam: 'md' }))));
 }
 
