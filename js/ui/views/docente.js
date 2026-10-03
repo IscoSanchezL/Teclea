@@ -75,7 +75,7 @@ export async function render({ query }) {
     return h('section', { class: 'panel panel--tabla' },
       h('div', { class: 'tabla-herr' }, h('div', { class: 'filtros', role: 'group', 'aria-label': 'Filtrar por clase' }, chips),
         h('div', { class: 'fila' }, contador, h('input', { class: 'input input--sm', type: 'search', placeholder: 'Buscar estudiante…', 'aria-label': 'Buscar estudiante', value: texto, oninput: (e) => { texto = e.target.value; pintarTabla(); } }))),
-      h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla tabla--lista' }, h('thead', {}, h('tr', {}, th('alias', 'Estudiante'), th('clase', 'Clase'), th('ppm', 'PPM', true), th('pre', 'Precisión', true), th('min', 'Tiempo', true), h('th', { scope: 'col' }, 'Evolución'), th('ult', 'Última práctica'), h('th', { scope: 'col' }, 'Estado'))), cuerpoTabla)));
+      h('div', { class: 'tabla-scroll tabla-scroll--fija' }, h('table', { class: 'tabla tabla--lista' }, h('thead', {}, h('tr', {}, th('alias', 'Estudiante'), th('clase', 'Clase'), th('ppm', 'PPM', true), th('pre', 'Precisión', true), th('min', 'Tiempo', true), h('th', { scope: 'col' }, 'Evolución'), th('ult', 'Última práctica'), h('th', { scope: 'col' }, 'Estado'))), cuerpoTabla)));
   }
   const abrirEstudiante = (i) => modalEstudiante({ insc: i, clase: claseDe(i.classId), sesiones, alCambiar: refrescar });
 

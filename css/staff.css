@@ -144,6 +144,9 @@
   background: color-mix(in srgb, var(--mal) calc(var(--i) * 100%), var(--superficie-2)); color: color-mix(in srgb, var(--texto) calc((1 - var(--i)) * 100%), #fff); border: 1px solid var(--borde); }
 
 .tabla-scroll { overflow-x: auto; }
+/* Lista larga: desplazamiento propio, con la fila de encabezados inmovilizada (como en una hoja de cálculo) */
+.tabla-scroll--fija { max-height: calc(100vh - 11rem); max-height: calc(100dvh - 11rem); min-height: 12rem; overflow: auto; }
+.tabla-scroll--fija thead th { z-index: 2; box-shadow: 0 1px 0 var(--borde); }
 .tabla { width: 100%; border-collapse: collapse; font-size: .85rem; }
 .tabla th, .tabla td { padding: .6rem .7rem; text-align: left; border-bottom: 1px solid var(--borde); white-space: nowrap; }
 .tabla thead th { font-size: .72rem; font-weight: 650; text-transform: uppercase; letter-spacing: .05em; color: var(--texto-suave); background: var(--superficie-2); position: sticky; top: 0; }
