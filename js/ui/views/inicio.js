@@ -4,6 +4,7 @@
  *   pro (5.º–6.º): panel de control con módulos en cuadrícula y estadísticas.
  * (El progreso real llega en la Fase 3: por ahora el mundo 1 está abierto y el resto bloqueado.)
  */
+import { tarjetaRetos } from '../retos-ui.js';
 import { state } from '../../core/state.js';
 import { h, movimientoReducido } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
@@ -139,12 +140,7 @@ export async function render() {
     h('a', { class: 'btn btn--primary btn--sm', href: '#/aprende' }, 'Empezar mi plan'));
   coach.dataset.mensaje = `Cuando termines tus primeras prácticas, aquí te diré qué teclas reforzar. Hoy empezamos por la fila base, ${u.apodo}.`;
 
-  const retos = h('section', { class: 'card' },
-    h('h2', { class: 'seccion__titulo' }, 'Retos de hoy'),
-    h('ul', { class: 'retos' },
-      [['Practica 5 minutos', '🎯'], ['Consigue 90 % de precisión', '✅'], ['Mantén tu racha', '🔥']].map(([t, e]) =>
-        h('li', { class: 'reto' }, h('span', { class: 'reto__emoji', 'aria-hidden': 'true' }, e), h('span', {}, t), h('span', { class: 'reto__estado suave' }, '0 / 1')))),
-    h('p', { class: 'suave pequeno' }, 'Los retos se activan en la Fase 4.'));
+  const retos = await tarjetaRetos({ hoy });
 
   const comparar = h('section', { class: 'card' },
     h('h2', { class: 'seccion__titulo' }, 'Hoy vs. mi mejor marca'),

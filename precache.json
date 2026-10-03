@@ -1,5 +1,5 @@
 {
-  "version": "77ee7ea0ecfe",
+  "version": "1b5eb1b5fc20",
   "archivos": [
     "assets/assets.json",
     "assets/img/favicon.svg",
@@ -9,6 +9,7 @@
     "css/efectos.css",
     "css/estilos.css",
     "css/fondo.css",
+    "css/juegos.css",
     "css/landing.css",
     "css/layout.css",
     "css/leccion.css",
@@ -79,6 +80,7 @@
     "js/ui/overlay.js",
     "js/ui/paleta.js",
     "js/ui/resultado.js",
+    "js/ui/retos-ui.js",
     "js/ui/sonido.js",
     "js/ui/sync-prefs.js",
     "js/ui/teclado-deco.js",
@@ -91,7 +93,9 @@
     "js/ui/views/entrar.js",
     "js/ui/views/inicio.js",
     "js/ui/views/introduccion.js",
+    "js/ui/views/juegos.js",
     "js/ui/views/leccion.js",
+    "js/ui/views/logros.js",
     "js/ui/views/no-encontrada.js",
     "js/ui/views/panel.js",
     "js/ui/views/pendiente.js",
@@ -100,6 +104,7 @@
     "js/ui/views/practica.js",
     "js/ui/views/privacidad.js",
     "js/ui/views/proximamente.js",
+    "js/ui/views/tienda.js",
     "manifest.webmanifest"
   ]
 }

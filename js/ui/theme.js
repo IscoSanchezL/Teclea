@@ -31,6 +31,8 @@ export function aplicarPrefs(prefs = state.prefs) {
   r.dataset.theme = oscuro ? 'dark' : 'light';
   r.dataset.textsize = prefs.texto;
   r.dataset.font = prefs.fuente;
+  const tc = state.user?.rol === 'estudiante' ? state.user.prefs?.temaColor : null;
+  if (tc) r.dataset.temaColor = tc; else delete r.dataset.temaColor;
   r.dataset.colorblind = prefs.daltonico ? 'on' : 'off';
   r.dataset.motion = prefs.movimiento === 'reducido' || mqMovimiento.matches ? 'reducido' : 'completo';
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', oscuro ? '#13112A' : '#6C4CF5');

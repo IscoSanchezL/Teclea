@@ -47,7 +47,7 @@ export async function render({ query }) {
   function guardarYMostrar({ resultado, motor, refId, titulo, volver }) {
     const resumen = (async () => {
       const r = await registrarActividad({ user: state.user, tipo: 'practica', refId, resultado, porTecla: motor.porTecla });
-      try { const { evaluarInsignias } = await import('../../game/insignias.js'); r.insignias = await evaluarInsignias({ user: r.usuario, evento: 'practica', resultado, resumen: r }); } catch (e) { console.warn('[insignias]', e); }
+      try { const { evaluarInsignias } = await import('../../game/insignias.js'); r.insignias = await evaluarInsignias({ user: r.usuario, evento: 'practica', resultado, resumen: r, refId }); } catch (e) { console.warn('[insignias]', e); }
       return r;
     })();
     montar(panelResultado({ titulo, subtitulo: 'Práctica', estrellas: null, resultado, resumen,

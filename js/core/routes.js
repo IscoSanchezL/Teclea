@@ -34,12 +34,16 @@ export const RUTAS = [
     nav: { icono: 'target', etiqueta: 'Práctica', orden: 3, movil: false },
   },
   {
-    path: '/juegos', acceso: 'sesion', solo: 'estudiante', titulo: 'Juegos', load: placeholder('juegos'),
+    path: '/juegos', acceso: 'sesion', solo: 'estudiante', titulo: 'Juegos', load: () => import('../ui/views/juegos.js'),
     nav: { icono: 'gamepad', etiqueta: 'Juegos', orden: 4, movil: true },
   },
   {
-    path: '/logros', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis logros', load: placeholder('logros'),
+    path: '/logros', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis logros', load: () => import('../ui/views/logros.js'),
     nav: { icono: 'trophy', etiqueta: 'Logros', orden: 5, movil: true },
+  },
+  {
+    path: '/tienda', acceso: 'sesion', solo: 'estudiante', titulo: 'Tienda', load: () => import('../ui/views/tienda.js'),
+    nav: { icono: 'bag', etiqueta: 'Tienda', orden: 5.5, movil: false },
   },
   {
     path: '/clases', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis clases', load: placeholder('clases'),

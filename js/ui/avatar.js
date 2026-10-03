@@ -12,5 +12,6 @@ export function avatar(u, { tam = 'md', clase = '' } = {}) {
   const caja = h('span', { class: `avatar avatar--${tam} ${clase}`, dataset: { fondo: a.fondo || 'violeta', marco: a.marco || '' }, 'aria-hidden': 'true' });
   if (u?.foto) caja.append(h('img', { src: u.foto, alt: '', decoding: 'async', draggable: 'false' }));
   else caja.append(h('span', { class: 'avatar__emoji' }, a.emoji || '🦊'));
+  if (a.accesorios?.length && !u?.foto) a.accesorios.slice(0, 2).forEach((e, i) => caja.append(h('span', { class: `avatar__acc avatar__acc--${i}` }, e)));
   return caja;
 }
