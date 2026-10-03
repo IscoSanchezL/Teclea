@@ -33,10 +33,41 @@ const ICONOS = {
   download: T('<path d="M12 3v12M7 11l5 5 5-5M4 21h16"/>'),
   trash: T('<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>'),
   sparkle: '<path fill="currentColor" d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9zM19 16l.9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9z"/>',
+  bolt: '<path fill="currentColor" d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  rocket: T('<path d="M12 2c3 2 5 5 5 9l-2 3H9l-2-3c0-4 2-7 5-9z"/><circle cx="12" cy="9" r="1.6"/><path d="M7 14l-3 3 3 1M17 14l3 3-3 1M10 17l2 4 2-4"/>'),
+  crown: '<path fill="currentColor" d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/>',
+  compass: T('<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>'),
+  mountain: T('<path d="M2 20l7-12 4 6 3-4 6 10z"/>'),
+  wand: T('<path d="M5 19L17 7M15 5l1-2 1 2 2 1-2 1-1 2-1-2-2-1z"/>'),
+  bag: T('<path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/>'),
+  flag: T('<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>'),
+  heart: '<path fill="currentColor" d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  sprout: T('<path d="M12 21v-8M12 13c0-4 3-6 7-6 0 4-3 6-7 6zM12 15c0-3-2-5-6-5 0 3 2 5 6 5z"/>'),
+  sunrise: T('<path d="M3 18h18M7 18a5 5 0 0 1 10 0M12 4v4M5 9l2 2M19 9l-2 2"/>'),
+  ghost: T('<path d="M6 21V10a6 6 0 0 1 12 0v11l-3-2-3 2-3-2z"/><path d="M10 10h.01M14 10h.01"/>'),
+  bulb: T('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c1 1 1 2 1 3h6c0-1 0-2 1-3a6 6 0 0 0-4-10z"/>'),
+  printer: T('<path d="M6 9V3h12v6M6 18H4v-7h16v7h-2M7 14h10v7H7z"/>'),
+  upload: T('<path d="M12 21V9M7 13l5-5 5 5M4 3h16"/>'),
+  edit: T('<path d="M4 20l4-1 11-11-3-3L5 16zM14 6l3 3"/>'),
+  plus: T('<path d="M12 5v14M5 12h14"/>'),
+  copy: T('<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>'),
+  pause: T('<path d="M8 5v14M16 5v14"/>'),
+  refresh: T('<path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/>'),
+  volume: T('<path d="M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6"/>'),
+  mute: T('<path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/>'),
+  medal: T('<circle cx="12" cy="15" r="5"/><path d="M9 11L6 3h5l1 4M15 11l3-8h-5l-1 4"/>'),
+  circlecheck: T('<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>'),
+  eye: T('<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>'),
+  qr: T('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/>'),
+  image: T('<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>'),
+  settings: T('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'),
   search: T('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>'),
   info: T('<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'),
   google: '<path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.7v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6H1.3a12 12 0 0 0 0 10.8z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.8 3.6-4.9 6.7-4.9z"/>',
 };
+
+/** Marcado interno de un ícono (para incrustarlo en otros SVG, p. ej. medallas). */
+export const marcadoIcono = (nombre) => ICONOS[nombre] || ICONOS.sparkle;
 
 /** icono('home', {tam: 24}) → <span class="icono"> con el SVG dentro */
 export function icono(nombre, { tam = 24, titulo = '' } = {}) {

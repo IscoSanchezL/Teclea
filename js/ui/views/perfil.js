@@ -11,10 +11,12 @@ import { sincronizarPrefs } from '../sync-prefs.js';
 import { segmentado, interruptor, seccion, campo } from '../componentes.js';
 import { confirmar, toast } from '../overlay.js';
 import { mascota } from '../art.js';
+import { avatar, EMOJIS_AVATAR, FONDOS_AVATAR } from '../avatar.js';
+import { fotoPerfil } from '../imagen.js';
+import { leer } from '../../db/store.js';
 import { icono } from '../icons.js';
 import { nivelPorXP } from '../../core/levels.js';
 
-const AVATARES = ['🦊', '🐼', '🐯', '🦄', '🐙', '🦖', '🤖', '🐸'];
 const ROLES = { estudiante: 'Estudiante', docente: 'Docente', admin: 'Administración' };
 
 const cambiar = (parche) => cambiarPrefs(parche, { alGuardar: sincronizarPrefs });
@@ -32,25 +34,46 @@ export async function render() {
     try { await guardarPerfil({ apodo: v }); toast('Nombre actualizado'); } catch { toast('No se pudo guardar', { tipo: 'error' }); }
   });
 
-  const botonesAvatar = AVATARES.map((e) => h('button', {
-    type: 'button', class: 'opcion-avatar', 'aria-pressed': String(e === (u.avatar?.emoji || '🦊')), 'aria-label': `Avatar ${e}`,
-    onclick: async () => {
-      botonesAvatar.forEach((b, i) => b.setAttribute('aria-pressed', String(AVATARES[i] === e)));
-      try { await guardarPerfil({ avatar: { ...(u.avatar || {}), emoji: e } }); } catch { toast('No se pudo guardar', { tipo: 'error' }); }
-    },
-  }, e));
+  // ── Avatar y foto ──
+  let fotosOk = true;
+  try { fotosOk = (await leer('config/app'))?.permitirFotos !== false; } catch { /* sin permiso: se asume permitido */ }
+  const vista = h('div', { class: 'avatar-editor__vista' });
+  const pintarVista = () => vista.replaceChildren(avatar(state.user, { tam: 'xl' }));
+  pintarVista();
+  const guardarAvatar = async (parche) => {
+    try { await guardarPerfil(parche); pintarVista(); } catch (e) { console.warn(e); toast('No se pudo guardar el cambio', { tipo: 'error' }); }
+  };
+  const emojis = h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': 'Elegir emoji de avatar' },
+    EMOJIS_AVATAR.map((e) => h('button', { type: 'button', class: 'opcion-avatar', 'aria-pressed': String(e === (state.user.avatar?.emoji || '🦊')), 'aria-label': `Avatar ${e}`,
+      onclick: (ev) => { emojis.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false')); ev.currentTarget.setAttribute('aria-pressed', 'true'); guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: e } }); } }, e)));
+  const fondos = h('div', { class: 'fondos', role: 'group', 'aria-label': 'Color de fondo del avatar' },
+    FONDOS_AVATAR.map((f) => h('button', { type: 'button', class: 'fondos__op', dataset: { fondo: f }, 'aria-label': `Fondo ${f}`, 'aria-pressed': String(f === (state.user.avatar?.fondo || 'violeta')),
+      onclick: (ev) => { fondos.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false')); ev.currentTarget.setAttribute('aria-pressed', 'true'); guardarAvatar({ avatar: { ...(state.user.avatar || {}), fondo: f } }); } },
+      h('span', { class: 'avatar avatar--sm', dataset: { fondo: f } }))));
+  const archivo = h('input', { type: 'file', accept: 'image/*', class: 'sr-only', id: 'foto-archivo', onchange: async (ev) => {
+    const f = ev.target.files[0]; ev.target.value = '';
+    if (!f) return;
+    try { await guardarAvatar({ foto: await fotoPerfil(f) }); toast('Foto actualizada'); } catch (e) { toast(e.message || 'No se pudo usar esa imagen', { tipo: 'error' }); }
+  } });
+  const bloqueFoto = fotosOk ? h('div', { class: 'pila' },
+    h('div', { class: 'fila fila--envuelve' },
+      archivo,
+      h('label', { class: 'btn btn--primary btn--sm', for: 'foto-archivo' }, icono('download', { tam: 16 }), 'Subir mi foto'),
+      state.user.foto ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => guardarAvatar({ foto: null }) }, 'Quitar foto') : null),
+    h('p', { class: 'suave pequeno' }, 'Tu foto solo la ven tú y el administrador del colegio. No aparece en rankings ni la ven tus compañeros. Se guarda reducida y puedes quitarla cuando quieras.'))
+    : h('p', { class: 'suave pequeno' }, 'El colegio desactivó las fotos de perfil. Puedes usar un avatar.');
+
+  const seccionAvatar = seccion('Mi avatar y mi foto',
+    h('div', { class: 'avatar-editor' }, vista, h('div', { class: 'pila' }, apodo.nodo, bloqueFoto)),
+    h('strong', {}, 'Elige un avatar'), emojis, h('strong', {}, 'Color de fondo'), fondos);
 
   const cabecera = h('section', { class: 'card card--hero perfil__cab' },
-    h('div', { class: 'perfil__avatar', 'aria-hidden': 'true' }, u.avatar?.emoji || '🦊'),
+    h('div', { class: 'perfil__avatar', 'aria-hidden': 'true' }, avatar(u, { tam: 'xl' })),
     h('div', { class: 'perfil__datos' },
       h('h1', {}, u.nombre),
       h('p', {}, h('span', { class: 'etiqueta' }, ROLES[u.rol] || u.rol), u.grado ? h('span', { class: 'etiqueta etiqueta--sol' }, `${u.grado}.º grado`) : null),
-      h('p', { class: 'suave' }, `Nivel ${nivel.nivel} · ${nivel.nombre} · ${u.xp.toLocaleString('es-CO')} XP`)),
+      u.rol === 'estudiante' ? h('p', { class: 'suave' }, `Nivel ${nivel.nivel} · ${nivel.nombre} · ${u.xp.toLocaleString('es-CO')} XP`) : h('p', { class: 'suave' }, u.email || '')),
     mascota('celebra', { tam: 'md' }));
-
-  const seccionAvatar = seccion('Mi avatar', apodo.nodo,
-    h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': 'Elegir avatar' }, botonesAvatar),
-    h('p', { class: 'suave pequeno' }, 'Pronto podrás vestir a tu avatar con accesorios de la tienda.'));
 
   // ── Apariencia ──
   const apariencia = seccion('Apariencia',

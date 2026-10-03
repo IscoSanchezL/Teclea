@@ -1,15 +1,125 @@
 {
   "version": 1,
   "mundos": [
-    { "id": 1,  "clave": "fila-base",      "nombre": "Fila base",              "emoji": "🏠", "color": ["#8A70FA", "#6C4CF5"], "descripcion": "Tus dedos llegan a casa: A S D F · J K L Ñ" },
-    { "id": 2,  "clave": "fila-superior",  "nombre": "Fila superior",          "emoji": "🚀", "color": ["#4FB6FF", "#6C4CF5"], "descripcion": "Despega hacia Q W E R T Y U I O P" },
-    { "id": 3,  "clave": "fila-inferior",  "nombre": "Fila inferior",          "emoji": "🌊", "color": ["#3DDBB0", "#4FB6FF"], "descripcion": "Navega por Z X C V B N M" },
-    { "id": 4,  "clave": "alfabeto",       "nombre": "Todas las letras y la Ñ","emoji": "🗺️", "color": ["#FFD04A", "#FF8A7A"], "descripcion": "Domina el abecedario completo" },
-    { "id": 5,  "clave": "mayusculas",     "nombre": "Mayúsculas y Shift",     "emoji": "🏔️", "color": ["#A794FF", "#4FB6FF"], "descripcion": "Sube la montaña con Shift" },
-    { "id": 6,  "clave": "tildes-signos",  "nombre": "Tildes y signos",        "emoji": "✨", "color": ["#FF8A7A", "#FFD04A"], "descripcion": "á é í ó ú ü · ¿ ? ¡ ! , . ; :" },
-    { "id": 7,  "clave": "numeros",        "nombre": "Números y símbolos",     "emoji": "🔢", "color": ["#3DDBB0", "#18BE94"], "descripcion": "1 2 3 … @ # % y más" },
-    { "id": 8,  "clave": "frases",         "nombre": "Palabras y frases",      "emoji": "💬", "color": ["#6C4CF5", "#FF8A7A"], "descripcion": "Escribe ideas completas" },
-    { "id": 9,  "clave": "parrafos",       "nombre": "Párrafos y textos reales","emoji": "📖", "color": ["#4FB6FF", "#3DDBB0"], "descripcion": "Cuentos, noticias y datos curiosos" },
-    { "id": 10, "clave": "retos",          "nombre": "Velocidad y precisión",  "emoji": "🏆", "color": ["#FFB800", "#FF6B5B"], "descripcion": "Retos de campeones" }
+    {
+      "id": 1,
+      "clave": "fila-base",
+      "nombre": "Fila base",
+      "emoji": "🏠",
+      "color": [
+        "#8A70FA",
+        "#6C4CF5"
+      ],
+      "descripcion": "Tus dedos llegan a casa: A S D F · J K L Ñ",
+      "teclas": "A S D F J K L Ñ"
+    },
+    {
+      "id": 2,
+      "clave": "fila-superior",
+      "nombre": "Fila superior",
+      "emoji": "🚀",
+      "color": [
+        "#4FB6FF",
+        "#6C4CF5"
+      ],
+      "descripcion": "Despega hacia Q W E R T Y U I O P",
+      "teclas": "Q W E R T Y U I O P"
+    },
+    {
+      "id": 3,
+      "clave": "fila-inferior",
+      "nombre": "Fila inferior",
+      "emoji": "🌊",
+      "color": [
+        "#3DDBB0",
+        "#4FB6FF"
+      ],
+      "descripcion": "Navega por Z X C V B N M",
+      "teclas": "Z X C V B N M , ."
+    },
+    {
+      "id": 4,
+      "clave": "alfabeto",
+      "nombre": "Todas las letras y la Ñ",
+      "emoji": "🗺️",
+      "color": [
+        "#FFD04A",
+        "#FF8A7A"
+      ],
+      "descripcion": "Domina el abecedario completo",
+      "teclas": "A–Z Ñ"
+    },
+    {
+      "id": 5,
+      "clave": "mayusculas",
+      "nombre": "Mayúsculas y Shift",
+      "emoji": "🏔️",
+      "color": [
+        "#A794FF",
+        "#4FB6FF"
+      ],
+      "descripcion": "Sube la montaña con Shift",
+      "teclas": "⇧ + letras"
+    },
+    {
+      "id": 6,
+      "clave": "tildes-signos",
+      "nombre": "Tildes y signos",
+      "emoji": "✨",
+      "color": [
+        "#FF8A7A",
+        "#FFD04A"
+      ],
+      "descripcion": "á é í ó ú ü · ¿ ? ¡ ! , . ; :",
+      "teclas": "á é í ó ú ü ¿ ¡ ? !"
+    },
+    {
+      "id": 7,
+      "clave": "numeros",
+      "nombre": "Números y símbolos",
+      "emoji": "🔢",
+      "color": [
+        "#3DDBB0",
+        "#18BE94"
+      ],
+      "descripcion": "1 2 3 … @ # % y más",
+      "teclas": "1 2 3 … @ # %"
+    },
+    {
+      "id": 8,
+      "clave": "frases",
+      "nombre": "Palabras y frases",
+      "emoji": "💬",
+      "color": [
+        "#6C4CF5",
+        "#FF8A7A"
+      ],
+      "descripcion": "Escribe ideas completas",
+      "teclas": "palabras y frases"
+    },
+    {
+      "id": 9,
+      "clave": "parrafos",
+      "nombre": "Párrafos y textos reales",
+      "emoji": "📖",
+      "color": [
+        "#4FB6FF",
+        "#3DDBB0"
+      ],
+      "descripcion": "Cuentos, noticias y datos curiosos",
+      "teclas": "párrafos"
+    },
+    {
+      "id": 10,
+      "clave": "retos",
+      "nombre": "Velocidad y precisión",
+      "emoji": "🏆",
+      "color": [
+        "#FFB800",
+        "#FF6B5B"
+      ],
+      "descripcion": "Retos de campeones",
+      "teclas": "retos"
+    }
   ]
 }

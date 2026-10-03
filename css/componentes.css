@@ -256,3 +256,29 @@
 .lista-check li { position: relative; padding-left: 1.8rem; margin-bottom: .4rem; font-weight: 700; }
 .lista-check li::before { content: '✓'; position: absolute; left: 0; top: 0; color: var(--ok-texto); font-weight: 800; }
 [data-colorblind="on"] .lista-check li::before { content: '✔'; }
+
+/* ───────── Avatar (foto o emoji) ───────── */
+.avatar { --a1: #8A70FA; --a2: #4527B8; display: inline-grid; place-items: center; flex: none; overflow: hidden; border-radius: 34%;
+  background: linear-gradient(145deg, var(--a1), var(--a2)); box-shadow: 0 3px 0 color-mix(in srgb, var(--a2) 80%, #000); }
+.avatar[data-fondo="coral"] { --a1: #FF9A8A; --a2: #E84F3F; }
+.avatar[data-fondo="menta"] { --a1: #5FE3C0; --a2: #0B8F6D; }
+.avatar[data-fondo="sol"] { --a1: #FFD04A; --a2: #E39A00; }
+.avatar[data-fondo="cielo"] { --a1: #6CC4FF; --a2: #1E78C8; }
+.avatar[data-fondo="noche"] { --a1: #3A3F7A; --a2: #12163A; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar--sm { width: 2.2rem; height: 2.2rem; font-size: 1.2rem; }
+.avatar--md { width: 2.9rem; height: 2.9rem; font-size: 1.6rem; }
+.avatar--lg { width: 5rem; height: 5rem; font-size: 2.8rem; }
+.avatar--xl { width: 7.5rem; height: 7.5rem; font-size: 4.2rem; border-radius: 30%; }
+.avatar[data-marco="oro"] { outline: 3px solid #FFD04A; outline-offset: 2px; }
+.avatar[data-marco="arcoiris"] { outline: 3px solid transparent; outline-offset: 2px; background-clip: padding-box; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #6C4CF5; }
+[data-estilo="staff"] .avatar { border-radius: 10px; box-shadow: none; }
+[data-estilo="ludico"] .avatar { border: 3px solid var(--contorno); }
+
+/* ───────── Medallas ───────── */
+.medalla { display: inline-block; line-height: 0; filter: drop-shadow(0 6px 8px rgba(30, 20, 90, .25)); transition: transform var(--t-media) var(--resorte); }
+.medalla:hover { transform: translateY(-3px) rotate(-3deg) scale(1.04); }
+.medalla--bloqueada { filter: grayscale(1) brightness(.9) opacity(.45); }
+.medalla--bloqueada:hover { transform: none; }
+.tabs--3 { grid-template-columns: repeat(3, 1fr); }
+.tabs--3 .tab { font-size: .9rem; padding-inline: .3rem; }

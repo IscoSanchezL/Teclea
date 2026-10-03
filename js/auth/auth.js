@@ -12,6 +12,7 @@ import { CONFIG, firebaseConfigurado } from '../core/config.js';
 import { state, setState } from '../core/state.js';
 import { slugUsuario } from '../core/utils.js';
 import { obtenerFirebase } from '../db/firebase.js';
+import { actualizar } from '../db/store.js';
 import { leerPerfil, crearPerfil, perfilNuevo, rolSolicitado, actualizarPerfil, demo } from '../db/users.js';
 import { aplicarEstiloUsuario, cambiarPrefs } from '../ui/theme.js';
 
@@ -40,14 +41,20 @@ async function perfilDesdeFirebase(fbUser) {
   let perfil = await leerPerfil(fbUser.uid);
   if (!perfil) {
     const email = fbUser.email || null;
-    const rol = await rolSolicitado(fbUser.emailVerified ? email : null);
+    const intencion = sessionStorage.getItem('teclea:intencion') === 'docente';
+    const rol = await rolSolicitado(fbUser.emailVerified ? email : null, { intencionDocente: intencion });
     perfil = await crearPerfil(perfilNuevo({
       uid: fbUser.uid, nombre: fbUser.displayName || 'Estudiante', email, rol,
       authTipo: fbUser.providerData?.[0]?.providerId === 'google.com' ? 'google' : 'pin',
     }));
   } else {
     actualizarPerfil(fbUser.uid, { ultimaConexion: true }).catch(() => {});
+    // La cuenta del administrador siempre figura como admin (por si se registró antes como estudiante).
+    if (fbUser.emailVerified && fbUser.email?.toLowerCase() === CONFIG.adminEmail.toLowerCase() && perfil.rol !== 'admin') {
+      try { await actualizar(`users/${fbUser.uid}`, { rol: 'admin' }); perfil.rol = 'admin'; } catch { /* reglas */ }
+    }
   }
+  try { sessionStorage.removeItem('teclea:intencion'); } catch { /* sin almacenamiento */ }
   return perfil;
 }
 
@@ -88,7 +95,8 @@ export async function iniciarAuth() {
   setState({ listo: true });
 }
 
-export async function entrarConGoogle() {
+export async function entrarConGoogle({ docente = false } = {}) {
+  try { sessionStorage.setItem('teclea:intencion', docente ? 'docente' : 'estudiante'); } catch { /* sin almacenamiento */ }
   const fb = await obtenerFirebase();
   const proveedor = new fb.au.GoogleAuthProvider();
   proveedor.setCustomParameters({

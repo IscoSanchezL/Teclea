@@ -2,6 +2,7 @@
  * Navegación: barra lateral flotante (estudiantes, escritorio), barra lateral fija con etiquetas
  * (docentes/administración), barra inferior (móvil) y barra superior.
  */
+import { marca } from '../core/marca.js';
 import { state, subscribe } from '../core/state.js';
 import { rutasVisibles, buscarRuta } from '../core/routes.js';
 import { h, contar } from '../core/utils.js';
@@ -9,6 +10,7 @@ import { nivelPorXP } from '../core/levels.js';
 import { icono } from './icons.js';
 import { logo } from './logo.js';
 import { mascota } from './art.js';
+import { avatar } from './avatar.js';
 import { alternarTema } from './theme.js';
 import { sincronizarPrefs } from './sync-prefs.js';
 import { abrirCapa } from './overlay.js';
@@ -62,8 +64,8 @@ function renderSidebar() {
           h('p', { class: 'sidebar__rotulo' }, g),
           visibles.filter((x) => (x.item.grupo || 'General') === g).map((x) => enlace(x, 'nav-item'))))),
       h('a', { class: 'sidebar__usuario', href: '#/perfil' },
-        h('span', { class: 'sidebar__avatar', 'aria-hidden': 'true' }, state.user.avatar?.emoji || '🦊'),
-        h('span', { class: 'sidebar__quien' }, h('strong', {}, state.user.nombre), h('small', {}, `${ROL[state.user.rol]} · ${CONFIG.colegio}`))));
+        avatar(state.user, { tam: 'sm', clase: 'sidebar__avatar' }),
+        h('span', { class: 'sidebar__quien' }, h('strong', {}, state.user.nombre), h('small', {}, `${ROL[state.user.rol]} · ${marca.colegio}`))));
     return;
   }
   raiz.replaceChildren(
@@ -104,10 +106,17 @@ function renderTopbar() {
       h('div', { class: 'topbar__acciones' }, botonTema(), h('a', { class: 'btn btn--primary btn--sm', href: '#/entrar' }, 'Entrar')));
     return;
   }
+  if (u.rol === 'pendiente' || u.rol === 'rechazado') {
+    raiz.replaceChildren(
+      h('a', { class: 'topbar__marca', href: '#/', 'aria-label': 'Inicio' }, logo()),
+      h('div', { class: 'topbar__acciones' }, botonTema(),
+        h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => { const { cerrarSesion } = await import('../auth/auth.js'); await cerrarSesion(); location.hash = '#/'; } }, 'Cerrar sesión')));
+    return;
+  }
   if (esStaff()) {
     raiz.replaceChildren(
       h('div', { class: 'topbar__migas' },
-        h('span', { class: 'suave' }, CONFIG.colegio), icono('arrow', { tam: 14 }),
+        h('span', { class: 'suave' }, marca.colegio), icono('arrow', { tam: 14 }),
         h('strong', { id: 'topbar-titulo' }, tituloDe(state.ruta))),
       h('div', { class: 'topbar__acciones' }, botonBuscar(), botonTema(),
         h('span', { class: 'rol-pill' }, ROL[u.rol])));
@@ -123,7 +132,7 @@ function renderTopbar() {
       chip('chip--moneda', 'coin', u.monedas || 0, 'Monedas'),
       chip('chip--xp', 'star', u.xp || 0, 'Puntos de experiencia'),
       botonTema(),
-      h('a', { class: 'avatar-mini', href: '#/perfil', 'aria-label': 'Mi perfil' }, u.avatar?.emoji || '🦊')));
+      h('a', { class: 'avatar-mini', href: '#/perfil', 'aria-label': 'Mi perfil' }, avatar(u, { tam: 'md' }))));
 }
 
 /** Marca el ítem activo (aria-current) y actualiza el título de la barra superior. */
@@ -145,7 +154,7 @@ export function redibujarNav() {
 export function iniciarNav() {
   let ultimo = '';
   subscribe((s) => {
-    const firma = `${s.user?.uid}|${s.user?.rol}|${s.user?.xp}|${s.user?.monedas}|${s.user?.racha}|${s.user?.apodo}|${s.user?.avatar?.emoji}|${s.prefs.tema}|${document.documentElement.dataset.estilo}`;
+    const firma = `${s.user?.uid}|${s.user?.rol}|${s.user?.xp}|${s.user?.monedas}|${s.user?.racha}|${s.user?.apodo}|${s.user?.avatar?.emoji}|${s.user?.avatar?.fondo}|${s.user?.foto ? 1 : 0}|${s.prefs.tema}|${document.documentElement.dataset.estilo}`;
     if (firma !== ultimo) { ultimo = firma; redibujarNav(); }
   });
   redibujarNav();

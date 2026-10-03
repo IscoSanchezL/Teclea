@@ -28,7 +28,7 @@ export function perfilNuevo({ uid, nombre, email = null, rol = 'estudiante', gra
 }
 
 /** Decide el rol que el cliente SOLICITA. Las reglas de Firestore validan y pueden rechazarlo. */
-export async function rolSolicitado(email) {
+export async function rolSolicitado(email, { intencionDocente = false } = {}) {
   if (!email) return 'estudiante';
   const correo = email.toLowerCase();
   if (correo === CONFIG.adminEmail.toLowerCase()) return 'admin';
@@ -36,8 +36,9 @@ export async function rolSolicitado(email) {
   try {
     const snap = await fb.fs.getDoc(fb.fs.doc(fb.db, 'teacher_whitelist', correo));
     if (snap.exists()) return 'docente';
-  } catch { /* sin permiso o sin red → estudiante */ }
-  return 'estudiante';
+  } catch { /* sin permiso o sin red → se decide por la intención */ }
+  // Docente que se registra por su cuenta: queda PENDIENTE hasta que el administrador lo apruebe.
+  return intencionDocente ? 'pendiente' : 'estudiante';
 }
 
 // ───────────────────────── Firebase ─────────────────────────
@@ -63,7 +64,7 @@ export async function crearPerfil(perfil) {
 }
 
 /** Campos que el estudiante puede editar por sí mismo (coinciden con firestore.rules). */
-const CAMPOS_EDITABLES = ['apodo', 'grado', 'avatar', 'prefs', 'ultimaConexion', 'solicitudEliminacion'];
+const CAMPOS_EDITABLES = ['apodo', 'grado', 'avatar', 'foto', 'prefs', 'ultimaConexion', 'solicitudEliminacion'];
 
 export async function actualizarPerfil(uid, parche) {
   const permitido = Object.fromEntries(Object.entries(parche).filter(([k]) => CAMPOS_EDITABLES.includes(k)));
@@ -87,7 +88,7 @@ export async function actualizarPerfil(uid, parche) {
 export const demo = {
   leer: () => almacen.leer(CLAVE_DEMO),
   crear(rol, grado = 3) {
-    const nombres = { estudiante: 'Sofía Demo', docente: 'Profe Demo', admin: 'Admin Demo' };
+    const nombres = { estudiante: 'Sofía Demo', docente: 'Profe Demo', admin: 'Admin Demo', pendiente: 'Profe Nuevo' };
     const perfil = {
       ...perfilNuevo({ uid: `demo-${rol}`, nombre: nombres[rol], rol, grado: rol === 'estudiante' ? grado : null, authTipo: 'demo' }),
       xp: rol === 'estudiante' ? 140 : 0, monedas: rol === 'estudiante' ? 35 : 0, racha: rol === 'estudiante' ? 3 : 0,

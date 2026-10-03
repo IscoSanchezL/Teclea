@@ -2,6 +2,7 @@
  * Aviso de privacidad (plantilla) — Ley 1581 de 2012 (habeas data) y Decreto 1377 de 2013.
  * IMPORTANTE: revísalo con el área jurídica del colegio antes de usarlo con estudiantes.
  */
+import { marca } from '../../core/marca.js';
 import { CONFIG } from '../../core/config.js';
 import { h } from '../../core/utils.js';
 
@@ -12,7 +13,7 @@ export async function render() {
     h('p', { class: 'suave' }, `Versión ${CONFIG.versionAvisoPrivacidad} · Plantilla pendiente de revisión por el colegio`),
 
     h('h2', {}, '¿Quién es el responsable?'),
-    h('p', {}, `${CONFIG.colegio} es el responsable del tratamiento de los datos que se recogen en ${CONFIG.appName}. Contacto: `, h('a', { href: `mailto:${CONFIG.contacto}` }, CONFIG.contacto), '.'),
+    h('p', {}, `${marca.colegio} es el responsable del tratamiento de los datos que se recogen en ${marca.nombre}. Contacto: `, h('a', { href: `mailto:${CONFIG.contacto}` }, CONFIG.contacto), '.'),
 
     h('h2', {}, '¿Para qué usamos los datos?'),
     h('p', {}, 'Únicamente para fines pedagógicos: enseñar mecanografía, guardar tu progreso, permitir que tu docente acompañe tu aprendizaje y mostrarte tus logros.'),

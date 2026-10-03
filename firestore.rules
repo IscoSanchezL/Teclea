@@ -35,9 +35,9 @@ service cloud.firestore {
         && request.auth.token.get('email_verified', false) == true;
     }
 
-    // ⚠️ CAMBIA ESTE CORREO por el del primer administrador.
+    // ÚNICO administrador: esta cuenta de Google (con correo verificado). Nadie más puede serlo.
     function bootstrapAdmin() {
-      return emailOk() && request.auth.token.email.lower() == 'admin@tu-colegio.edu.co';
+      return emailOk() && request.auth.token.email.lower() == 'franksanlo@gmail.com';
     }
 
     function userPath(uid) { return /databases/$(db)/documents/users/$(uid); }
@@ -46,8 +46,17 @@ service cloud.firestore {
         ? get(userPath(request.auth.uid)).data.rol
         : null;
     }
-    function isAdmin()   { return bootstrapAdmin() || miRol() == 'admin'; }
+    function isAdmin()   { return bootstrapAdmin(); }
     function isTeacher() { return isAdmin() || miRol() == 'docente'; }
+
+    function cfgApp() { return get(/databases/$(db)/documents/config/app).data; }
+    function cfgExiste() { return exists(/databases/$(db)/documents/config/app); }
+    function fotosPermitidas() { return !cfgExiste() || cfgApp().get('permitirFotos', true) == true; }
+    // Si el admin define dominiosAlumnos (p. ej. ['micolegio.edu.co']), solo esos correos de Google pueden registrarse como estudiantes.
+    function dominioAlumnoOk() {
+      return !cfgExiste() || cfgApp().get('dominiosAlumnos', []).size() == 0
+        || (emailOk() && request.auth.token.email.lower().split('@')[1] in cfgApp().dominiosAlumnos);
+    }
 
     function whitelisted() {
       return emailOk()
@@ -101,14 +110,15 @@ service cloud.firestore {
       function validNewSelf(d) {
         return d.keys().hasOnly(['uid','nombre','apodo','email','rol','grado','avatar','xp','nivel','monedas',
                                  'racha','rachaMax','ultimoDia','protectores','prefs','authTipo','activo',
-                                 'consentimiento','creadoEn','ultimaConexion','creadoPor'])
+                                 'consentimiento','creadoEn','ultimaConexion','creadoPor','foto'])
           && d.keys().hasAll(['uid','nombre','apodo','rol','xp','monedas','racha','creadoEn'])
           && d.uid == request.auth.uid
           && baseUserOk(d)
           && d.creadoEn == request.time
           && d.creadoPor == null
-          && (d.rol == 'estudiante'
+          && ((d.rol == 'estudiante' && (d.authTipo != 'google' || dominioAlumnoOk()))
               || (d.rol == 'docente' && whitelisted())
+              || (d.rol == 'pendiente' && emailOk())      // docente que se registró con Google: espera aprobación del admin
               || (d.rol == 'admin' && bootstrapAdmin()));
       }
       function validNewByTeacher(d) {
@@ -122,9 +132,10 @@ service cloud.firestore {
       function validSelfUpdate() {
         let n = request.resource.data;
         let o = resource.data;
-        return onlyTouch(['apodo','grado','avatar','xp','nivel','monedas','racha','rachaMax','ultimoDia',
+        return onlyTouch(['apodo','grado','avatar','foto','xp','nivel','monedas','racha','rachaMax','ultimoDia',
                           'protectores','prefs','ultimaConexion','solicitudEliminacion'])
           && isStr(n.apodo, 1, 30)
+          && (!('foto' in n) || n.foto == null || (fotosPermitidas() && (n.foto is string) && n.foto.size() < 90000 && n.foto.matches('^data:image/(jpeg|webp|png);base64,.*')))
           && (o.grado == null ? (n.grado == null || isInt(n.grado, 2, 6)) : n.grado == o.grado)
           && n.avatar is map && n.prefs is map && n.prefs.size() <= 30
           && isInt(n.xp, 0, 1000000)    && n.xp >= o.xp          && n.xp - o.xp <= 600
@@ -146,6 +157,8 @@ service cloud.firestore {
     match /shop_items/{id}   { allow read: if signedIn(); allow write: if isAdmin(); }
     match /daily_challenges/{id} { allow read: if signedIn(); allow write: if isAdmin(); }
     match /config/{doc}      { allow read: if signedIn(); allow write: if isAdmin(); }
+    // Marca (nombre, logo, imagen de portada): pública para que el login ya la muestre.
+    match /config/branding   { allow get: if true; allow write: if isAdmin(); }
 
     // Lista blanca de docentes: el admin la gestiona; cada persona puede leer SOLO su propio correo.
     match /teacher_whitelist/{email} {
@@ -391,6 +404,15 @@ service cloud.firestore {
                        && request.resource.data.docenteId == request.auth.uid
                        && isStr(request.resource.data.texto, 5, 5000);
       allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+    }
+
+    // Estadísticas por tecla del estudiante (alimenta el refuerzo adaptativo)
+    match /key_stats/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['teclas','actualizadoEn'])
+        && request.resource.data.teclas is map && request.resource.data.teclas.size() <= 90;
+      allow delete: if isAdmin();
     }
 
     // ═════════════════════════ Auditoría (solo se agrega; solo admin lee) ═════════════════════════

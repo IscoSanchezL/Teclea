@@ -2,6 +2,7 @@
  * Resumen del docente/administración (vista sobria).
  * Hoy muestra datos de EJEMPLO; en la Fase 5 se alimenta de Firestore (enrollments.stats y sessions).
  */
+import { marca } from '../../core/marca.js';
 import { state } from '../../core/state.js';
 import { CONFIG } from '../../core/config.js';
 import { h } from '../../core/utils.js';
@@ -58,5 +59,5 @@ export async function render() {
         h('ul', { class: 'actividad' }, ACTIVIDAD_DEMO.map((a) => h('li', { class: `actividad__item ${a.cuando === 'alerta' ? 'actividad__item--alerta' : ''}` },
           h('span', { class: 'actividad__ic' }, icono(a.icono, { tam: 16 })),
           h('span', {}, h('strong', {}, a.quien), ' ', a.que), h('time', { class: 'suave' }, a.cuando)))))),
-    h('p', { class: 'suave pequeno' }, `${CONFIG.appName} · panel docente · los datos mostrados son ilustrativos.`));
+    h('p', { class: 'suave pequeno' }, `${marca.nombre} · panel docente · los datos mostrados son ilustrativos.`));
 }

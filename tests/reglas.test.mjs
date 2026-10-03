@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs';
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
 import { doc, getDoc, setDoc, updateDoc, addDoc, collection, getDocs, query, where, serverTimestamp, Timestamp, writeBatch } from 'firebase/firestore';
 
-const ADMIN_EMAIL = 'admin@tu-colegio.edu.co';
+const ADMIN_EMAIL = 'franksanlo@gmail.com';
 const env = await initializeTestEnvironment({
   projectId: 'demo-teclea',
   firestore: { rules: readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8'), host: '127.0.0.1', port: 8080 },
@@ -50,7 +50,7 @@ await env.withSecurityRulesDisabled(async (ctx) => {
 const est1 = env.authenticatedContext('est1').firestore();
 const prof1 = env.authenticatedContext('prof1').firestore();
 const prof2 = env.authenticatedContext('prof2').firestore();
-const adm1 = env.authenticatedContext('adm1').firestore();
+const adm1 = env.authenticatedContext('adm1', { email: ADMIN_EMAIL, email_verified: true }).firestore();
 const anon = env.unauthenticatedContext().firestore();
 
 console.log('\nPerfiles y roles');
@@ -115,6 +115,32 @@ await prueba('estudiante NO inscrito no lee la tarea', () => assertFails(getDoc(
 const rico = env.authenticatedContext('rico').firestore();
 await prueba('compra correcta (lote: -30 monedas + inventario)', async () => { const b = writeBatch(rico); b.update(doc(rico, 'users/rico'), { monedas: 70 }); b.set(doc(rico, 'inventory/rico_gorra'), { uid: 'rico', itemId: 'gorra', compradoEn: serverTimestamp(), equipado: false }); await assertSucceeds(b.commit()); });
 await prueba('NO compra regalada (inventario sin descontar monedas)', () => assertFails(setDoc(doc(est1, 'inventory/est1_gorra'), { uid: 'est1', itemId: 'gorra', compradoEn: serverTimestamp(), equipado: false })));
+
+console.log('\nAdministrador único, aprobación de docentes, marca y fotos');
+const goog = (uid, email, v = true) => env.authenticatedContext(uid, { email, email_verified: v }).firestore();
+await prueba('docente por Google (sin lista blanca) queda PENDIENTE', () => assertSucceeds(setDoc(doc(goog('p1', 'nuevo.profe@colegio.edu.co'), 'users/p1'), perfil('p1', { rol: 'pendiente', email: 'nuevo.profe@colegio.edu.co', authTipo: 'google' }))));
+await prueba('pendiente NO puede autopromoverse a docente', () => assertFails(updateDoc(doc(goog('p1', 'nuevo.profe@colegio.edu.co'), 'users/p1'), { rol: 'docente' })));
+await prueba('pendiente NO ve clases ni crea clases', () => assertFails(setDoc(doc(goog('p1', 'nuevo.profe@colegio.edu.co'), 'classes/cp'), { docenteId: 'p1', nombre: 'X', grado: 4, grupo: 'A', color: '#6C4CF5', codigo: 'QQQ222', config: {}, activa: true })));
+await prueba('el admin (franksanlo) aprueba al docente', () => assertSucceeds(updateDoc(doc(adm1, 'users/p1'), { rol: 'docente' })));
+await prueba('un docente NO puede aprobar a otro', () => assertFails(updateDoc(doc(prof1, 'users/p1'), { rol: 'docente' })));
+await prueba('un usuario con rol admin en su perfil pero otro correo NO es admin', () => assertFails(updateDoc(doc(goog('falso', 'otro@gmail.com'), 'users/est1'), { rol: 'admin' })));
+await prueba('NO se puede crear perfil admin con otro correo verificado', () => assertFails(setDoc(doc(goog('y1', 'otro@gmail.com'), 'users/y1'), perfil('y1', { rol: 'admin', email: 'otro@gmail.com', authTipo: 'google' }))));
+await prueba('admin agrega correo a la lista blanca', () => assertSucceeds(setDoc(doc(adm1, 'teacher_whitelist/nuevo@colegio.edu.co'), { correo: 'nuevo@colegio.edu.co' })));
+await prueba('docente NO escribe la lista blanca', () => assertFails(setDoc(doc(prof1, 'teacher_whitelist/otro@x.co'), { correo: 'otro@x.co' })));
+await prueba('cualquiera (sin sesión) lee la marca pública', () => assertSucceeds(getDoc(doc(anon, 'config/branding'))));
+await prueba('NO se lee otra configuración sin sesión', () => assertFails(getDoc(doc(anon, 'config/app'))));
+await prueba('solo el admin edita la marca', () => assertSucceeds(setDoc(doc(adm1, 'config/branding'), { nombre: 'MiTeclea', logo: 'data:image/png;base64,AAAA' })));
+await prueba('un docente NO edita la marca', () => assertFails(setDoc(doc(prof1, 'config/branding'), { nombre: 'Hack' })));
+const foto = 'data:image/jpeg;base64,' + 'A'.repeat(1000);
+await prueba('estudiante sube foto de perfil válida', () => assertSucceeds(updateDoc(doc(est1, 'users/est1'), { foto })));
+await prueba('NO foto que no sea imagen', () => assertFails(updateDoc(doc(est1, 'users/est1'), { foto: 'http://malo.com/x.jpg' })));
+await prueba('NO foto gigante (> 90 KB)', () => assertFails(updateDoc(doc(est1, 'users/est1'), { foto: 'data:image/jpeg;base64,' + 'A'.repeat(100000) })));
+await env.withSecurityRulesDisabled(async (ctx) => { await setDoc(doc(ctx.firestore(), 'config/app'), { permitirFotos: false, dominiosAlumnos: ['micolegio.edu.co'] }); });
+await prueba('si el admin desactiva fotos, se rechazan', () => assertFails(updateDoc(doc(est1, 'users/est1'), { foto })));
+await prueba('con dominio configurado: Gmail ajeno NO se registra como estudiante', () => assertFails(setDoc(doc(goog('d1', 'ajeno@gmail.com'), 'users/d1'), perfil('d1', { email: 'ajeno@gmail.com', authTipo: 'google' }))));
+await prueba('con dominio configurado: correo del colegio SÍ', () => assertSucceeds(setDoc(doc(goog('d2', 'nino@micolegio.edu.co'), 'users/d2'), perfil('d2', { email: 'nino@micolegio.edu.co', authTipo: 'google' }))));
+await prueba('estadísticas de teclas propias', () => assertSucceeds(setDoc(doc(est1, 'key_stats/est1'), { teclas: { a: { ok: 10, err: 1 } }, actualizadoEn: serverTimestamp() })));
+await prueba('NO estadísticas de otro', () => assertFails(setDoc(doc(est1, 'key_stats/est2'), { teclas: {}, actualizadoEn: serverTimestamp() })));
 
 console.log(`\n${ok} correctas, ${mal} con fallo`);
 await env.cleanup();

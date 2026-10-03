@@ -24,7 +24,7 @@ Tiempo estimado: 20–30 minutos. Todo funciona en el plan **gratuito (Spark)**.
 
 ## 4. Reglas e índices
 Opción A — consola (más fácil):
-1. Edita `firestore.rules` y cambia `admin@tu-colegio.edu.co` por **tu correo de Google** (función `bootstrapAdmin`). Haz lo mismo en `js/core/config.js` → `adminEmail`.
+1. Edita `firestore.rules` y cambia `franksanlo@gmail.com` por **tu correo de Google** (función `bootstrapAdmin`). Haz lo mismo en `js/core/config.js` → `adminEmail`.
 2. Firestore → pestaña **Reglas** → pega todo el contenido de `firestore.rules` → **Publicar**.
 3. Los **índices** se pueden crear al vuelo: cuando una consulta lo necesite, la consola del navegador muestra un enlace; púlsalo y confirma. O bien usa la opción B.
 

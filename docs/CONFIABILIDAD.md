@@ -76,7 +76,7 @@ Cuentas de la cuota gratuita (plan **Spark**, límites diarios de Firestore: 50 
 ## 5. Pasos de seguridad (haz esto antes de usar con estudiantes)
 
 ### 5.1 Reglas
-1. Cambia `admin@tu-colegio.edu.co` en `firestore.rules` (función `bootstrapAdmin`) y en `js/core/config.js`.
+1. Cambia `franksanlo@gmail.com` en `firestore.rules` (función `bootstrapAdmin`) y en `js/core/config.js`.
 2. Publica: consola Firebase → Firestore → Reglas → pegar → **Publicar** (o `firebase deploy --only firestore:rules,firestore:indexes`).
 3. *(Opcional)* Ejecuta las pruebas: `cd tests && npm install && npm test` (requiere Java 11+ y descarga el emulador). Deben pasar **53/53**.
 

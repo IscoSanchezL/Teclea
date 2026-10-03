@@ -4,6 +4,7 @@
  * - Transiciones suaves con View Transitions API (con respaldo sin ella).
  * - Gestión de foco y anuncio para lectores de pantalla.
  */
+import { marca } from './marca.js';
 import { state, setState } from './state.js';
 import { buscarRuta } from './routes.js';
 import { movimientoReducido, anunciar, h } from './utils.js';
@@ -41,6 +42,10 @@ function aplicarGuardas(ruta, query) {
   }
   if (Array.isArray(ruta.acceso) && !ruta.acceso.includes(u?.rol)) {
     return { redirigir: '/', aviso: 'Esa zona es solo para docentes o administración.' };
+  }
+  // Docente que aún no fue aprobado (o fue rechazado): solo ve la pantalla de estado.
+  if (u && (u.rol === 'pendiente' || u.rol === 'rechazado') && !['/pendiente', '/privacidad'].includes(ruta.path)) {
+    return { redirigir: '/pendiente' };
   }
   // Estudiante sin grado → primero la bienvenida.
   if (u && u.rol === 'estudiante' && !u.grado && ruta.path !== '/bienvenida' && ruta.acceso === 'sesion') {
@@ -84,7 +89,7 @@ async function resolver() {
     contenedor.replaceChildren(nodo);
     contenedor.removeAttribute('aria-busy');
     setState({ ruta: path });
-    document.title = `${ruta.titulo} · ${CONFIG.appName}`;
+    document.title = `${ruta.titulo} · ${marca.nombre}`;
     window.scrollTo({ top: 0 });
     alMontar(ruta);
     mod?.despues?.(nodo);

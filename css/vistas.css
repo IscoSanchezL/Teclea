@@ -333,3 +333,18 @@
 .inicio--ludico .tile--ppm { background: #CFF7EA; color: #06261D; } .inicio--ludico .tile--pre { background: #FFD9E3; color: #3A0A18; } .inicio--ludico .tile--min { background: #DCD3FF; color: #1D1250; }
 .inicio--ludico .tile .suave, .inicio--ludico .tile__tit, .inicio--ludico .anillo__centro small, .inicio--ludico .tile__num small { color: inherit; opacity: .8; }
 .inicio--ludico .semana__dia { color: inherit; }
+
+/* ───────── Estado de cuenta (docente pendiente) ───────── */
+.estado-cuenta { max-width: 560px; margin: 4vh auto 0; display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; padding: var(--e6); }
+.estado-cuenta h1 { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2rem); }
+.estado-cuenta p { margin: 0; color: var(--texto-suave); }
+.estado-cuenta__ic { display: grid; place-items: center; width: 4rem; height: 4rem; border-radius: 18px; background: color-mix(in srgb, var(--primario) 14%, transparent); color: var(--primario); }
+.estado-cuenta__ic--no { background: var(--mal-fondo); color: var(--mal-texto); }
+
+/* ───────── Editor de avatar ───────── */
+.avatar-editor { display: flex; flex-wrap: wrap; gap: var(--e4); align-items: flex-start; }
+.avatar-editor > .pila { flex: 1 1 14rem; }
+.fondos { display: flex; flex-wrap: wrap; gap: .5rem; }
+.fondos__op { padding: 3px; border: 2px solid transparent; border-radius: 40%; background: none; }
+.fondos__op[aria-pressed="true"] { border-color: var(--primario); }
+.perfil__avatar { background: none !important; box-shadow: none !important; width: auto; height: auto; }

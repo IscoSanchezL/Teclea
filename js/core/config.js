@@ -14,9 +14,9 @@ export const CONFIG = {
   contacto: 'soporte@tu-colegio.edu.co',
 
   // ── Roles y acceso ──
-  // Correo del PRIMER administrador. Debe coincidir con el que
-  // pongas en firestore.rules (función bootstrapAdmin).
-  adminEmail: 'admin@tu-colegio.edu.co',
+  // Único administrador. Debe coincidir con el correo de firestore.rules (función bootstrapAdmin).
+  // Solo esta cuenta de Google (verificada) puede ser administrador.
+  adminEmail: 'franksanlo@gmail.com',
   // Dominio de Google Workspace del colegio (ej. 'micolegio.edu.co').
   // Si lo llenas, Google sugerirá esa cuenta institucional. Déjalo '' si no aplica.
   dominioInstitucional: '',

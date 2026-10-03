@@ -20,6 +20,7 @@ export const RUTAS = [
     load: () => (!state.user ? import('../ui/views/portada.js') : esStaff(state.user) ? import('../ui/views/panel.js') : import('../ui/views/inicio.js')),
     nav: { icono: 'home', etiqueta: 'Inicio', orden: 1, movil: true, staff: { icono: 'chart', etiqueta: 'Resumen', grupo: 'General' } },
   },
+  { path: '/pendiente', acceso: 'sesion', titulo: 'Solicitud en revisión', load: () => import('../ui/views/pendiente.js') },
   { path: '/entrar', acceso: 'publica', titulo: 'Entrar', load: () => import('../ui/views/entrar.js') },
   { path: '/bienvenida', acceso: 'sesion', titulo: 'Bienvenida', load: () => import('../ui/views/bienvenida.js') },
   {
@@ -66,6 +67,7 @@ export const buscarRuta = (path) => RUTAS.find((r) => r.path === path) || RUTA_4
 /** Devuelve cómo se muestra la ruta en el menú para el usuario actual, o null si no debe verse. */
 export function itemNav(ruta, u = state.user) {
   if (!ruta.nav || !u) return null;
+  if (u.rol === 'pendiente' || u.rol === 'rechazado') return null;
   const staff = esStaff(u);
   if (Array.isArray(ruta.acceso) && !ruta.acceso.includes(u.rol)) return null;
   if (staff && ruta.solo === 'estudiante') return null;
