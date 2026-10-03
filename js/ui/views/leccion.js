@@ -100,13 +100,13 @@ export async function render({ query }) {
         if (e.ctrlKey || e.metaKey || e.altKey && e.key !== 'AltGraph') return;
         kb.presionar(e.code, true); setTimeout(() => kb.presionar(e.code, false), 160);
         // Basta con pulsar CUALQUIERA de las teclas de la demostración (el brillo cambia cada segundo y el niño puede tardar)
-        if (boton.disabled) { if (permitidas.has(e.code) || kb.codigosIluminados().includes(e.code) || chars.includes(String(e.key).toLowerCase())) habilitar(); }
+        if (boton.disabled) { if (e.key.length === 1 || /^(Key|Digit)/.test(e.code) || permitidas.has(e.code)) habilitar(); }
         else if (e.key === 'Enter') { e.preventDefault(); boton.click(); }
       };
-      document.addEventListener('keydown', alTecla);
-      quitarEscucha = () => { document.removeEventListener('keydown', alTecla); clearTimeout(saltar); };
+      document.addEventListener('keydown', alTecla, true);
+      quitarEscucha = () => { document.removeEventListener('keydown', alTecla, true); clearTimeout(saltar); };
       // Por si el teclado no responde: a los 12 s se ofrece continuar igual
-      saltar = setTimeout(() => { if (boton.disabled) { boton.disabled = false; boton.classList.remove('btn--esperando'); pista.textContent = '¿No funciona el teclado? Igual puedes empezar.'; } }, 12000);
+      saltar = setTimeout(() => { if (boton.disabled) { boton.disabled = false; boton.classList.remove('btn--esperando'); pista.textContent = '¿No funciona el teclado? Igual puedes empezar.'; } }, 6000);
     }
   }
 
