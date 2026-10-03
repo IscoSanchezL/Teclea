@@ -26,7 +26,7 @@ const ERRORES = {
   'auth/user-not-found': 'Usuario, PIN o código de clase incorrectos. Pídele ayuda a tu profe.',
   'auth/wrong-password': 'Usuario, PIN o código de clase incorrectos. Pídele ayuda a tu profe.',
   'auth/unauthorized-domain': 'Este sitio aún no está autorizado en Firebase (Authentication → Configuración → Dominios autorizados).',
-  'permission-denied': 'No tienes permiso para esa acción. Avísale a tu docente.',
+  'permission-denied': 'No tienes permiso para esa acción. Avísale a tu docente o al administrador: faltan publicar las reglas nuevas.',
 };
 export const mensajeError = (e) => ERRORES[e?.code] || 'Algo salió mal. Inténtalo de nuevo en un momento.';
 

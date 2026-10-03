@@ -117,7 +117,8 @@ export function nombreCorto(nombre) {
 }
 
 /* ═════════════ Alumnos de 2.º: ingreso por lista (código de acceso + tocar el nombre) ═════════════ */
-export const listaPorClave = (clave) => store.leer(`class_access/${String(clave).trim().toUpperCase()}`).catch(() => null);
+/** Lista pública del grupo (null si no existe). Los errores (p. ej. reglas sin publicar) se propagan. */
+export const listaPorClave = (clave) => store.leer(`class_access/${String(clave).trim().toUpperCase()}`);
 
 /** Reconstruye la lista pública del grupo desde las inscripciones con usuario (solo apodo corto y animal). */
 export async function publicarLista(docente, clase) {
@@ -135,7 +136,7 @@ export async function publicarLista(docente, clase) {
 export async function crearEstudiantes(docente, clase, nombres, { alProgreso = () => {}, clave: claveElegida } = {}) {
   const clave = String(clase.claveAlumnos || claveElegida || claveSugerida(clase)).trim().toUpperCase();
   if (!claveValida(clave)) throw new Error('El código de acceso debe tener de 6 a 12 letras o números, sin espacios ni tildes.');
-  const ocupada = await store.leer(`class_access/${clave}`).catch(() => null);
+  const ocupada = await store.leer(`class_access/${clave}`).catch((e) => { if (e?.code === 'permission-denied') throw new Error('Faltan publicar las reglas de seguridad nuevas en Firebase (Firestore → Reglas). Pídele al administrador que las actualice.'); return null; });
   if (ocupada && ocupada.classId !== clase.id) throw new Error('Ese código de acceso ya lo usa otra clase. Elige otro (por ejemplo, agrega el nombre del colegio).');
   if (!clase.claveAlumnos) { await actualizarClase(clase, { claveAlumnos: clave }); clase.claveAlumnos = clave; }
   const fb = state.modo === 'firebase' ? await obtenerFirebase() : null;
