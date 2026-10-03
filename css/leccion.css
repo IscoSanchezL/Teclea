@@ -162,8 +162,8 @@
 .reglas { display: flex; flex-direction: column; gap: .8rem; } .reglas li { display: flex; gap: .8rem; align-items: flex-start; } .reglas p { margin: 0; color: var(--texto-suave); } .reglas__ic { display: grid; place-items: center; flex: none; width: 2.8rem; height: 2.8rem; border-radius: 14px; background: color-mix(in srgb, var(--primario) 14%, transparent); color: var(--primario); }
 
 /* Estilos por grado */
-[data-estilo="ludico"] .t--act { box-shadow: 0 4px 0 var(--contorno); }
-[data-estilo="ludico"] .kv__k { border: 2px solid var(--contorno); }
+[data-estilo="ludico"] .t--act { box-shadow: 0 4px 10px -3px var(--sombra-color); }
+[data-estilo="ludico"] .kv__k { border: 1.5px solid var(--borde-suave); }
 [data-estilo="staff"] .t--act { box-shadow: 0 2px 0 var(--primario); }
 
 .tutorial { display: flex; align-items: center; gap: var(--e4); flex-wrap: wrap; border: 2px dashed var(--primario); }

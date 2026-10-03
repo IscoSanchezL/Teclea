@@ -328,7 +328,7 @@
 .inicio--pro .tile { padding: .85rem 1rem; }
 .inicio--pro .tile__num, .inicio--pro .tile__medio { font-family: var(--fuente-mono); }
 /* Lúdico: estadísticas como pegatinas */
-.inicio--ludico .tile { border: 3px solid var(--contorno); box-shadow: 0 5px 0 var(--contorno); }
+.inicio--ludico .tile { border: 1.5px solid var(--borde-suave); box-shadow: var(--realce), 0 8px 18px -8px var(--sombra-color); }
 .inicio--ludico .tile--racha { background: #FFE9A8; color: #3A2A00; } .inicio--ludico .tile--racha .suave, .inicio--ludico .tile--racha .tile__tit { color: #5A4300; }
 .inicio--ludico .tile--ppm { background: #CFF7EA; color: #06261D; } .inicio--ludico .tile--pre { background: #FFD9E3; color: #3A0A18; } .inicio--ludico .tile--min { background: #DCD3FF; color: #1D1250; }
 .inicio--ludico .tile .suave, .inicio--ludico .tile__tit, .inicio--ludico .anillo__centro small, .inicio--ludico .tile__num small { color: inherit; opacity: .8; }

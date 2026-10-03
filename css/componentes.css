@@ -273,7 +273,7 @@
 .avatar[data-marco="oro"] { outline: 3px solid #FFD04A; outline-offset: 2px; }
 .avatar[data-marco="arcoiris"] { outline: 3px solid transparent; outline-offset: 2px; background-clip: padding-box; box-shadow: 0 0 0 3px #fff, 0 0 0 6px #6C4CF5; }
 [data-estilo="staff"] .avatar { border-radius: 10px; box-shadow: none; }
-[data-estilo="ludico"] .avatar { border: 3px solid var(--contorno); }
+[data-estilo="ludico"] .avatar { border: 2px solid rgba(255, 255, 255, .6); box-shadow: 0 4px 10px -3px var(--sombra-color); }
 
 /* ───────── Medallas ───────── */
 .medalla { display: inline-block; line-height: 0; filter: drop-shadow(0 6px 8px rgba(30, 20, 90, .25)); transition: transform var(--t-media) var(--resorte); }
@@ -294,7 +294,7 @@
 
 /* Ingreso por nombre (2.º): botones grandes con animalito */
 .nombres-rejilla { display: grid; gap: .7rem; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); }
-.nombre-btn { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .8rem .5rem; border: 3px solid var(--borde); border-radius: var(--r-lg, 1.2rem); background: var(--superficie); color: var(--texto); cursor: pointer; font: 700 1.05rem var(--fuente-titulo); transition: transform .15s var(--resorte), border-color .15s; }
+.nombre-btn { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .8rem .5rem; border: 2px solid var(--borde-suave, var(--borde)); border-radius: var(--r-lg, 1.2rem); background: var(--superficie); color: var(--texto); cursor: pointer; font: 700 1.05rem var(--fuente-titulo); transition: transform .15s var(--resorte), border-color .15s; }
 .nombre-btn:hover:not(:disabled), .nombre-btn:focus-visible { transform: translateY(-3px); border-color: var(--primario); }
 .nombre-btn:disabled { opacity: .6; cursor: default; }
 .nombre-btn__emoji { font-size: 2.6rem; line-height: 1; }
