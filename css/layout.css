@@ -32,7 +32,7 @@
 
 /* ───────── Logo ───────── */
 .logo { display: inline-flex; align-items: center; gap: .6rem; }
-.logo__marca svg { filter: drop-shadow(0 3px 4px rgba(69, 39, 184, .35)); }
+.logo__marca svg, .logo__marca img { filter: drop-shadow(0 3px 4px rgba(69, 39, 184, .35)); }
 .logo__texto { font: 700 1.55rem var(--fuente-titulo); letter-spacing: .03em; color: var(--texto); }
 
 /* ───────── Navegación ───────── */

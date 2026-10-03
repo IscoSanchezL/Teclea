@@ -84,7 +84,7 @@
 .sidebar__quien strong { font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sidebar__quien small { color: var(--texto-suave); font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 [data-estilo="staff"] .logo__texto { font-size: 1.1rem; font-weight: 700; letter-spacing: 0; }
-[data-estilo="staff"] .logo__marca svg { width: 30px; height: 30px; filter: none; }
+[data-estilo="staff"] .logo__marca svg, [data-estilo="staff"] .logo__marca img { width: 30px; height: 30px; filter: none; }
 .sidebar__usuario, .sidebar__rotulo { display: none; }
 [data-estilo="staff"] .sidebar__usuario { display: flex; }
 [data-estilo="staff"] .sidebar__rotulo { display: block; }

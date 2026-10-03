@@ -1,8 +1,15 @@
 {
-  "version": "371620a23afb",
+  "version": "75c4445a6528",
   "archivos": [
     "assets/assets.json",
+    "assets/img/apple-touch-icon.png",
+    "assets/img/favicon-32.png",
     "assets/img/favicon.svg",
+    "assets/img/icono-192.png",
+    "assets/img/icono-512.png",
+    "assets/img/icono-maskable-512.png",
+    "assets/img/icono-maskable.svg",
+    "assets/img/logo-tecla.svg",
     "assets/marca/portada-gi-school.jpg",
     "css/animaciones.css",
     "css/base.css",
