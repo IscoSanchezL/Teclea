@@ -1,7 +1,7 @@
 /**
  * Reproductor de lecciones:  Introducción → Guiado → Libre → Prueba (estrellas) → Resultado.
  */
-import { opcionesDeClases } from '../../db/clases.js';
+import { opcionesRapidas } from '../../db/clases.js';
 import { state } from '../../core/state.js';
 import { h } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
@@ -35,10 +35,9 @@ const MENSAJE_TIPO = {
 
 export async function render({ query }) {
   const u = state.user;
-  const leccion = await cargarLeccion(query.id || '');
+  const [leccion, indice, progreso, opciones] = await Promise.all([cargarLeccion(query.id || ''), cargarIndice(), cargarProgreso(u.uid), opcionesRapidas(state.user)]);
   if (!leccion) { toast('No encontré esa lección.', { tipo: 'error' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
-  const [indice, progreso] = await Promise.all([cargarIndice(), cargarProgreso(u.uid)]);
-  const estados = estadoLecciones(indice, progreso, await opcionesDeClases(state.user));
+  const estados = estadoLecciones(indice, progreso, opciones);
   if (estados[leccion.id] === 'bloqueada') { toast('Completa la lección anterior para abrir esta. 🔒', { tipo: 'info' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
 
   const grado = u.grado || 4;

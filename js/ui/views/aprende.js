@@ -1,7 +1,7 @@
 /**
  * Curso completo: mundos y lecciones con estrellas, bloqueos, continuar y refuerzo inteligente.
  */
-import { opcionesDeClases } from '../../db/clases.js';
+import { opcionesRapidas } from '../../db/clases.js';
 import { state } from '../../core/state.js';
 import { h } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
@@ -18,8 +18,8 @@ const ETIQUETA_TIPO = { nueva: 'Teclas nuevas', repaso: 'Repaso', palabras: 'Pal
 
 export async function render({ query }) {
   const u = state.user;
-  const [indice, progreso, mundos, debiles] = await Promise.all([cargarIndice(), cargarProgreso(u.uid), cargarMundos(), teclasDebiles(u.uid, 5)]);
-  const estados = estadoLecciones(indice, progreso, await opcionesDeClases(state.user));
+  const [indice, progreso, mundos, debiles, opciones] = await Promise.all([cargarIndice(), cargarProgreso(u.uid), cargarMundos(), teclasDebiles(u.uid, 5), opcionesRapidas(state.user)]);
+  const estados = estadoLecciones(indice, progreso, opciones);
   const actualId = indice.find((l) => estados[l.id] === 'actual')?.id;
   let sel = Number(query.mundo) || mundoActual(indice, estados);
   const recomendados = MUNDOS_RECOMENDADOS[u.grado || 4] || [];

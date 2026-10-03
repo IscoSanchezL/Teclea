@@ -249,3 +249,11 @@ export async function opcionesDeClases(user) {
   cacheCfg = { uid: user.uid, t: Date.now(), v: { mundosAbiertos: [...abiertos], mundosBloqueados: [...cerrados] } };
   return cacheCfg.v;
 }
+
+/**
+ * Igual que opcionesDeClases pero sin hacer esperar la pantalla: si tarda más de `ms`, se sigue con las reglas normales
+ * (la consulta continúa en segundo plano y queda en caché para la próxima vez).
+ */
+export function opcionesRapidas(user, ms = 600) {
+  return Promise.race([opcionesDeClases(user), new Promise((r) => setTimeout(() => r({ mundosAbiertos: [], mundosBloqueados: [] }), ms))]);
+}
