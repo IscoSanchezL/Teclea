@@ -1,0 +1,67 @@
+/* ============================================================
+   TECLEA · Animaciones (todas se anulan con data-motion="reducido")
+   ============================================================ */
+
+@keyframes girar { to { transform: rotate(360deg); } }
+
+@keyframes malla-deriva {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to   { transform: translate3d(2%, 2%, 0) scale(1.08); }
+}
+@keyframes blob-morfa {
+  0%   { border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%; }
+  50%  { border-radius: 40% 60% 38% 62% / 60% 40% 60% 40%; }
+  100% { border-radius: 52% 48% 63% 37% / 42% 58% 42% 58%; }
+}
+@keyframes blob-flota {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to   { transform: translate3d(5%, 7%, 0) rotate(25deg); }
+}
+
+@keyframes tecla-late {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.04); }
+}
+
+@keyframes flotar {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(1.5deg); }
+}
+.mascota--flota { animation: flotar 4.5s ease-in-out infinite; }
+
+@keyframes tecla-flota {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes llama {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  50% { transform: scale(1.12) rotate(3deg); }
+}
+
+@keyframes barra-llena { from { width: 0; } }
+
+/* Aparición escalonada (--i = posición) */
+@keyframes aparece {
+  from { opacity: 0; transform: translateY(22px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+.reveal { animation: aparece .7s var(--suave) both; animation-delay: calc(var(--i, 0) * 90ms + 80ms); }
+
+@keyframes nodo-late {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 0 rgba(0, 0, 0, .18), 0 0 0 0 color-mix(in srgb, var(--g1) 55%, transparent); }
+  50% { transform: scale(1.07); box-shadow: 0 8px 0 rgba(0, 0, 0, .18), 0 0 0 18px color-mix(in srgb, var(--g1) 0%, transparent); }
+}
+
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* ───────── Transición entre páginas (View Transitions API) ───────── */
+@keyframes vt-sale { to { opacity: 0; transform: translateY(-14px) scale(.99); } }
+@keyframes vt-entra { from { opacity: 0; transform: translateY(18px) scale(.99); } }
+::view-transition-old(vista) { animation: vt-sale .22s var(--suave) both; }
+::view-transition-new(vista) { animation: vt-entra .38s var(--suave) both; }
+::view-transition-group(root) { animation-duration: 0s; }

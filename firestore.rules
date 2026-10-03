@@ -1,0 +1,408 @@
+rules_version = '2';
+
+/**
+ * ============================================================
+ *  TECLEA · Reglas de seguridad de Firestore
+ * ============================================================
+ *  ANTES DE PUBLICAR: cambia el correo del administrador inicial en
+ *  la función bootstrapAdmin() (debe coincidir con CONFIG.adminEmail).
+ *
+ *  Principios:
+ *   - El estudiante solo lee/escribe lo suyo.
+ *   - El docente solo ve lo de SUS clases (por docenteId).
+ *   - El admin ve todo.
+ *   - Se validan tipos y rangos: nadie puede guardar 9999 PPM, y el PPM
+ *     debe ser coherente con los caracteres y el tiempo de la sesión.
+ *
+ *  LÍMITE HONESTO: sin Cloud Functions (plan Spark) un cliente
+ *  modificado todavía puede "inflar" XP/monedas dentro de los topes por
+ *  escritura. Las reglas lo hacen costoso y detectable (sessions es
+ *  inmutable y auditable), pero la protección total requiere una
+ *  Cloud Function que otorgue XP al crear cada sesión (ver docs).
+ * ============================================================
+ */
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // ───────────────────────── Identidad y roles ─────────────────────────
+
+    function signedIn() { return request.auth != null; }
+
+    // Correo verificado de Google (las cuentas PIN usan un correo falso NO verificado).
+    function emailOk() {
+      return signedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email_verified == true;
+    }
+
+    // ⚠️ CAMBIA ESTE CORREO por el del primer administrador.
+    function bootstrapAdmin() {
+      return emailOk() && request.auth.token.email.lower() == 'admin@tu-colegio.edu.co';
+    }
+
+    function userPath(uid) { return /databases/$(db)/documents/users/$(uid); }
+    function miRol() {
+      return signedIn() && exists(userPath(request.auth.uid))
+        ? get(userPath(request.auth.uid)).data.rol
+        : null;
+    }
+    function isAdmin()   { return bootstrapAdmin() || miRol() == 'admin'; }
+    function isTeacher() { return isAdmin() || miRol() == 'docente'; }
+
+    function whitelisted() {
+      return emailOk()
+        && exists(/databases/$(db)/documents/teacher_whitelist/$(request.auth.token.email.lower()));
+    }
+
+    function enrolled(classId) {
+      return signedIn()
+        && exists(/databases/$(db)/documents/enrollments/$(classId + '_' + request.auth.uid));
+    }
+
+    // ───────────────────────── Validadores ─────────────────────────
+
+    function isNum(v, lo, hi) { return (v is number) && v >= lo && v <= hi; }
+    function isInt(v, lo, hi) { return (v is int) && v >= lo && v <= hi; }
+    function isStr(v, lo, hi) { return (v is string) && v.size() >= lo && v.size() <= hi; }
+    function isStrOrNull(v, hi) { return v == null || isStr(v, 0, hi); }
+    function noTouch(keys) { return !request.resource.data.diff(resource.data).affectedKeys().hasAny(keys); }
+    function onlyTouch(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
+
+    // ═════════════════════════ users ═════════════════════════
+    match /users/{uid} {
+      allow get: if signedIn() && (
+        request.auth.uid == uid || isAdmin()
+        || (isTeacher() && resource.data.creadoPor == request.auth.uid)
+      );
+      allow list: if signedIn() && (
+        isAdmin() || (isTeacher() && resource.data.creadoPor == request.auth.uid)
+      );
+
+      // Alta propia (Google) o alta por el docente (estudiantes con PIN).
+      allow create: if signedIn() && (
+        (request.auth.uid == uid && validNewSelf(request.resource.data))
+        || (isTeacher() && validNewByTeacher(request.resource.data))
+      );
+
+      allow update: if signedIn() && (
+        (request.auth.uid == uid && validSelfUpdate())
+        || isAdmin()
+        || (isTeacher() && resource.data.creadoPor == request.auth.uid && validTeacherUpdate())
+      );
+      allow delete: if isAdmin();
+
+      function baseUserOk(d) {
+        return isStr(d.nombre, 1, 80) && isStr(d.apodo, 1, 30)
+          && (d.grado == null || isInt(d.grado, 2, 6))
+          && d.xp == 0 && d.nivel == 1 && d.monedas == 0
+          && d.racha == 0 && d.rachaMax == 0 && d.protectores == 0
+          && d.avatar is map && d.prefs is map;
+      }
+      function validNewSelf(d) {
+        return d.keys().hasOnly(['uid','nombre','apodo','email','rol','grado','avatar','xp','nivel','monedas',
+                                 'racha','rachaMax','ultimoDia','protectores','prefs','authTipo','activo',
+                                 'consentimiento','creadoEn','ultimaConexion','creadoPor'])
+          && d.keys().hasAll(['uid','nombre','apodo','rol','xp','monedas','racha','creadoEn'])
+          && d.uid == request.auth.uid
+          && baseUserOk(d)
+          && d.creadoEn == request.time
+          && d.creadoPor == null
+          && (d.rol == 'estudiante'
+              || (d.rol == 'docente' && whitelisted())
+              || (d.rol == 'admin' && bootstrapAdmin()));
+      }
+      function validNewByTeacher(d) {
+        return d.keys().hasOnly(['uid','nombre','apodo','email','rol','grado','avatar','xp','nivel','monedas',
+                                 'racha','rachaMax','ultimoDia','protectores','prefs','authTipo','activo',
+                                 'consentimiento','creadoEn','ultimaConexion','creadoPor'])
+          && d.rol == 'estudiante' && d.authTipo == 'pin'
+          && d.creadoPor == request.auth.uid
+          && baseUserOk(d) && d.creadoEn == request.time;
+      }
+      function validSelfUpdate() {
+        let n = request.resource.data;
+        let o = resource.data;
+        return onlyTouch(['apodo','grado','avatar','xp','nivel','monedas','racha','rachaMax','ultimoDia',
+                          'protectores','prefs','ultimaConexion','solicitudEliminacion'])
+          && isStr(n.apodo, 1, 30)
+          && (o.grado == null ? (n.grado == null || isInt(n.grado, 2, 6)) : n.grado == o.grado)
+          && n.avatar is map && n.prefs is map && n.prefs.size() <= 30
+          && isInt(n.xp, 0, 1000000)    && n.xp >= o.xp          && n.xp - o.xp <= 600
+          && isInt(n.nivel, 1, 50)      && n.nivel >= o.nivel
+          && isInt(n.monedas, 0, 1000000) && n.monedas - o.monedas <= 300 && o.monedas - n.monedas <= 5000
+          && isInt(n.racha, 0, 3650)    && n.racha - o.racha <= 1
+          && isInt(n.rachaMax, 0, 3650) && n.rachaMax >= o.rachaMax && n.rachaMax - o.rachaMax <= 1
+          && isInt(n.protectores, 0, 3);
+      }
+      function validTeacherUpdate() {
+        return onlyTouch(['grado','apodo','activo']) && (request.resource.data.grado == null || isInt(request.resource.data.grado, 2, 6));
+      }
+    }
+
+    // ═════════════════════════ Catálogos (solo admin escribe) ═════════════════════════
+    match /lessons/{id}      { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /texts/{id}        { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /badges/{id}       { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /shop_items/{id}   { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /daily_challenges/{id} { allow read: if signedIn(); allow write: if isAdmin(); }
+    match /config/{doc}      { allow read: if signedIn(); allow write: if isAdmin(); }
+
+    // Lista blanca de docentes: el admin la gestiona; cada persona puede leer SOLO su propio correo.
+    match /teacher_whitelist/{email} {
+      allow get: if emailOk() && request.auth.token.email.lower() == email;
+      allow read, write: if isAdmin();
+    }
+
+    // ═════════════════════════ classes / class_codes ═════════════════════════
+    match /classes/{classId} {
+      allow get: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(classId));
+      allow list: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid);
+      allow create: if isTeacher() && request.resource.data.docenteId == request.auth.uid && validClass(request.resource.data);
+      allow update: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid
+                        && request.resource.data.docenteId == request.auth.uid && validClass(request.resource.data));
+      allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+
+      function validClass(d) {
+        return isStr(d.nombre, 1, 60) && isInt(d.grado, 2, 6) && isStr(d.grupo, 0, 20)
+          && isStr(d.color, 4, 9) && isStr(d.codigo, 6, 6)
+          && d.config is map && d.activa is bool;
+      }
+
+      // Aportes al "Reto de la clase" (cada estudiante escribe SOLO el suyo).
+      match /aportes/{uid} {
+        allow read: if signedIn() && (isAdmin() || get(/databases/$(db)/documents/classes/$(classId)).data.docenteId == request.auth.uid || enrolled(classId));
+        allow create, update: if request.auth.uid == uid && enrolled(classId)
+          && isInt(request.resource.data.caracteres, 0, 10000000)
+          && isInt(request.resource.data.sesiones, 0, 100000)
+          && request.resource.data.keys().hasOnly(['caracteres','sesiones','actualizadoEn']);
+        allow delete: if isAdmin();
+      }
+
+      // Ranking positivo: solo apodo + mejora (nunca nombre completo).
+      match /ranking/{uid} {
+        allow read: if signedIn() && (isAdmin() || get(/databases/$(db)/documents/classes/$(classId)).data.docenteId == request.auth.uid
+                      || (enrolled(classId) && get(/databases/$(db)/documents/classes/$(classId)).data.config.get('rankingVisible', true)));
+        allow create, update: if request.auth.uid == uid && enrolled(classId)
+          && request.resource.data.keys().hasOnly(['apodo','avatar','puntos','mejora','actualizadoEn'])
+          && isStr(request.resource.data.apodo, 1, 30)
+          && isInt(request.resource.data.puntos, 0, 100000)
+          && isNum(request.resource.data.mejora, -100, 200);
+        allow delete: if isAdmin() || request.auth.uid == uid;
+      }
+    }
+
+    // Búsqueda de clase por código: solo "get" (nadie puede listar todos los códigos).
+    match /class_codes/{codigo} {
+      allow get: if signedIn();
+      allow create: if isTeacher() && codigo.matches('^[A-HJ-NP-Z2-9]{6}$')
+        && request.resource.data.docenteId == request.auth.uid
+        && request.resource.data.keys().hasOnly(['classId','docenteId'])
+        && getAfter(/databases/$(db)/documents/classes/$(request.resource.data.classId)).data.docenteId == request.auth.uid;
+      allow update, delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+    }
+
+    // ═════════════════════════ enrollments (id = classId_uid) ═════════════════════════
+    match /enrollments/{id} {
+      allow get, list: if signedIn() && (
+        resource.data.uid == request.auth.uid || resource.data.docenteId == request.auth.uid || isAdmin()
+      );
+
+      allow create: if signedIn() && (studentJoins() || teacherEnrolls());
+      allow update: if signedIn() && (
+        (resource.data.uid == request.auth.uid && studentUpdates())
+        || (resource.data.docenteId == request.auth.uid && onlyTouch(['metaOverride','estado','notaDocente']))
+        || isAdmin()
+      );
+      allow delete: if signedIn() && (resource.data.uid == request.auth.uid || resource.data.docenteId == request.auth.uid || isAdmin());
+
+      function enrollShapeOk(d) {
+        return d.keys().hasOnly(['uid','classId','docenteId','codigo','alias','avatar','grado','estado','stats',
+                                 'metaOverride','notaDocente','unidoEn','ultimaConexion'])
+          && id == d.classId + '_' + d.uid
+          && isStr(d.alias, 1, 30)
+          && d.stats is map && d.stats.get('xp', 0) == 0;
+      }
+      function studentJoins() {
+        let d = request.resource.data;
+        let cc = get(/databases/$(db)/documents/class_codes/$(d.codigo)).data;
+        return enrollShapeOk(d) && d.uid == request.auth.uid
+          && cc.classId == d.classId && cc.docenteId == d.docenteId
+          && d.unidoEn == request.time;
+      }
+      function teacherEnrolls() {
+        let d = request.resource.data;
+        return isTeacher() && enrollShapeOk(d) && d.docenteId == request.auth.uid
+          && get(/databases/$(db)/documents/classes/$(d.classId)).data.docenteId == request.auth.uid;
+      }
+      function studentUpdates() {
+        let s = request.resource.data.stats;
+        return onlyTouch(['stats','ultimaConexion','alias','avatar'])
+          && isStr(request.resource.data.alias, 1, 30)
+          && isNum(s.get('xp', 0), 0, 1000000)
+          && isNum(s.get('mejorWpm', 0), 0, 200)
+          && isNum(s.get('precisionProm', 0), 0, 100)
+          && isNum(s.get('minutos', 0), 0, 1000000)
+          && isInt(s.get('sesiones', 0), 0, 1000000)
+          && isInt(s.get('medallas', 0), 0, 500);
+      }
+    }
+
+    // ═════════════════════════ lessons_progress (id = uid_lessonId) ═════════════════════════
+    match /lessons_progress/{id} {
+      allow get, list: if signedIn() && (
+        resource.data.uid == request.auth.uid
+        || (request.auth.uid in resource.data.docenteIds) || isAdmin()
+      );
+      allow create: if request.auth.uid == request.resource.data.uid
+        && id == request.auth.uid + '_' + request.resource.data.lessonId
+        && validProgress(request.resource.data);
+      allow update: if request.auth.uid == resource.data.uid && validProgress(request.resource.data)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.lessonId == resource.data.lessonId
+        && request.resource.data.mejorWpm >= resource.data.mejorWpm
+        && request.resource.data.estrellas >= resource.data.estrellas;
+      allow delete: if isAdmin();
+
+      function validProgress(d) {
+        return d.keys().hasOnly(['uid','lessonId','mundo','estrellas','mejorWpm','mejorPrecision','intentos',
+                                 'completada','docenteIds','actualizadoEn'])
+          && isStr(d.lessonId, 1, 60) && isInt(d.mundo, 1, 10)
+          && isInt(d.estrellas, 0, 3) && isNum(d.mejorWpm, 0, 200) && isNum(d.mejorPrecision, 0, 100)
+          && isInt(d.intentos, 0, 100000) && d.completada is bool
+          && d.docenteIds is list && d.docenteIds.size() <= 3
+          && d.actualizadoEn == request.time;
+      }
+    }
+
+    // ═════════════════════════ sessions (inmutables) ═════════════════════════
+    match /sessions/{sid} {
+      allow get, list: if signedIn() && (
+        resource.data.uid == request.auth.uid || resource.data.docenteId == request.auth.uid || isAdmin()
+      );
+      allow create: if request.auth.uid == request.resource.data.uid && validSession(request.resource.data);
+      allow update: if false;
+      allow delete: if isAdmin();
+
+      function validSession(d) {
+        return d.keys().hasOnly(['uid','classId','docenteId','tipo','refId','wpm','precision','errores',
+                                 'duracionSeg','caracteres','erroresPorTecla','flags','creadoEn'])
+          && d.keys().hasAll(['uid','tipo','wpm','precision','errores','duracionSeg','caracteres','creadoEn'])
+          && d.tipo in ['leccion','practica','juego','examen','asignacion']
+          && (!('refId' in d) || isStr(d.refId, 1, 80))
+          && isNum(d.wpm, 0, 200)
+          && isNum(d.precision, 0, 100)
+          && isInt(d.errores, 0, 5000)
+          && isInt(d.duracionSeg, 3, 3600)
+          && isInt(d.caracteres, 0, 15000)
+          // Anti-trampa: máx. 12 caracteres/seg (≈144 PPM sostenidos) y PPM coherente con lo escrito.
+          && d.caracteres <= d.duracionSeg * 12
+          && d.wpm * d.duracionSeg <= (d.caracteres / 5.0) * 60 + 30
+          && (!('erroresPorTecla' in d) || (d.erroresPorTecla is map && d.erroresPorTecla.size() <= 80))
+          && (!('flags' in d) || d.flags is map)
+          && d.creadoEn == request.time
+          && validClassLink(d);
+      }
+      function validClassLink(d) {
+        return !('classId' in d) || d.classId == null
+          || get(/databases/$(db)/documents/enrollments/$(d.classId + '_' + request.auth.uid)).data.docenteId == d.docenteId;
+      }
+    }
+
+    // ═════════════════════════ badges_earned (id = uid_badgeId) ═════════════════════════
+    match /badges_earned/{id} {
+      allow get, list: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if request.auth.uid == request.resource.data.uid
+        && id == request.auth.uid + '_' + request.resource.data.badgeId
+        && request.resource.data.keys().hasOnly(['uid','badgeId','ganadaEn'])
+        && exists(/databases/$(db)/documents/badges/$(request.resource.data.badgeId))
+        && request.resource.data.ganadaEn == request.time;
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // ═════════════════════════ Tienda e inventario ═════════════════════════
+    match /inventory/{id} {
+      allow get, list: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      // La compra debe ir en un lote (batch) que también descuente las monedas exactas del usuario.
+      allow create: if request.auth.uid == request.resource.data.uid
+        && id == request.auth.uid + '_' + request.resource.data.itemId
+        && request.resource.data.keys().hasOnly(['uid','itemId','compradoEn','equipado'])
+        && request.resource.data.compradoEn == request.time
+        && getAfter(userPath(request.auth.uid)).data.monedas
+           == get(userPath(request.auth.uid)).data.monedas
+              - get(/databases/$(db)/documents/shop_items/$(request.resource.data.itemId)).data.precio;
+      allow update: if request.auth.uid == resource.data.uid && onlyTouch(['equipado']) && request.resource.data.equipado is bool;
+      allow delete: if isAdmin();
+    }
+
+    match /challenge_progress/{id} {   // id = uid_idReto
+      allow get, list: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create, update: if request.auth.uid == request.resource.data.uid
+        && id.matches('^' + request.auth.uid + '_.*')
+        && request.resource.data.keys().hasOnly(['uid','retoId','progreso','completado','actualizadoEn'])
+        && isNum(request.resource.data.progreso, 0, 100000);
+      allow delete: if isAdmin();
+    }
+
+    // ═════════════════════════ Tareas del docente ═════════════════════════
+    match /assignments/{id} {
+      allow get: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(resource.data.classId));
+      allow list: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(resource.data.classId));
+      allow create: if isTeacher() && request.resource.data.docenteId == request.auth.uid && validAssignment(request.resource.data);
+      allow update: if isTeacher() && resource.data.docenteId == request.auth.uid && validAssignment(request.resource.data)
+                       && request.resource.data.docenteId == resource.data.docenteId;
+      allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+
+      function validAssignment(d) {
+        return isStr(d.titulo, 1, 120) && isStr(d.classId, 1, 60)
+          && d.tipo in ['leccion','ejercicio','juego','examen']
+          && isStr(d.refId, 1, 80)
+          && (!('instrucciones' in d) || isStr(d.instrucciones, 0, 1000))
+          && (!('modoExamen' in d) || d.modoExamen is map)
+          && get(/databases/$(db)/documents/classes/$(d.classId)).data.docenteId == request.auth.uid;
+      }
+    }
+
+    match /submissions/{id} {   // id = assignmentId_uid
+      allow get, list: if signedIn() && (resource.data.uid == request.auth.uid || resource.data.docenteId == request.auth.uid || isAdmin());
+      allow create: if request.auth.uid == request.resource.data.uid
+        && id.matches('.*_' + request.auth.uid)
+        && validSubmission(request.resource.data)
+        && enrolled(request.resource.data.classId);
+      allow update: if (request.auth.uid == resource.data.uid && validSubmission(request.resource.data) && !('nota' in resource.data))
+        || (resource.data.docenteId == request.auth.uid && onlyTouch(['nota','comentario']));
+      allow delete: if isAdmin();
+
+      function validSubmission(d) {
+        return d.keys().hasOnly(['uid','assignmentId','classId','docenteId','sessionId','wpm','precision','estado','enviadaEn','nota','comentario'])
+          && isNum(d.wpm, 0, 200) && isNum(d.precision, 0, 100)
+          && d.estado in ['pendiente','entregada','tarde']
+          && d.enviadaEn == request.time;
+      }
+    }
+
+    // Ejercicios personalizados del docente (su propio texto/vocabulario).
+    match /custom_exercises/{id} {
+      allow get, list: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid
+                          || (resource.data.classId != null && enrolled(resource.data.classId)));
+      allow create: if isTeacher() && request.resource.data.docenteId == request.auth.uid
+                       && isStr(request.resource.data.titulo, 1, 120) && isStr(request.resource.data.texto, 5, 5000);
+      allow update: if isTeacher() && resource.data.docenteId == request.auth.uid
+                       && request.resource.data.docenteId == request.auth.uid
+                       && isStr(request.resource.data.texto, 5, 5000);
+      allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+    }
+
+    // ═════════════════════════ Auditoría (solo se agrega; solo admin lee) ═════════════════════════
+    match /audit_logs/{id} {
+      allow read: if isAdmin();
+      allow create: if signedIn() && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['actorUid','rol','accion','objetivo','detalle','creadoEn'])
+        && isStr(request.resource.data.accion, 1, 60)
+        && request.resource.data.creadoEn == request.time;
+      allow update, delete: if false;
+    }
+
+    // Todo lo demás: denegado por defecto.
+  }
+}

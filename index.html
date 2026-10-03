@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es-CO" data-theme="light" data-textsize="normal" data-font="normal" data-colorblind="off" data-motion="completo" data-estilo="medio">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>TECLEA · Aprende a teclear jugando</title>
+  <meta name="description" content="Plataforma gratuita para aprender mecanografía en español, con juegos, medallas y teclado latinoamericano (ñ, tildes, ¿ ¡). Para primaria.">
+  <meta name="theme-color" content="#6C4CF5">
+  <meta name="color-scheme" content="light dark">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/favicon.svg">
+
+  <!-- Aplica el tema guardado ANTES de pintar (evita el parpadeo claro/oscuro) -->
+  <script>
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem('teclea:prefs') || '{}'), r = document.documentElement;
+        var oscuro = p.tema === 'oscuro' || ((!p.tema || p.tema === 'auto') && matchMedia('(prefers-color-scheme: dark)').matches);
+        r.dataset.theme = oscuro ? 'dark' : 'light';
+        if (p.texto) r.dataset.textsize = p.texto;
+        if (p.fuente) r.dataset.font = p.fuente;
+        if (p.daltonico) r.dataset.colorblind = 'on';
+        if (p.movimiento === 'reducido' || matchMedia('(prefers-reduced-motion: reduce)').matches) r.dataset.motion = 'reducido';
+      } catch (e) { /* sin almacenamiento: se usan los valores por defecto */ }
+    })();
+  </script>
+
+  <!-- Tipografías: títulos redondeados (Fredoka), lectura (Nunito), accesible (Lexend), código (JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Lexend:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap">
+
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/fondo.css">
+  <link rel="stylesheet" href="css/componentes.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/vistas.css">
+  <link rel="stylesheet" href="css/animaciones.css">
+
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#view">Saltar al contenido</a>
+
+  <!-- Fondo vivo: malla de gradientes + formas orgánicas (decorativo) -->
+  <div class="fondo" aria-hidden="true">
+    <div class="fondo__malla"></div>
+    <span class="blob blob--1"></span>
+    <span class="blob blob--2"></span>
+    <span class="blob blob--3"></span>
+  </div>
+
+  <!-- Pantalla de carga inicial -->
+  <div id="splash" class="splash" role="status" aria-live="polite">
+    <div class="splash__tecla" aria-hidden="true">T</div>
+    <p>Preparando tu aventura…</p>
+  </div>
+
+  <div id="app" class="app" data-shell="public" hidden>
+    <aside id="sidebar" class="sidebar" aria-label="Menú principal"></aside>
+    <div class="principal">
+      <header id="topbar" class="topbar"></header>
+      <main id="view" class="vista" tabindex="-1"></main>
+    </div>
+    <nav id="bottomnav" class="bottomnav" aria-label="Menú móvil"></nav>
+  </div>
+
+  <div id="sheet-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+  <div id="sr-announcer" class="sr-only" aria-live="polite" role="status"></div>
+
+  <noscript>
+    <p style="padding:2rem;font-family:sans-serif">Esta plataforma necesita JavaScript para funcionar. Actívalo en tu navegador e inténtalo de nuevo.</p>
+  </noscript>
+</body>
+</html>

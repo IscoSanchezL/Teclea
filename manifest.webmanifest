@@ -1,0 +1,17 @@
+{
+  "name": "TECLEA · Aprende a teclear jugando",
+  "short_name": "TECLEA",
+  "description": "Práctica de mecanografía en español para primaria.",
+  "lang": "es-CO",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F7F5FF",
+  "theme_color": "#6C4CF5",
+  "categories": ["education", "kids"],
+  "icons": [
+    { "src": "assets/img/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/img/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,93 @@
+/* ============================================================
+   TECLEA · Layout: barra lateral flotante, barra inferior móvil, barra superior
+   ============================================================ */
+
+.app { min-height: 100dvh; }
+.principal { min-height: 100dvh; display: flex; flex-direction: column; }
+
+.vista {
+  flex: 1; width: 100%; max-width: var(--ancho-max); margin-inline: auto;
+  padding: var(--e5) var(--e4) var(--e8);
+  view-transition-name: vista;
+}
+
+/* ───────── Barra superior (flotante, vidrio) ───────── */
+.topbar {
+  position: sticky; top: .75rem; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between; gap: var(--e3);
+  width: min(calc(100% - 1.5rem), var(--ancho-max)); margin: .75rem auto 0;
+  padding: .55rem .75rem .55rem 1.1rem;
+  background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: var(--r-pill);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+  box-shadow: var(--sombra-2);
+}
+.topbar__saludo { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.topbar__saludo > div { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+.topbar__hola { font: 600 1.1rem var(--fuente-titulo); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar__nivel { font-size: .8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar__acciones { display: flex; align-items: center; gap: .5rem; flex: none; }
+.topbar__marca { text-decoration: none; color: inherit; }
+.avatar-mini {
+  display: grid; place-items: center; width: 2.9rem; height: 2.9rem; border-radius: 50%;
+  background: linear-gradient(145deg, var(--violeta-200), var(--violeta-400)); font-size: 1.6rem; text-decoration: none;
+  box-shadow: 0 3px 0 var(--violeta-600); transition: transform var(--t-rapida) var(--resorte);
+}
+.avatar-mini:hover { transform: translateY(-2px) rotate(-4deg); }
+
+/* ───────── Logo ───────── */
+.logo { display: inline-flex; align-items: center; gap: .6rem; }
+.logo__marca svg { filter: drop-shadow(0 3px 4px rgba(69, 39, 184, .35)); }
+.logo__texto { font: 700 1.55rem var(--fuente-titulo); letter-spacing: .03em; color: var(--texto); }
+
+/* ───────── Navegación ───────── */
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem;
+  min-height: 3.6rem; padding: .4rem .25rem; border: 0; border-radius: var(--r-md);
+  background: transparent; color: var(--texto-suave); text-decoration: none;
+  font: 800 .72rem var(--fuente-texto);
+  transition: background var(--t-media) var(--suave), color var(--t-rapida), transform var(--t-rapida) var(--resorte);
+}
+.nav-item:hover { background: var(--superficie-2); color: var(--texto); transform: translateY(-2px); }
+.nav-item[aria-current="page"] {
+  background: linear-gradient(145deg, var(--violeta-400), var(--violeta-600)); color: #fff;
+  box-shadow: 0 4px 0 var(--violeta-700), 0 10px 18px -6px rgba(108, 76, 245, .5);
+}
+.nav-item__texto { line-height: 1.1; text-align: center; }
+
+.sidebar, .bottomnav { display: none; }
+
+/* Escritorio: barra lateral flotante */
+@media (min-width: 900px) {
+  .app[data-shell="app"] .sidebar {
+    position: fixed; z-index: 40; left: 1rem; top: 1rem; bottom: 1rem; width: var(--ancho-lateral);
+    display: flex; flex-direction: column; align-items: stretch; gap: 1rem; padding: .9rem .6rem;
+    background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: var(--r-xl);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: var(--sombra-3); overflow-y: auto; scrollbar-width: none;
+  }
+  .sidebar__logo { display: grid; place-items: center; text-decoration: none; padding-top: .25rem; }
+  .sidebar__lista { display: flex; flex-direction: column; gap: .35rem; }
+  .app[data-shell="app"] .principal { padding-left: calc(var(--ancho-lateral) + 1.5rem); }
+}
+
+/* Móvil y tablet: barra inferior */
+@media (max-width: 899.98px) {
+  .app[data-shell="app"] .bottomnav {
+    position: fixed; z-index: 40; left: .5rem; right: .5rem; bottom: calc(.5rem + env(safe-area-inset-bottom));
+    height: var(--alto-inferior); display: flex; align-items: stretch; gap: .15rem; padding: .35rem;
+    background: var(--vidrio); border: 1px solid var(--vidrio-borde); border-radius: var(--r-xl);
+    -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
+    box-shadow: var(--sombra-3);
+  }
+  .bottomnav .nav-item { flex: 1; min-height: 0; min-width: 0; }
+  .app[data-shell="app"] .vista { padding-bottom: calc(var(--alto-inferior) + 2.5rem); }
+  .topbar__nivel { display: none; }
+}
+@media (max-width: 560px) {
+  .chip--xp { display: none; }
+  .topbar { padding-left: .75rem; }
+  .logo__texto { font-size: 1.35rem; }
+}
+@media (max-width: 480px) {
+  .topbar__saludo > div { display: none; } /* en pantallas pequeñas solo la mascota; el saludo está en el inicio */
+}

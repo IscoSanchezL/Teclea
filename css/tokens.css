@@ -1,0 +1,140 @@
+/* ============================================================
+   TECLEA · Tokens de diseño (variables CSS)
+   Edita aquí colores, radios y tipografías para cambiar TODO el look.
+   ============================================================ */
+
+:root {
+  /* ── Paleta base ── */
+  --violeta-50: #F1EEFF;  --violeta-100: #E2DBFF; --violeta-200: #C5B8FF; --violeta-300: #A794FF;
+  --violeta-400: #8A70FA; --violeta-500: #6C4CF5; --violeta-600: #5636E0; --violeta-700: #4527B8; --violeta-900: #1D1250;
+  --coral-300: #FFB1A5;   --coral-400: #FF8A7A;   --coral-500: #FF6B5B;   --coral-600: #E84F3F;
+  --menta-300: #7BE8CC;   --menta-400: #3DDBB0;   --menta-500: #18BE94;   --menta-700: #0B7A60;
+  --sol-300: #FFE17A;     --sol-400: #FFD04A;     --sol-500: #FFB800;
+  --cielo-400: #4FB6FF;   --cielo-600: #1E78C8;
+
+  /* ── Semánticos (modo claro) ── */
+  --fondo: #F7F5FF;
+  --superficie: #FFFFFF;
+  --superficie-2: #F1EEFF;
+  --vidrio: rgba(255, 255, 255, 0.72);
+  --vidrio-borde: rgba(255, 255, 255, 0.85);
+  --borde: rgba(76, 60, 160, 0.14);
+  --texto: #1D1A3A;
+  --texto-suave: #55527C;       /* ≥ 6:1 sobre --fondo */
+  --primario: var(--violeta-500);
+  --primario-hover: var(--violeta-600);
+  --primario-tinta: #FFFFFF;
+  --foco: var(--violeta-700);
+  --enlace: var(--violeta-600);
+
+  /* Resultado de teclear (cambian en modo daltónico) */
+  --ok: #12A37F;       --ok-texto: #0B7A60;    --ok-fondo: #D9F7EE;
+  --mal: #E5484D;      --mal-texto: #BE262B;   --mal-fondo: #FFE3E3;
+
+  /* Dedos (teclado virtual y manos) */
+  --dedo-menique: #FF7AA2;
+  --dedo-anular: #FFC93C;
+  --dedo-medio: #3DDBB0;
+  --dedo-indice: #4FB6FF;
+  --dedo-pulgar: #A794FF;
+
+  /* ── Malla de fondo ── */
+  --malla-1: #E6DEFF; --malla-2: #D5F3FF; --malla-3: #FFE6DF; --malla-4: #DFFBEF;
+  --blob-1: #A794FF;  --blob-2: #FF9E8F;  --blob-3: #5FE3C0;
+  --blob-opacidad: 0.38;
+
+  /* ── Forma ── */
+  --r-sm: 14px;
+  --r-md: 22px;
+  --r-lg: 28px;
+  --r-xl: 36px;
+  --r-pill: 999px;
+
+  /* ── Sombras en capas, suaves y con tinte violeta ── */
+  --sombra-1: 0 1px 2px rgba(60, 40, 160, .06), 0 4px 10px rgba(60, 40, 160, .06);
+  --sombra-2: 0 2px 4px rgba(60, 40, 160, .06), 0 10px 24px rgba(60, 40, 160, .10), 0 24px 48px rgba(60, 40, 160, .06);
+  --sombra-3: 0 4px 8px rgba(60, 40, 160, .08), 0 18px 40px rgba(60, 40, 160, .16), 0 40px 80px rgba(60, 40, 160, .10);
+  --sombra-boton: 0 4px 0 var(--violeta-700), 0 10px 20px rgba(108, 76, 245, .35);
+
+  /* ── Espacios ── */
+  --e1: .25rem; --e2: .5rem; --e3: .75rem; --e4: 1rem; --e5: 1.5rem; --e6: 2rem; --e7: 3rem; --e8: 4.5rem;
+
+  /* ── Tipografía ── */
+  --fuente-titulo: 'Fredoka', 'Baloo 2', ui-rounded, 'Nunito', system-ui, sans-serif;
+  --fuente-texto: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --fuente-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --interletra: 0;
+
+  /* ── Movimiento ── */
+  --resorte: cubic-bezier(.34, 1.56, .64, 1);
+  --suave: cubic-bezier(.22, 1, .36, 1);
+  --t-rapida: .16s;
+  --t-media: .32s;
+
+  /* ── Medidas de layout ── */
+  --alto-boton: 3rem;
+  --ancho-lateral: 96px;
+  --alto-inferior: 72px;
+  --ancho-max: 1180px;
+}
+
+/* ── Modo oscuro ── */
+[data-theme="dark"] {
+  --fondo: #13112A;
+  --superficie: #1F1C42;
+  --superficie-2: #2A2659;
+  --vidrio: rgba(34, 30, 76, 0.66);
+  --vidrio-borde: rgba(255, 255, 255, 0.10);
+  --borde: rgba(190, 180, 255, 0.16);
+  --texto: #F3F1FF;
+  --texto-suave: #BDB8E6;
+  --primario: #8A70FA;
+  --primario-hover: #9C85FF;
+  --primario-tinta: #14102E;       /* texto oscuro sobre violeta claro = contraste AA */
+  --foco: #FFE17A;
+  --enlace: #B9A8FF;
+
+  --ok: #3DDBB0;  --ok-texto: #6FF0CB;  --ok-fondo: rgba(61, 219, 176, .16);
+  --mal: #FF7B80; --mal-texto: #FF9A9E; --mal-fondo: rgba(255, 123, 128, .16);
+
+  --malla-1: #2B2160; --malla-2: #123652; --malla-3: #3B1E4A; --malla-4: #113D3A;
+  --blob-opacidad: 0.30;
+
+  --sombra-1: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 10px rgba(0, 0, 0, .25);
+  --sombra-2: 0 2px 4px rgba(0, 0, 0, .3), 0 10px 24px rgba(0, 0, 0, .35), 0 24px 48px rgba(0, 0, 0, .25);
+  --sombra-3: 0 4px 8px rgba(0, 0, 0, .35), 0 18px 40px rgba(0, 0, 0, .45), 0 40px 80px rgba(0, 0, 0, .3);
+  --sombra-boton: 0 4px 0 #4A34B8, 0 10px 20px rgba(0, 0, 0, .4);
+}
+
+/* ── Modo daltónico: azul/naranja en lugar de verde/rojo ── */
+[data-colorblind="on"] {
+  --ok: #2F7BFF;  --ok-texto: #1457C9;  --ok-fondo: #DCE9FF;
+  --mal: #F28C00; --mal-texto: #A85A00; --mal-fondo: #FFEBD0;
+}
+[data-colorblind="on"][data-theme="dark"] {
+  --ok: #6FA8FF; --ok-texto: #9CC2FF; --ok-fondo: rgba(111, 168, 255, .18);
+  --mal: #FFA938; --mal-texto: #FFC273; --mal-fondo: rgba(255, 169, 56, .18);
+}
+
+/* ── Tamaño de texto ── */
+[data-textsize="grande"] { font-size: 112.5%; }
+[data-textsize="enorme"] { font-size: 125%; }
+
+/* ── Letra fácil de leer (dislexia) ── */
+[data-font="dislexia"] {
+  --fuente-texto: 'Lexend', 'Nunito', system-ui, sans-serif;
+  --fuente-titulo: 'Lexend', 'Fredoka', system-ui, sans-serif;
+  --interletra: .02em;
+}
+
+/* ── Estilo por grado ──
+   lúdico (2.º–3.º): redondeado, grande y colorido · pro (5.º–6.º): más sobrio y compacto */
+[data-estilo="ludico"] {
+  --r-md: 26px; --r-lg: 34px; --r-xl: 44px;
+  --alto-boton: 3.5rem;
+}
+[data-estilo="pro"] {
+  --r-md: 18px; --r-lg: 24px; --r-xl: 30px;
+  --alto-boton: 2.75rem;
+  --blob-opacidad: 0.22;
+}
