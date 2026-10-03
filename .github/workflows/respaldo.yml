@@ -36,7 +36,12 @@ jobs:
       - name: Copiar a repositorio privado de respaldos
         if: ${{ env.BACKUP_REPO_TOKEN != '' && env.BACKUP_REPO != '' }}
         run: |
-          git clone "https://x-access-token:${BACKUP_REPO_TOKEN}@github.com/${BACKUP_REPO}.git" destino
+          TOKEN=$(printf %s "$BACKUP_REPO_TOKEN" | tr -d '[:space:]')
+          BACKUP_REPO=$(printf %s "$BACKUP_REPO" | tr -d '[:space:]')
+          # Diagnóstico (no muestra el token): ¿existe el repositorio y el token puede escribir?
+          curl -s -H "Authorization: Bearer $TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${BACKUP_REPO}" \
+            | python3 -c "import sys,json; d=json.load(sys.stdin); print('repo:', d.get('full_name') or d.get('message'), '| privado:', d.get('private'), '| puede escribir:', (d.get('permissions') or {}).get('push'))"
+          git clone "https://oauth2:${TOKEN}@github.com/${BACKUP_REPO}.git" destino
           mkdir -p destino/respaldos && cp respaldos/* destino/respaldos/
           cd destino
           # Limpieza: se conservan los últimos 60 días completos y, de los más antiguos, solo el del día 1 de cada mes
