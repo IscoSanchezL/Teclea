@@ -14,6 +14,7 @@ import { iniciarAuth } from './auth/auth.js';
 import { iniciarConexion, registrarServiceWorker } from './ui/conexion.js';
 import { iniciarEfectos } from './ui/efectos.js';
 import { iniciarPaleta } from './ui/paleta.js';
+import { iniciarInactividad } from './core/inactividad.js';
 
 async function arrancar() {
   aplicarMarca();
@@ -38,6 +39,7 @@ async function arrancar() {
   iniciarConexion();
   iniciarEfectos();
   iniciarPaleta();
+  iniciarInactividad();
   registrarServiceWorker();
 }
 
