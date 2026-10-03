@@ -1,0 +1,63 @@
+/* ============================================================
+   TECLEA · Clases, tareas, tarjetas de acceso, boletín e impresión
+   ============================================================ */
+.tabs--staff { max-width: 28rem; }
+[data-estilo="staff"] .tabs--staff { border-radius: 10px; }
+.fila--entre { justify-content: space-between; }
+.rejilla-campos { display: grid; gap: var(--e3); grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+.colores { display: flex; gap: .5rem; flex-wrap: wrap; }
+.color { width: 2rem; height: 2rem; border-radius: 50%; border: 3px solid transparent; cursor: pointer; }
+.color[aria-pressed="true"] { border-color: var(--texto); box-shadow: 0 0 0 2px var(--superficie) inset; }
+.vacio { align-items: flex-start; }
+.fila-click { cursor: pointer; }
+.fila-click:focus-visible { outline: 2px solid var(--primario); outline-offset: -2px; }
+.pill--nuevo { background: var(--superficie-2); color: var(--texto-suave); }
+
+.clases-grid { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); }
+.clase-panel__cab { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding-left: .8rem; border-left: 4px solid var(--c, var(--primario)); }
+.clase-panel__cab h2 { font-size: 1.05rem; margin: 0; }
+
+.compartir { display: flex; flex-direction: column; align-items: center; gap: var(--e3); text-align: center; }
+.compartir__codigo { font: 700 2.4rem var(--fuente-mono, monospace); letter-spacing: .25em; padding: .4rem 1rem; border: 2px dashed var(--borde); border-radius: var(--r-md); }
+.compartir__qr svg { display: block; border-radius: 8px; background: #fff; }
+
+.datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: .5rem; }
+.dato { display: flex; flex-direction: column; padding: .55rem .7rem; border: 1px solid var(--borde); border-radius: var(--r-md); }
+.dato small { color: var(--texto-suave); font-size: .72rem; }
+.dato strong { font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+
+.tareas { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.tarea { display: flex; align-items: center; gap: .75rem; padding: .7rem .9rem; border-radius: var(--r-md); background: var(--superficie-2); flex-wrap: wrap; }
+.tarea__ic { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: color-mix(in srgb, var(--primario) 16%, transparent); color: var(--primario); flex: none; }
+.tarea--hecha .tarea__ic { background: var(--menta-500, #3DDBB0); color: #06261D; }
+.tarea__txt { flex: 1; min-width: 12rem; display: flex; flex-direction: column; }
+.tareas--docente .tarea { background: transparent; border: 1px solid var(--borde); }
+
+/* Estudiante: mis clases */
+.clases-est { display: flex; flex-direction: column; gap: var(--e4); }
+.clases-est__unir .campo { flex: 1 1 14rem; }
+.clase-est__cab { display: flex; justify-content: space-between; align-items: center; gap: var(--e3); padding-left: .8rem; border-left: 5px solid var(--c); margin-bottom: var(--e3); }
+.clase-est__cab h2 { margin: 0; }
+.clase-est__reto { display: flex; flex-direction: column; gap: .3rem; margin-bottom: var(--e4); }
+.clase-est__ranks { display: grid; gap: var(--e4); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.clase-est__ranks h3 { font-size: 1rem; margin: 0 0 .4rem; }
+.rank { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.rank li { display: flex; align-items: center; gap: .6rem; padding: .35rem .6rem; border-radius: var(--r-md); background: var(--superficie-2); }
+.rank__yo { outline: 2px solid var(--primario); }
+.rank__pos { width: 1.4rem; font-weight: 800; text-align: center; }
+.rank__nombre { flex: 1; font-weight: 700; }
+
+/* Hojas impresas */
+.hoja { font-family: var(--fuente-texto, system-ui, sans-serif); color: #000; background: #fff; padding: 0; }
+.hoja h1 { font-size: 1.4rem; margin: 0 0 .4rem; }
+.tarjetas-acceso { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8mm; margin-top: 6mm; }
+.tarjeta-acceso { border: 1.5px dashed #555; border-radius: 6px; padding: 4mm; display: flex; flex-direction: column; gap: 2mm; break-inside: avoid; }
+.tarjeta-acceso > div { display: flex; justify-content: space-between; gap: 6mm; }
+.tarjeta-acceso b { font: 700 1.1rem var(--fuente-mono, monospace); letter-spacing: .08em; }
+.boletin__cab { display: flex; align-items: center; gap: 4mm; border-bottom: 2px solid #000; padding-bottom: 3mm; margin-bottom: 4mm; }
+.boletin__tabla { width: 100%; border-collapse: collapse; margin: 4mm 0; }
+.boletin__tabla th, .boletin__tabla td { border: 1px solid #888; padding: 2mm 3mm; text-align: left; }
+.boletin__pie { font-size: .8rem; color: #444; margin-top: 8mm; }
+.certificado { text-align: center; border: 6px double #6C4CF5; padding: 16mm 10mm; min-height: 150mm; display: flex; flex-direction: column; justify-content: center; gap: 6mm; }
+.certificado h1 { font: 700 2.4rem Georgia, serif; }
+.certificado__nombre { font: italic 700 2.2rem Georgia, serif; border-bottom: 2px solid #000; display: inline-block; padding: 0 12mm 2mm; align-self: center; }

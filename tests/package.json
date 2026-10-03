@@ -5,7 +5,12 @@
   "scripts": {
     "test": "firebase emulators:exec --only firestore --project demo-teclea \"node reglas.test.mjs\"",
     "carga": "node carga.mjs",
-    "offline": "node offline.mjs"
+    "offline": "node offline.mjs",
+    "test:progreso": "firebase emulators:exec --only firestore --project demo-teclea \"node progreso.test.mjs\"",
+    "test:gamificacion": "firebase emulators:exec --only firestore --project demo-teclea \"node gamificacion.test.mjs\"",
+    "test:clases": "firebase emulators:exec --only firestore --project demo-teclea \"node clases.test.mjs\"",
+    "test:puras": "node motor.test.mjs && node curriculo.test.mjs",
+    "test:todo": "npm run test:puras && npm test && npm run test:progreso && npm run test:gamificacion && npm run test:clases"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^3.0.4",

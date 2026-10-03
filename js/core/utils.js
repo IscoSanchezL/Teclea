@@ -98,3 +98,13 @@ export function descargarJSON(nombre, objeto) {
   a.click();
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
+
+/** Imprime un fragmento (boletín, certificado, tarjetas): lo muestra solo en la hoja impresa y limpia al terminar. */
+export function imprimir(nodo) {
+  const raiz = document.createElement('div');
+  raiz.id = 'print-root'; raiz.append(nodo);
+  document.body.append(raiz); document.body.classList.add('imprimiendo');
+  const fin = () => { document.body.classList.remove('imprimiendo'); raiz.remove(); window.removeEventListener('afterprint', fin); };
+  window.addEventListener('afterprint', fin);
+  setTimeout(() => window.print(), 80);
+}

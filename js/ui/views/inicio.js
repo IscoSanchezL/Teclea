@@ -4,6 +4,7 @@
  *   pro (5.º–6.º): panel de control con módulos en cuadrícula y estadísticas.
  * (El progreso real llega en la Fase 3: por ahora el mundo 1 está abierto y el resto bloqueado.)
  */
+import { opcionesDeClases } from '../../db/clases.js';
 import { tarjetaRetos } from '../retos-ui.js';
 import { state } from '../../core/state.js';
 import { h, movimientoReducido } from '../../core/utils.js';
@@ -112,7 +113,7 @@ function modulosPro(mundos, indice, estados, progreso) {
 export async function render() {
   const u = state.user;
   const [mundos, indice, progreso, hoy] = await Promise.all([cargarMundos(), cargarIndice(), cargarProgreso(u.uid), resumenHoy(u.uid).catch(() => ({}))]);
-  const estados = estadoLecciones(indice, progreso);
+  const estados = estadoLecciones(indice, progreso, await opcionesDeClases(state.user));
   const siguiente = indice.find((l) => estados[l.id] === 'actual');
   const mejorGlobal = Object.values(progreso).reduce((m, x) => Math.max(m, x.mejorWpm || 0), 0);
   const hechas = indice.filter((l) => (progreso[l.id]?.estrellas || 0) >= 1).length;

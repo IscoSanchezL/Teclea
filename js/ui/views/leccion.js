@@ -1,6 +1,7 @@
 /**
  * Reproductor de lecciones:  Introducción → Guiado → Libre → Prueba (estrellas) → Resultado.
  */
+import { opcionesDeClases } from '../../db/clases.js';
 import { state } from '../../core/state.js';
 import { h } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
@@ -37,7 +38,7 @@ export async function render({ query }) {
   const leccion = await cargarLeccion(query.id || '');
   if (!leccion) { toast('No encontré esa lección.', { tipo: 'error' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
   const [indice, progreso] = await Promise.all([cargarIndice(), cargarProgreso(u.uid)]);
-  const estados = estadoLecciones(indice, progreso);
+  const estados = estadoLecciones(indice, progreso, await opcionesDeClases(state.user));
   if (estados[leccion.id] === 'bloqueada') { toast('Completa la lección anterior para abrir esta. 🔒', { tipo: 'info' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
 
   const grado = u.grado || 4;
@@ -123,6 +124,7 @@ export async function render({ query }) {
     const resumen = (async () => {
       const r = await registrarActividad({ user: state.user, tipo: 'leccion', refId: leccion.id, resultado, leccion, estrellas, porTecla: acumTeclas });
       try { const { evaluarInsignias } = await import('../../game/insignias.js'); r.insignias = await evaluarInsignias({ user: r.usuario, evento: 'leccion', leccion, estrellas, resultado, resumen: r }); } catch (e) { console.warn('[insignias]', e); }
+      if (estrellas >= 1) import('../../db/clases.js').then((m) => m.entregarTareas(r.usuario, { tipo: 'leccion', refId: leccion.id, resultado, sesionId: r.sesionId })).catch(() => {});
       return r;
     })();
     const sig = estrellas >= 1 ? await siguienteDe(leccion.id) : null;

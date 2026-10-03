@@ -165,6 +165,7 @@
 .pill i { width: .45rem; height: .45rem; border-radius: 50%; background: currentColor; }
 .pill--ok, .pill--destacado { background: var(--ok-fondo); color: var(--ok-texto); }
 .pill--atrasado { background: var(--aviso-fondo, #FEF3C7); color: var(--aviso-texto, #92400E); }
+.pill--nuevo { background: var(--superficie-2); color: var(--texto-suave); }
 .pill--inactivo { background: var(--mal-fondo); color: var(--mal-texto); }
 
 .clases { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }

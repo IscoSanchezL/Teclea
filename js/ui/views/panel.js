@@ -1,63 +1,49 @@
 /**
- * Resumen del docente/administración (vista sobria).
- * Hoy muestra datos de EJEMPLO; en la Fase 5 se alimenta de Firestore (enrollments.stats y sessions).
+ * Resumen del docente/administración (vista sobria) con datos reales de sus clases.
  */
 import { marca } from '../../core/marca.js';
 import { state } from '../../core/state.js';
-import { CONFIG } from '../../core/config.js';
 import { h } from '../../core/utils.js';
+import * as C from '../../db/clases.js';
+import { consultar } from '../../db/store.js';
+import { resumenClase, estadoDe, textoUltima } from '../../db/analitica.js';
 import { icono } from '../icons.js';
-import { sparkline, barras, tecladoCalor } from '../graficas.js';
-import { ESTUDIANTES_DEMO, MINUTOS_SEMANA, ERRORES_TECLAS, ACTIVIDAD_DEMO } from '../datos-demo.js';
-import { avisoDemo, pill } from './_staff.js';
+import { barras, tecladoCalor } from '../graficas.js';
+import { pill } from './_staff.js';
 
-function kpi({ titulo, valor, unidad = '', delta, bueno = true, serie, color }) {
-  return h('article', { class: 'kpi' },
-    h('span', { class: 'kpi__tit' }, titulo),
-    h('div', { class: 'kpi__fila' },
-      h('strong', { class: 'kpi__num' }, valor, unidad ? h('small', {}, unidad) : null),
-      serie ? sparkline(serie, { color, etiqueta: titulo }) : null),
-    delta ? h('span', { class: `delta ${bueno ? 'delta--bien' : 'delta--mal'}` }, delta, h('small', {}, ' vs. semana anterior')) : null);
-}
+const kpi = ({ titulo, valor, unidad = '' }) => h('article', { class: 'kpi' }, h('span', { class: 'kpi__tit' }, titulo), h('div', { class: 'kpi__fila' }, h('strong', { class: 'kpi__num' }, valor, unidad ? h('small', {}, unidad) : null)));
 
 export async function render() {
-  const apoyo = ESTUDIANTES_DEMO.filter((e) => e.estado === 'atrasado' || e.estado === 'inactivo').slice(0, 5);
-  const nombre = state.user.nombre.split(' ')[0];
+  const u = state.user, nombre = u.nombre.split(' ')[0];
+  const [clases, inscs, sesiones] = await Promise.all([C.listarClases(u), C.inscripcionesDocente(u),
+    consultar('sessions', { donde: [['docenteId', '==', u.uid]], orden: ['creadoEn', 'desc'], limite: 600 }).catch(() => [])]);
+  const cab = h('header', { class: 'pagina__cab' },
+    h('div', {}, h('h1', {}, `Buen día, ${nombre}`), h('p', { class: 'suave' }, 'Resumen de tus grupos · últimos 7 días')),
+    h('div', { class: 'fila' }, h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => document.dispatchEvent(new CustomEvent('teclea:paleta')) }, icono('search', { tam: 16 }), 'Buscar'),
+      h('a', { class: 'btn btn--primary btn--sm', href: '#/docente' }, 'Ver estudiantes', icono('arrow', { tam: 16 }))));
 
-  return h('div', { class: 'pagina' },
-    h('header', { class: 'pagina__cab' },
-      h('div', {}, h('h1', {}, `Buen día, ${nombre}`), h('p', { class: 'suave' }, 'Resumen de tus grupos · últimos 7 días')),
-      h('div', { class: 'fila' },
-        h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => document.dispatchEvent(new CustomEvent('teclea:paleta')) }, icono('search', { tam: 16 }), 'Buscar'),
-        h('a', { class: 'btn btn--primary btn--sm', href: '#/docente' }, 'Ver estudiantes', icono('arrow', { tam: 16 })))),
-    avisoDemo(),
+  if (!clases.length) return h('div', { class: 'pagina' }, cab, h('section', { class: 'panel vacio' }, h('h2', {}, 'Empecemos'), h('p', { class: 'suave' }, 'Crea tu primera clase para obtener un código, agregar estudiantes y ver aquí su progreso.'),
+    h('a', { class: 'btn btn--primary', href: '#/docente?tab=clases' }, 'Crear mi primera clase')));
 
+  const r = resumenClase(inscs, sesiones);
+  const nombreDe = (uid) => inscs.find((i) => i.uid === uid)?.alias || 'Estudiante';
+  const claseDe = (id) => clases.find((c) => c.id === id);
+  const reciente = sesiones.slice(0, 8);
+  const hay = Object.keys(r.calor).length > 0;
+  return h('div', { class: 'pagina' }, cab,
     h('section', { class: 'kpis', 'aria-label': 'Indicadores' },
-      kpi({ titulo: 'Activos hoy', valor: '18', unidad: ' / 24', delta: '+3', serie: [11, 14, 12, 16, 15, 17, 18], color: 'var(--primario)' }),
-      kpi({ titulo: 'Velocidad media', valor: '19,4', unidad: ' PPM', delta: '+1,8', serie: [16, 16.5, 17, 17.8, 18.4, 19, 19.4], color: 'var(--ok)' }),
-      kpi({ titulo: 'Precisión media', valor: '91,2', unidad: ' %', delta: '+0,6', serie: [89.8, 90.1, 90.3, 90.9, 91, 91.1, 91.2], color: 'var(--ok)' }),
-      kpi({ titulo: 'Tareas por revisar', valor: '7', delta: '−2', bueno: true, serie: [12, 11, 10, 11, 9, 8, 7], color: 'var(--primario)' })),
-
+      kpi({ titulo: 'Activos hoy', valor: r.activos, unidad: ` / ${r.total}` }), kpi({ titulo: 'Velocidad media', valor: r.ppm ? String(r.ppm).replace('.', ',') : '—', unidad: ' PPM' }),
+      kpi({ titulo: 'Precisión media', valor: r.precision ? String(r.precision).replace('.', ',') : '—', unidad: ' %' }), kpi({ titulo: 'Requieren apoyo', valor: r.apoyo.length })),
     h('div', { class: 'rejilla-2' },
-      h('section', { class: 'panel' },
-        h('header', { class: 'panel__cab' }, h('h2', {}, 'Práctica semanal'), h('span', { class: 'suave' }, 'minutos totales por día')),
-        barras(MINUTOS_SEMANA, { alto: 210, unidad: ' min' })),
-      h('section', { class: 'panel' },
-        h('header', { class: 'panel__cab' }, h('h2', {}, 'Teclas con más errores'), h('span', { class: 'suave' }, 'todos los grupos')),
-        tecladoCalor(ERRORES_TECLAS),
-        h('p', { class: 'suave pequeno' }, 'La Ñ y las teclas de las esquinas concentran los errores: conviene reforzar la fila base y los meñiques.'))),
-
+      h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, 'Práctica semanal'), h('span', { class: 'suave' }, 'minutos totales por día')), barras(r.minutosSemana.map((d) => ({ etiqueta: d.etiqueta, valor: d.valor })), { alto: 210, unidad: ' min' })),
+      h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, 'Teclas con más errores'), h('span', { class: 'suave' }, 'todos los grupos')),
+        hay ? [tecladoCalor(r.calor), h('p', { class: 'suave pequeno' }, 'Las teclas más oscuras concentran más errores: conviene reforzarlas en clase.')] : h('p', { class: 'suave' }, 'Aparecerá cuando tus estudiantes practiquen.'))),
     h('div', { class: 'rejilla-2 rejilla-2--desigual' },
-      h('section', { class: 'panel' },
-        h('header', { class: 'panel__cab' }, h('h2', {}, 'Requieren apoyo'), h('a', { href: '#/docente' }, 'Ver todos')),
-        h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' },
-          h('thead', {}, h('tr', {}, ['Estudiante', 'Clase', 'PPM', 'Última práctica', 'Estado'].map((t) => h('th', { scope: 'col' }, t)))),
-          h('tbody', {}, apoyo.map((e) => h('tr', {},
-            h('th', { scope: 'row' }, e.apodo), h('td', {}, e.clase.replace(/(\d)/, '$1.º ')), h('td', { class: 'num' }, e.ppm), h('td', {}, e.ult), h('td', {}, pill(e.estado)))))))),
-      h('section', { class: 'panel' },
-        h('header', { class: 'panel__cab' }, h('h2', {}, 'Actividad reciente')),
-        h('ul', { class: 'actividad' }, ACTIVIDAD_DEMO.map((a) => h('li', { class: `actividad__item ${a.cuando === 'alerta' ? 'actividad__item--alerta' : ''}` },
-          h('span', { class: 'actividad__ic' }, icono(a.icono, { tam: 16 })),
-          h('span', {}, h('strong', {}, a.quien), ' ', a.que), h('time', { class: 'suave' }, a.cuando)))))),
-    h('p', { class: 'suave pequeno' }, `${marca.nombre} · panel docente · los datos mostrados son ilustrativos.`));
+      h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, 'Requieren apoyo'), h('a', { href: '#/docente' }, 'Ver todos')),
+        r.apoyo.length ? h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, ['Estudiante', 'Clase', 'PPM', 'Última práctica', 'Estado'].map((t) => h('th', { scope: 'col' }, t)))),
+          h('tbody', {}, r.apoyo.slice(0, 6).map((i) => h('tr', {}, h('th', { scope: 'row' }, i.alias), h('td', {}, claseDe(i.classId)?.nombre || ''), h('td', { class: 'num' }, Math.round(i.stats?.mejorWpm || 0) || '—'), h('td', {}, textoUltima(i.stats?.ultimaPractica)), h('td', {}, pill(estadoDe(i, claseDe(i.classId)?.grado)))))))) : h('p', { class: 'suave' }, '¡Todos al día! 🎉')),
+      h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, 'Actividad reciente')),
+        reciente.length ? h('ul', { class: 'actividad' }, reciente.map((s) => h('li', { class: 'actividad__item' }, h('span', { class: 'actividad__ic' }, icono(s.tipo === 'juego' ? 'gamepad' : 'keyboard', { tam: 16 })),
+          h('span', {}, h('strong', {}, nombreDe(s.uid)), ` ${s.tipo === 'leccion' ? 'completó una lección' : s.tipo === 'juego' ? 'jugó' : 'practicó'} · ${Math.round(s.wpm)} PPM`), h('time', { class: 'suave' }, textoUltima(s.creadoEn))))) : h('p', { class: 'suave' }, 'Sin actividad todavía.'))),
+    h('p', { class: 'suave pequeno' }, `${marca.nombre} · panel docente · solo se muestran apodos.`));
 }

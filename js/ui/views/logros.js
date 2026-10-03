@@ -11,6 +11,17 @@ import { medallaSVG } from '../medallas.js';
 import { icono } from '../icons.js';
 import { tarjetaRetos } from '../retos-ui.js';
 import { abrirCapa } from '../overlay.js';
+import { cargarIndice } from '../../lessons/curriculo.js';
+import { marca } from '../../core/marca.js';
+import { imprimir } from '../../core/utils.js';
+
+const NOMBRES_MUNDO = ['Fila base', 'Fila superior', 'Fila inferior', 'Todas las letras', 'Mayúsculas y Shift', 'Tildes y signos', 'Números y símbolos', 'Palabras y frases', 'Párrafos y textos', 'Velocidad y precisión'];
+function certificado(u, mundo) {
+  const fecha = new Date().toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+  return h('div', { class: 'hoja certificado' }, marca.logo ? h('img', { src: marca.logo, alt: '', width: 64, height: 64, style: { alignSelf: 'center' } }) : null,
+    h('h2', {}, marca.nombre), h('h1', {}, 'Certificado de logro'), h('p', {}, 'Se otorga a'), h('div', { class: 'certificado__nombre' }, u.nombre),
+    h('p', {}, `por completar el Mundo ${mundo}: ${NOMBRES_MUNDO[mundo - 1]} del curso de mecanografía.`), h('p', {}, `${marca.colegio ? `${marca.colegio} · ` : ''}${fecha}`));
+}
 
 const CATEGORIAS = { todas: 'Todas', constancia: 'Constancia', velocidad: 'Velocidad', precision: 'Precisión', exploracion: 'Exploración', juegos: 'Juegos', primera: 'Primeras veces', clase: 'Clase', secretas: 'Secretas' };
 
@@ -34,6 +45,11 @@ export async function render() {
       h('a', { class: 'btn btn--sun btn--sm', href: '#/tienda' }, icono('bag', { tam: 18 }), 'Ir a la tienda')));
 
   const retos = await tarjetaRetos({ hoy });
+  const indice = await cargarIndice();
+  const completos = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter((n) => { const ls = indice.filter((l) => l.mundo === n); return ls.length && ls.every((l) => (progreso[l.id]?.estrellas || 0) >= 1); });
+  const certs = h('section', { class: 'card' }, h('h2', { class: 'seccion__titulo' }, 'Certificados'),
+    completos.length ? h('ul', { class: 'tareas' }, completos.map((n) => h('li', { class: 'tarea' }, h('div', { class: 'tarea__txt' }, h('strong', {}, `Mundo ${n}`), h('small', { class: 'suave' }, NOMBRES_MUNDO[n - 1])),
+      h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => imprimir(certificado(u, n)) }, icono('printer', { tam: 16 }), 'Imprimir')))) : h('p', { class: 'suave' }, 'Completa todas las lecciones de un mundo para ganar su certificado.'));
 
   const vitrina = h('div', { class: 'vitrina' });
   const filtros = h('div', { class: 'filtros', role: 'group', 'aria-label': 'Categorías' });
@@ -54,5 +70,5 @@ export async function render() {
   return h('div', { class: 'logros' }, hero,
     h('div', { class: 'logros__cuerpo' },
       h('section', { class: 'card' }, h('div', { class: 'fila fila--entre' }, h('h2', { class: 'seccion__titulo' }, 'Mi vitrina'), h('span', { class: 'suave' }, `${ganadas.size} / ${cat.length}`)), filtros, vitrina),
-      h('aside', { class: 'logros__lateral' }, retos)));
+      h('aside', { class: 'logros__lateral pila' }, retos, certs)));
 }

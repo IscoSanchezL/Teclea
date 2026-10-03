@@ -25,6 +25,9 @@ export async function cargarProgreso(uid) {
   return cache.progreso;
 }
 
+/** Fuerza a releer las inscripciones (tras unirse o salir de una clase). */
+export const refrescarInscripciones = () => { cache.inscripciones = null; };
+
 export async function cargarInscripciones(uid) {
   asegurar(uid);
   if (!cache.inscripciones) cache.inscripciones = await store.consultar('enrollments', { donde: [['uid', '==', uid]] });
@@ -54,8 +57,9 @@ export async function teclasDebiles(uid, max = 6) {
 /** Resumen de hoy: minutos, mejor PPM, precisión media y nº de sesiones (para el inicio y los retos). */
 export async function resumenHoy(uid) {
   const d = new Date(); d.setHours(0, 0, 0, 0);
-  const ses = await store.consultar('sessions', { donde: [['uid', '==', uid], ['creadoEn', '>=', d.getTime()]] });
-  const hoy = ses.filter((x) => (x.creadoEn || 0) >= d.getTime());
+  // Igualdad por día (sin rango) para no exigir índices compuestos en Firestore
+  const ses = await store.consultar('sessions', { donde: [['uid', '==', uid], ['dia', '==', hoyISO()]] });
+  const hoy = ses;
   const minutos = hoy.reduce((a, x) => a + (x.duracionSeg || 0), 0) / 60;
   const porTipo = (t) => hoy.filter((x) => x.tipo === t).length;
   return {
@@ -139,7 +143,7 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
   const sesion = {
     uid, tipo, refId, wpm: resultado.ppm, precision: resultado.precision, errores: resultado.errores,
     duracionSeg: resultado.duracionSeg, caracteres: resultado.caracteres,
-    creadoEn: store.ahora(),
+    dia: hoyISO(), creadoEn: store.ahora(),
   };
   const ept = erroresPorTecla(porTecla || resultado.porTecla);
   if (Object.keys(ept).length) sesion.erroresPorTecla = ept;
@@ -182,7 +186,16 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
     };
     if (leccion && estrellas >= 1 && !prev?.completada) datos['stats.lecciones'] = store.sumar(1);
     if (leccion) datos['stats.mundo'] = leccion.mundo;
+    const chars = Math.min(5000, resultado.caracteres || 0);
+    datos['stats.caracteres'] = store.sumar(chars);
+    if (s.ppmInicial == null) datos['stats.ppmInicial'] = resultado.ppm;
     ops.push({ tipo: 'update', ruta: `enrollments/${i.id}`, datos });
+    // Ranking positivo (solo apodo y avatar, nunca nombre ni foto) y aporte al reto de la clase
+    const mejorNuevo = Math.max(s.mejorWpm || 0, resultado.ppm);
+    ops.push({ tipo: 'set', ruta: `classes/${i.classId}/ranking/${uid}`, datos: {
+      apodo: String(user.apodo || 'Estudiante').slice(0, 30), avatar: { emoji: user.avatar?.emoji || '🦊', fondo: user.avatar?.fondo || 'violeta' },
+      puntos: Math.min(100000, (s.xp || 0) + xpGanado), mejora: Math.round(Math.max(-100, Math.min(200, mejorNuevo - (s.ppmInicial ?? resultado.ppm))) * 10) / 10, actualizadoEn: store.ahora() } });
+    ops.push({ tipo: 'set', ruta: `classes/${i.classId}/aportes/${uid}`, datos: { caracteres: Math.min(10000000, (s.caracteres || 0) + chars), sesiones: Math.min(100000, (s.sesiones || 0) + 1), actualizadoEn: store.ahora() } });
   }
 
   const estadoEscritura = await store.esperarMax(store.lote(ops)); // sin red: queda en cola y se sincroniza al reconectar
@@ -192,6 +205,8 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
   for (const i of inscripciones) {
     const s = (i.stats ||= {});
     s.xp = (s.xp || 0) + xpGanado; s.sesiones = (s.sesiones || 0) + 1; s.minutos = (s.minutos || 0) + minutos;
+    if (s.ppmInicial == null) s.ppmInicial = resultado.ppm;
+    s.caracteres = (s.caracteres || 0) + Math.min(5000, resultado.caracteres || 0);
     s.mejorWpm = Math.max(s.mejorWpm || 0, resultado.ppm);
     if (leccion && estrellas >= 1 && !prev?.completada) s.lecciones = (s.lecciones || 0) + 1;
   }

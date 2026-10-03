@@ -1,10 +1,11 @@
 {
-  "version": "1b5eb1b5fc20",
+  "version": "128b1aebb1af",
   "archivos": [
     "assets/assets.json",
     "assets/img/favicon.svg",
     "css/animaciones.css",
     "css/base.css",
+    "css/clases.css",
     "css/componentes.css",
     "css/efectos.css",
     "css/estilos.css",
@@ -42,6 +43,8 @@
     "js/core/routes.js",
     "js/core/state.js",
     "js/core/utils.js",
+    "js/db/analitica.js",
+    "js/db/clases.js",
     "js/db/firebase.js",
     "js/db/progreso.js",
     "js/db/store.js",
@@ -79,6 +82,7 @@
     "js/ui/nav.js",
     "js/ui/overlay.js",
     "js/ui/paleta.js",
+    "js/ui/qr.js",
     "js/ui/resultado.js",
     "js/ui/retos-ui.js",
     "js/ui/sonido.js",
@@ -89,6 +93,8 @@
     "js/ui/views/admin.js",
     "js/ui/views/aprende.js",
     "js/ui/views/bienvenida.js",
+    "js/ui/views/clases.js",
+    "js/ui/views/docente-modales.js",
     "js/ui/views/docente.js",
     "js/ui/views/entrar.js",
     "js/ui/views/inicio.js",
@@ -105,6 +111,7 @@
     "js/ui/views/privacidad.js",
     "js/ui/views/proximamente.js",
     "js/ui/views/tienda.js",
+    "js/vendor/qrcode.js",
     "manifest.webmanifest"
   ]
 }

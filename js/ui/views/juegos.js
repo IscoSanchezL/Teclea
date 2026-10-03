@@ -57,6 +57,7 @@ export async function render({ query }) {
     const resumen = (async () => {
       const g = await registrarActividad({ user: state.user, tipo: 'juego', refId: j.id, resultado, puntos: r.puntos });
       try { const { evaluarInsignias } = await import('../../game/insignias.js'); g.insignias = await evaluarInsignias({ user: g.usuario, evento: 'juego', juego: j.id, resultado, resumen: g, refId: j.id }); } catch (e) { console.warn('[insignias]', e); }
+      import('../../db/clases.js').then((m) => m.entregarTareas(g.usuario, { tipo: 'juego', refId: j.id, resultado, sesionId: g.sesionId })).catch(() => {});
       return g;
     })();
     montar(panelResultado({ titulo: `${r.puntos} puntos`, subtitulo: j.nombre, estrellas: null, resultado, resumen,

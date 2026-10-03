@@ -44,10 +44,11 @@ export async function render({ query }) {
   const limpiar = () => { actual?.destruir(); actual = null; };
   const montar = (...n) => { limpiar(); cont.replaceChildren(...n.filter(Boolean)); window.scrollTo({ top: 0 }); };
 
-  function guardarYMostrar({ resultado, motor, refId, titulo, volver }) {
+  function guardarYMostrar({ resultado, motor, refId, titulo, volver, tarea = null }) {
     const resumen = (async () => {
       const r = await registrarActividad({ user: state.user, tipo: 'practica', refId, resultado, porTecla: motor.porTecla });
       try { const { evaluarInsignias } = await import('../../game/insignias.js'); r.insignias = await evaluarInsignias({ user: r.usuario, evento: 'practica', resultado, resumen: r, refId }); } catch (e) { console.warn('[insignias]', e); }
+      if (tarea) import('../../db/clases.js').then((m) => m.entregarTareas(r.usuario, { tipo: 'ejercicio', refId: tarea, resultado, sesionId: r.sesionId })).catch(() => {});
       return r;
     })();
     montar(panelResultado({ titulo, subtitulo: 'Práctica', estrellas: null, resultado, resumen,
@@ -117,7 +118,20 @@ export async function render({ query }) {
     ej.enfocar();
   }
 
-  if (query.modo === 'refuerzo') await refuerzo(); else await configurar();
+  async function ejercicioDocente(id) {
+    const { leerEjercicio } = await import('../../db/clases.js');
+    const ej = await leerEjercicio(id).catch(() => null);
+    if (!ej) { toast('No encontré ese ejercicio.', { tipo: 'error' }); return configurar(); }
+    const motorUI = crearEjercicio({
+      texto: ej.texto, modo: 'libre', grande: grado <= 3, titulo: ej.titulo,
+      alSalir: async () => { if (await confirmar({ titulo: '¿Salir del ejercicio?', mensaje: 'No se guardará este ejercicio.', si: 'Salir', no: 'Seguir' })) navegar('/clases'); },
+      alFin: ({ resultado, motor }) => guardarYMostrar({ resultado, motor, refId: `ej:${id}`, tarea: id, titulo: '¡Ejercicio terminado!', volver: () => navegar('/clases') }),
+    });
+    montar(h('div', { class: 'ej-cab' }, h('h1', {}, ej.titulo), h('p', { class: 'suave' }, 'Ejercicio de tu profe')), motorUI.el);
+    actual = motorUI; motorUI.enfocar();
+  }
+
+  if (query.ej) await ejercicioDocente(query.ej); else if (query.modo === 'refuerzo') await refuerzo(); else await configurar();
   return cont;
 }
 

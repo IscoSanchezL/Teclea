@@ -46,7 +46,7 @@ export const RUTAS = [
     nav: { icono: 'bag', etiqueta: 'Tienda', orden: 5.5, movil: false },
   },
   {
-    path: '/clases', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis clases', load: placeholder('clases'),
+    path: '/clases', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis clases', load: () => import('../ui/views/clases.js'),
     nav: { icono: 'users', etiqueta: 'Mis clases', orden: 6, movil: false },
   },
   {
