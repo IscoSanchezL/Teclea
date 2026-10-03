@@ -172,8 +172,11 @@ export async function render({ query }) {
     setTimeout(() => cont.querySelector('[autofocus]')?.focus(), 1800);
   }
 
-  intro();
+  // La introducción arranca en despues(): el router destruye la vista anterior ANTES, y así no borra las escuchas de esta
+  cont.__iniciar = intro;
   return cont;
 }
+
+export function despues(nodo) { nodo?.__iniciar?.(); }
 
 export function destroy() { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; quitarEscucha?.(); quitarEscucha = null; }
