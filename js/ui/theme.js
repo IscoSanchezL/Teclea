@@ -7,7 +7,7 @@
  *  data-font     normal | dislexia
  *  data-colorblind  on | off
  *  data-motion   completo | reducido   (auto se resuelve con prefers-reduced-motion)
- *  data-estilo   ludico | medio | pro  (según el grado: 2°–3° / 4° / 5°–6°)
+ *  data-estilo   ludico | medio | pro  (según el grado: 2°–3° / 4°–5° / 6°)
  */
 import { state, setState, PREFS_POR_DEFECTO } from '../core/state.js';
 import { almacen } from '../core/utils.js';
@@ -19,7 +19,7 @@ const mqMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)');
 /** Estilo visual recomendado por grado. */
 export function estiloPorGrado(grado) {
   if (grado <= 3) return 'ludico';
-  if (grado === 4) return 'medio';
+  if (grado <= 5) return 'medio';
   return 'pro';
 }
 

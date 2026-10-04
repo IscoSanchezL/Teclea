@@ -1,6 +1,6 @@
 /* ============================================================
    TECLEA · Identidad visual POR GRADO
-   data-estilo="ludico" (2.º–3.º) · "medio" (4.º) · "pro" (5.º–6.º)
+   data-estilo="ludico" (2.º–3.º) · "medio" (4.º–5.º) · "pro" (6.º)
    Se carga al final: sobrescribe tokens y componentes.
    ============================================================ */
 
@@ -174,3 +174,90 @@
 @media (max-width: 899.98px) {
   [data-estilo="pro"] .nav-item[aria-current="page"]::before { display: none; }
 }
+
+
+/* ============================================================
+   LÚDICO (2.º–3.º) — MUY infantil y divertido: letra grande y redonda, botones gordos que se menean,
+   globos y estrellas que flotan, tarjetas de colores de caramelo. Se nota en modo claro y oscuro.
+   ============================================================ */
+html[data-estilo="ludico"] { font-size: 112.5%; }
+[data-estilo="ludico"] {
+  --fuente-texto: 'Fredoka', 'Nunito', system-ui, sans-serif;
+  --r-md: 26px; --r-lg: 34px; --r-xl: 42px; --alto-boton: 3.5rem;
+}
+[data-estilo="ludico"] body { font-weight: 500; }
+[data-estilo="ludico"] h1::after { content: ' ✨'; font-size: .8em; }
+[data-estilo="ludico"] .card { border-radius: 34px; }
+[data-estilo="ludico"] .btn { border-radius: 999px; padding-inline: 2rem; font-weight: 700; letter-spacing: .01em; background-image: linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 55%); }
+[data-estilo="ludico"] .btn:hover { animation: lud-meneo .55s ease; }
+[data-estilo="ludico"] .btn--lg.btn--primary:not(:disabled) { animation: lud-pulso 2.4s ease-in-out infinite; }
+[data-estilo="ludico"] .btn--sm { min-height: 2.9rem; }
+@keyframes lud-meneo { 20% { transform: translateY(-3px) rotate(-3deg) scale(1.05); } 60% { transform: translateY(-3px) rotate(3deg) scale(1.05); } }
+@keyframes lud-pulso { 50% { transform: scale(1.045); } }
+/* Tarjetas de colores de caramelo (en claro y oscuro) */
+[data-estilo="ludico"] .tiles .tile:nth-child(1) { background: color-mix(in srgb, #FFC93C 38%, var(--superficie)); }
+[data-estilo="ludico"] .tiles .tile:nth-child(2) { background: color-mix(in srgb, #3DDBB0 34%, var(--superficie)); }
+[data-estilo="ludico"] .tiles .tile:nth-child(3) { background: color-mix(in srgb, #FF7AA2 34%, var(--superficie)); }
+[data-estilo="ludico"] .tiles .tile:nth-child(4) { background: color-mix(in srgb, #8A70FA 34%, var(--superficie)); }
+[data-estilo="ludico"] .tile { border-radius: 30px; }
+[data-estilo="ludico"] .tile:hover { transform: translateY(-6px) rotate(-1.5deg); }
+[data-estilo="ludico"] .nav-item .icono { transition: transform .25s var(--resorte); }
+[data-estilo="ludico"] .nav-item:hover .icono, [data-estilo="ludico"] .nav-item[aria-current="page"] .icono { transform: scale(1.25) rotate(-8deg); }
+[data-estilo="ludico"] .nav-item { font-size: .8rem; font-weight: 700; }
+[data-estilo="ludico"] .chip { font-size: 1.05rem; font-weight: 700; }
+[data-estilo="ludico"] .kv__k { font-size: calc(var(--k) * .4); }
+/* Globos, estrellas y arcoíris que flotan en el fondo */
+[data-estilo="ludico"] .blob { display: block; position: absolute; width: auto; height: auto; min-width: 0; background: none; filter: none; opacity: 1; border-radius: 0; font-size: 3.4rem; line-height: 1; animation: lud-flota 7s ease-in-out infinite; }
+[data-estilo="ludico"] .blob--1 { top: auto; bottom: 22%; left: 3%; right: auto; } [data-estilo="ludico"] .blob--1::before { content: '🎈'; }
+[data-estilo="ludico"] .blob--2 { top: 14%; bottom: auto; right: 4%; left: auto; animation-delay: -2.5s; } [data-estilo="ludico"] .blob--2::before { content: '⭐'; }
+[data-estilo="ludico"] .blob--3 { top: 56%; left: auto; right: 7%; animation-delay: -4.5s; font-size: 3rem; } [data-estilo="ludico"] .blob--3::before { content: '🌈'; }
+@keyframes lud-flota { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-22px) rotate(6deg); } }
+/* Noche de caramelo (modo oscuro): colorida y alegre, no la misma noche violeta de los grandes */
+[data-estilo="ludico"][data-theme="dark"] .fondo__malla {
+  background:
+    radial-gradient(2.5px 2.5px at 12% 22%, #FFE17A, transparent), radial-gradient(2.5px 2.5px at 68% 16%, #fff, transparent), radial-gradient(3px 3px at 88% 40%, #FF9EC6, transparent),
+    radial-gradient(2px 2px at 30% 52%, #fff, transparent), radial-gradient(3px 3px at 52% 34%, #7BE8CC, transparent),
+    linear-gradient(180deg, #2A1B7F 0%, #6B2FA8 52%, #D0509A 100%);
+}
+[data-estilo="ludico"][data-theme="dark"] .nube { opacity: .25; }
+@media (prefers-reduced-motion: reduce) { [data-estilo="ludico"] .blob, [data-estilo="ludico"] .btn { animation: none !important; } }
+@media (max-width: 700px) { [data-estilo="ludico"] .blob { font-size: 2.2rem; opacity: .75; } }
+
+/* ============================================================
+   PRO (6.º) — serio y moderno: vidrio con borde de luz, cuadrícula fina, auroras, números en monoespaciada,
+   botones planos con brillo. Se siente como un panel de control de verdad.
+   ============================================================ */
+[data-estilo="pro"] {
+  --fuente-texto: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 20px;
+  --luz-borde: linear-gradient(135deg, color-mix(in srgb, var(--primario) 70%, transparent), transparent 38%, transparent 62%, color-mix(in srgb, var(--coral-500) 55%, transparent));
+}
+[data-estilo="pro"] .card, [data-estilo="pro"] .tile, [data-estilo="pro"] .topbar, [data-estilo="pro"] .sidebar {
+  border: 1px solid transparent;
+  background: linear-gradient(color-mix(in srgb, var(--superficie) 86%, transparent), color-mix(in srgb, var(--superficie) 86%, transparent)) padding-box, var(--luz-borde) border-box;
+  -webkit-backdrop-filter: blur(14px) saturate(1.25); backdrop-filter: blur(14px) saturate(1.25);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .06) inset, 0 12px 32px -16px rgba(0, 0, 0, .45);
+}
+[data-estilo="pro"] .card--hero { background: linear-gradient(135deg, color-mix(in srgb, var(--primario) 38%, #070B1A), #070B1A 70%) padding-box, var(--luz-borde) border-box; color: #EAF0FF; }
+[data-estilo="pro"] .card--hero::after { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; background: repeating-linear-gradient(0deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 4px); }
+[data-estilo="pro"] .btn { border-radius: 12px; font-family: var(--fuente-titulo); font-weight: 600; letter-spacing: .01em; border: 1px solid rgba(255, 255, 255, .18); box-shadow: 0 0 0 transparent, 0 6px 18px -8px color-mix(in srgb, var(--primario) 70%, transparent); background-image: linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 60%); }
+[data-estilo="pro"] .btn:hover { transform: translateY(-1px); box-shadow: 0 0 22px -2px color-mix(in srgb, var(--primario) 70%, transparent); }
+[data-estilo="pro"] .btn--suave { border-color: var(--borde); background-image: none; }
+[data-estilo="pro"] .tile__num, [data-estilo="pro"] .anillo__centro b, [data-estilo="pro"] .chip b, [data-estilo="pro"] .chip { font-family: var(--fuente-mono); font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+[data-estilo="pro"] h1 { font-weight: 600; letter-spacing: -.02em; }
+[data-estilo="pro"] h1::before { content: ''; display: inline-block; width: .32em; height: .9em; margin-right: .35em; vertical-align: -.08em; border-radius: 2px; background: linear-gradient(var(--primario), var(--coral-500)); box-shadow: 0 0 14px color-mix(in srgb, var(--primario) 70%, transparent); }
+[data-estilo="pro"] .nav-item[aria-current="page"] { background: color-mix(in srgb, var(--primario) 16%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--primario) 45%, transparent), 0 0 20px -6px color-mix(in srgb, var(--primario) 70%, transparent); }
+[data-estilo="pro"] .tile { border-radius: 14px; }
+[data-estilo="pro"] .tile__tit { font-family: var(--fuente-mono); font-size: .7rem; letter-spacing: .08em; }
+[data-estilo="pro"] .kv__teclado { background: linear-gradient(180deg, #0C1226, #090E1F); border-color: rgba(130, 160, 255, .22); transform: none; }
+[data-estilo="pro"] .kv__k { background: linear-gradient(180deg, #1B2547, #131B38); color: #CFE0FF; border: 1px solid color-mix(in srgb, var(--dedo) 55%, transparent); box-shadow: 0 0 10px -4px var(--dedo), inset 0 1px 0 rgba(255, 255, 255, .08); text-shadow: none; font-family: var(--fuente-mono); }
+[data-estilo="pro"] .kv__k--sig { background: color-mix(in srgb, var(--dedo) 80%, #fff 10%) !important; color: #05081A !important; box-shadow: 0 0 22px var(--dedo), 0 0 0 2px #fff !important; }
+[data-estilo="pro"] .fondo__malla { background: radial-gradient(60% 50% at 15% 0%, color-mix(in srgb, var(--primario) 30%, transparent), transparent 70%), radial-gradient(50% 45% at 90% 100%, color-mix(in srgb, var(--coral-500) 20%, transparent), transparent 70%), var(--fondo); animation: none; }
+[data-estilo="pro"]:not([data-theme="dark"]) .card, [data-estilo="pro"]:not([data-theme="dark"]) .tile, [data-estilo="pro"]:not([data-theme="dark"]) .topbar, [data-estilo="pro"]:not([data-theme="dark"]) .sidebar { background: linear-gradient(rgba(255, 255, 255, .88), rgba(255, 255, 255, .88)) padding-box, var(--luz-borde) border-box; box-shadow: 0 10px 28px -16px rgba(20, 30, 90, .3); }
+/* Tarjetas de caramelo en modo oscuro: más color y texto claro (si no, se ven turbias) */
+[data-estilo="ludico"][data-theme="dark"] .tiles .tile:nth-child(1) { background: color-mix(in srgb, #FFC93C 52%, #2A1B7F); }
+[data-estilo="ludico"][data-theme="dark"] .tiles .tile:nth-child(2) { background: color-mix(in srgb, #3DDBB0 48%, #2A1B7F); }
+[data-estilo="ludico"][data-theme="dark"] .tiles .tile:nth-child(3) { background: color-mix(in srgb, #FF7AA2 52%, #2A1B7F); }
+[data-estilo="ludico"][data-theme="dark"] .tiles .tile:nth-child(4) { background: color-mix(in srgb, #8A70FA 60%, #2A1B7F); }
+[data-estilo="ludico"][data-theme="dark"] .inicio--ludico .tile, [data-estilo="ludico"][data-theme="dark"] .inicio--ludico .tile .tile__tit, [data-estilo="ludico"][data-theme="dark"] .inicio--ludico .tile .suave, [data-estilo="ludico"][data-theme="dark"] .inicio--ludico .tile small { color: #fff !important; }
+[data-estilo="pro"]:not([data-theme="dark"]) .card--hero { background: linear-gradient(135deg, color-mix(in srgb, var(--primario) 55%, #0B1230), #0B1230 75%) padding-box, var(--luz-borde) border-box; box-shadow: 0 18px 40px -18px rgba(20, 30, 90, .55); }
