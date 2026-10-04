@@ -50,7 +50,7 @@ export async function render({ query }) {
       fila('Archivos guardados en el dispositivo', `${d.archivos} · ${d.usoMB} MB`),
       fila('Versión de la app', `v${CONFIG.version} · caché ${d.cache}`),
       fila('Docentes pendientes de aprobar', String(pend.length), pend.length ? 'alerta' : 'ok'));
-    const botonCat = cat && !cat.completo ? h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.sembrarCatalogos(); toast(`Catálogos publicados (${n})`); await pintar(); } catch (er) { toast(er.message || 'No se pudo publicar', { tipo: 'error' }); e.currentTarget.disabled = false; } } }, 'Publicar catálogos ahora') : null;
+    const botonCat = cat ? h('button', { class: `btn ${cat.completo ? 'btn--suave' : 'btn--primary'} btn--sm`, type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.sembrarCatalogos(); toast(`Catálogos publicados (${n})`); await pintar(); } catch (er) { toast(er.message || 'No se pudo publicar', { tipo: 'error' }); e.currentTarget.disabled = false; } } }, cat.completo ? 'Volver a publicar catálogos' : 'Publicar catálogos ahora') : null;
     return [
       pend.length ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, `Hay ${pend.length} solicitud${pend.length === 1 ? '' : 'es'} de docentes por revisar.`), h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => { tab = 'docentes'; pintar(); } }, 'Revisar')) : null,
       h('div', { class: 'rejilla-2' },
