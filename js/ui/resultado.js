@@ -51,6 +51,18 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
     fila, grid, cola, zonaMedallas,
     h('div', { class: 'res__acciones fila fila--envuelve' }, acciones.map((a) => h('button', { class: `btn ${a.clase || 'btn--suave'}`, type: 'button', onclick: a.onclick, autofocus: a.principal ? true : null }, a.icono ? icono(a.icono, { tam: 18 }) : null, a.texto))));
 
+  // 2.º grado: la mascota en 3D baila y lanza confeti según las estrellas
+  if (infantil && document.documentElement.dataset.grado === '2') {
+    import('./escena3d.js').then(async (m) => {
+      if (!m.soporta3D()) return;
+      const e = await m.crear3D({ tipo: 'resultado', usuario: state.user, ancho: 230, alto: 250 });
+      const slot = raiz.querySelector('.res__amigo');
+      if (!e || !slot?.isConnected) { e?.destruir(); return; }
+      slot.classList.add('res__amigo--3d'); slot.replaceChildren(e.el);
+      setTimeout(() => e.reaccionar(estrellas == null || estrellas >= 3 ? 'baila' : estrellas === 2 ? 'gira' : estrellas === 1 ? 'salta' : 'ay'), 500);
+    }).catch((er) => console.warn('[3d]', er));
+  }
+
   // Estrellas una a una (con sonido) y confeti si hubo 3
   if (estrellas != null) {
     const nodos = [...raiz.querySelectorAll('.res__estrella--llena')];

@@ -25,14 +25,14 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
 
   // ── Compañero (solo 2.º y 3.º): tu mascota anima, celebra cada racha de aciertos y consuela al fallar ──
   const infantil = document.documentElement.dataset.estilo === 'ludico';
-  let amigo = null, burbuja = null, racha = 0, hablaFin = 0;
+  let amigo = null, burbuja = null, racha = 0, hablaFin = 0, escena3d = null, destruido = false;
   const FRASES_RACHA = ['¡Súper! 🌟', '¡Wow, qué rápido! 🚀', '¡Sigue así! 💪', '¡Eres genial! 🎉', '¡Increíble! ✨', '¡Qué bien escribes! 👏'];
   const FRASES_ERROR = ['¡Casi! Tú puedes 💪', 'Sin problema, ¡otra vez! 😊', '¡Con calma, vas muy bien! 🌈'];
   const azar = (l) => l[Math.floor(Math.random() * l.length)];
   function decir(texto, estado, ms = 1600) {
     if (!amigo) return;
     burbuja.textContent = texto; burbuja.classList.add('ej__burbuja--ver');
-    amigo.dataset.estado = estado || ''; clearTimeout(hablaFin);
+    amigo.dataset.estado = estado || ''; clearTimeout(hablaFin); if (estado) escena3d?.reaccionar(estado);
     hablaFin = setTimeout(() => { burbuja.classList.remove('ej__burbuja--ver'); amigo.dataset.estado = ''; }, ms);
   }
   function animarAmigo(ev) {
@@ -79,6 +79,15 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
     amigo = h('div', { class: 'ej__amigo', 'aria-hidden': 'true' }, personajeSVG(especieDe(u?.avatar), { acc: u?.avatar?.accesorios || [], cabeza: true, tam: 96 }));
     burbuja = h('div', { class: 'ej__burbuja', 'aria-hidden': 'true' });
     amigo.append(burbuja);
+    if (document.documentElement.dataset.grado === '2') {
+      import('../ui/escena3d.js').then(async (m) => {
+        if (!m.soporta3D()) return;
+        const e = await m.crear3D({ tipo: 'companero', usuario: u, ancho: 150, alto: 172 });
+        if (!e) return;
+        if (!amigo.isConnected && destruido) { e.destruir(); return; }
+        amigo.classList.add('ej__amigo--3d'); amigo.querySelector('.pj3d')?.remove(); amigo.prepend(e.el); escena3d = e;
+      }).catch((er) => console.warn('[3d]', er));
+    }
   }
   const raiz = h('section', { class: 'ej', 'aria-label': titulo || 'Ejercicio' }, hud, zonaTexto, aviso, teclado.el, amigo);
 
@@ -125,6 +134,6 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
   return {
     el: raiz, motor, teclado,
     enfocar: () => setTimeout(() => entrada.enfocar(), 60),
-    destruir() { clearInterval(intervalo); entrada?.destruir(); },
+    destruir() { destruido = true; clearInterval(intervalo); entrada?.destruir(); escena3d?.destruir(); },
   };
 }

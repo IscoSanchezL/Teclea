@@ -29,6 +29,8 @@ async function* recorrer(dir) {
 const archivos = [...RAIZ_ARCHIVOS];
 for (const c of CARPETAS) {
   for await (const f of recorrer(join(RAIZ, c))) {
+    // three.js (3D de 2.º grado) pesa ~650 KB: no se baja con todo; se guarda en el dispositivo la primera vez que se usa
+    if (relative(RAIZ, f).split('\\').join('/').startsWith('js/vendor/')) continue;
     if (EXT_OK.has(extname(f).toLowerCase())) archivos.push(relative(RAIZ, f).split('\\').join('/'));
   }
 }

@@ -42,12 +42,14 @@ export function aplicarPrefs(prefs = state.prefs) {
 export function aplicarEstiloUsuario(u) {
   const staff = u && (u.rol === 'docente' || u.rol === 'admin');
   document.documentElement.dataset.estilo = staff ? 'staff' : u?.grado ? estiloPorGrado(u.grado) : 'medio';
+  document.documentElement.dataset.grado = !staff && u?.grado ? String(u.grado) : '';
   aplicarPrefs();
 }
 
 /** Vista previa del estilo de un grado (pantalla de bienvenida). */
 export function aplicarEstiloGrado(grado) {
   document.documentElement.dataset.estilo = grado ? estiloPorGrado(grado) : 'medio';
+  document.documentElement.dataset.grado = grado ? String(grado) : '';
   aplicarPrefs(); // el tema "automático" depende del estilo
 }
 

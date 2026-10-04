@@ -1,5 +1,5 @@
 {
-  "version": "acae369c3e7e",
+  "version": "2cec9e14d8ed",
   "archivos": [
     "assets/assets.json",
     "assets/img/apple-touch-icon.png",
@@ -85,6 +85,7 @@
     "js/ui/datos-demo.js",
     "js/ui/decoracion.js",
     "js/ui/efectos.js",
+    "js/ui/escena3d.js",
     "js/ui/graficas.js",
     "js/ui/hero3d.js",
     "js/ui/icons.js",
@@ -126,7 +127,6 @@
     "js/ui/views/proximamente.js",
     "js/ui/views/tienda.js",
     "js/ui/views/unirse.js",
-    "js/vendor/qrcode.js",
     "manifest.webmanifest"
   ]
 }

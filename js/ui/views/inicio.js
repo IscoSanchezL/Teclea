@@ -132,6 +132,17 @@ export async function render() {
       h('p', { class: 'suave' }, nivel.siguiente ? `${nivel.siguiente.xp - u.xp} XP para “${nivel.siguiente.nombre}”` : '¡Nivel máximo!'),
       h('a', { class: 'btn btn--sun btn--lg', href: siguiente ? `#/leccion?id=${siguiente.id}` : '#/practica' }, icono('play', { tam: 20 }), hechas ? 'Continuar aventura' : 'Empezar mi primera lección')),
     h('div', { class: 'inicio__hero-anillo' }, anilloNivel));
+  // 2.º grado: la mascota en 3D de verdad (se carga aparte; si el equipo no puede, queda el anillo de siempre)
+  if (document.documentElement.dataset.grado === '2') {
+    import('../escena3d.js').then(async (m) => {
+      if (!m.soporta3D()) return;
+      const e = await m.crear3D({ tipo: 'hero', usuario: state.user, ancho: 300, alto: 300 });
+      const slot = hero.querySelector('.inicio__hero-anillo');
+      for (let i = 0; i < 80 && slot && !slot.isConnected; i++) await new Promise((r) => setTimeout(r, 50)); // el router aún puede estar montando la vista
+      if (e && slot?.isConnected) { slot.classList.add('inicio__hero-anillo--3d'); slot.replaceChildren(e.el); slot.addEventListener('click', () => e.reaccionar('gira')); }
+      else e?.destruir();
+    }).catch((er) => console.warn('[3d]', er));
+  }
 
   const coach = h('section', { class: 'card coach', 'aria-label': 'Entrenador de Tecli' },
     h('header', { class: 'coach__cab' }, h('span', { class: 'coach__ic' }, icono('sparkle', { tam: 22 })),

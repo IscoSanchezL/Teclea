@@ -207,3 +207,10 @@
 .res__amigo .pj3d, .res__amigo svg { display: block; width: 100%; height: auto; }
 @media (max-width: 700px) { .ej__amigo { width: 4.2rem; bottom: 4.6rem; } .ej__burbuja { font-size: .85rem; min-width: 7rem; } }
 @media (prefers-reduced-motion: reduce) { .ej__amigo, .res__amigo { animation: none; } }
+/* 3D (2.º grado) */
+.ej__amigo--3d { width: 150px; right: clamp(.2rem, 1.5vw, 1.2rem); bottom: clamp(.2rem, 2vh, 1rem); }
+.ej__amigo--3d .escena3d { display: block; width: 150px; height: 172px; filter: drop-shadow(0 8px 10px rgba(20, 10, 70, .25)); }
+.ej__amigo--3d .ej__burbuja { right: 62%; bottom: 74%; }
+.res__amigo--3d { width: 230px; margin-block: -1rem; animation: none; }
+.res__amigo--3d .escena3d { display: block; width: 230px; height: 250px; max-width: 100%; }
+@media (max-width: 700px) { .ej__amigo--3d { width: 96px; } .ej__amigo--3d .escena3d { width: 96px; height: 110px; } .res__amigo--3d { width: 170px; } .res__amigo--3d .escena3d { width: 170px; height: 185px; } }

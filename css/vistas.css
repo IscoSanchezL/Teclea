@@ -353,3 +353,6 @@
 .rejilla-avatares:has(.opcion-mascota) { grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); }
 .opcion-mascota { aspect-ratio: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 22px; padding: .6rem .4rem; gap: .2rem; font: 800 .9rem var(--fuente-titulo); }
 .opcion-mascota svg { display: block; width: 5rem; height: auto; margin-bottom: .35rem; }
+.inicio__hero-anillo--3d { width: 300px; height: 300px; flex: none; margin: -2.5rem -1rem -2.5rem 0; cursor: pointer; }
+.inicio__hero-anillo--3d .escena3d { display: block; width: 100% !important; height: 100% !important; filter: drop-shadow(0 14px 18px rgba(20, 10, 70, .3)); }
+@media (max-width: 800px) { .inicio__hero-anillo--3d { width: 220px; height: 220px; margin: -1rem auto -1.5rem; } }
