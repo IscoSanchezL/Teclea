@@ -6,7 +6,7 @@
 :root {
   /* ── Paleta base ── */
   --violeta-50: #F1EEFF;  --violeta-100: #E2DBFF; --violeta-200: #C5B8FF; --violeta-300: #A794FF;
-  --violeta-400: #8A70FA; --violeta-500: #6C4CF5; --violeta-600: #5636E0; --violeta-700: #4527B8; --violeta-900: #1D1250;
+  --violeta-400: #8A70FA; --violeta-500: #6C4CF5; --violeta-600: #5636E0; --violeta-700: #4527B8; --violeta-800: #2B1A7A; --violeta-900: #1D1250;
   --coral-300: #FFB1A5;   --coral-400: #FF8A7A;   --coral-500: #FF6B5B;   --coral-600: #E84F3F;
   --menta-300: #7BE8CC;   --menta-400: #3DDBB0;   --menta-500: #18BE94;   --menta-700: #0B7A60;
   --sol-300: #FFE17A;     --sol-400: #FFD04A;     --sol-500: #FFB800;

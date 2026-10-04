@@ -16,7 +16,7 @@
 /* ── Juegos: menú ── */
 .juegos__cab { margin-bottom: var(--e4); }
 .juegos__rejilla { display: grid; gap: var(--e4); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
-.juego-tarjeta { --g1: #8A70FA; --g2: #4F6BFF; position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; padding: var(--e5); text-align: left; color: #fff; border: 0; border-radius: var(--r-xl, 1.5rem); cursor: pointer;
+.juego-tarjeta { --g1: var(--violeta-400); --g2: #4F6BFF; position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; padding: var(--e5); text-align: left; color: #fff; border: 0; border-radius: var(--r-xl, 1.5rem); cursor: pointer;
   background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--g1) 70%, #fff) 0%, transparent 55%), linear-gradient(145deg, var(--g1), var(--g2)); box-shadow: 0 10px 28px -12px var(--g2); transition: transform .25s var(--resorte), box-shadow .25s; overflow: hidden; }
 .juego-tarjeta::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,.18), transparent 40%); pointer-events: none; }
 .juego-tarjeta:hover { transform: translateY(-5px) rotate(-.6deg); box-shadow: 0 18px 36px -14px var(--g2); }
@@ -124,11 +124,11 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 
 /* Campo de juego con contraste claro (palabras bien visibles en cualquier tema) */
 .jg__campo { background: radial-gradient(90% 70% at 50% 0%, #4B3AC7 0%, transparent 70%), linear-gradient(180deg, #1B1745, #2E2A78); border-color: rgba(255,255,255,.18); }
-.jg__palabra { color: #fff; background: linear-gradient(135deg, #8A70FA, #4F6BFF); border: 2px solid rgba(255,255,255,.35); box-shadow: 0 6px 18px -6px rgba(0,0,0,.5); }
+.jg__palabra { color: #fff; background: linear-gradient(135deg, var(--violeta-400), #4F6BFF); border: 2px solid rgba(255,255,255,.35); box-shadow: 0 6px 18px -6px rgba(0,0,0,.5); }
 .jg__palabra--sel { background: linear-gradient(135deg, #FFD04A, #FF8A3D); color: #2A1E00; border-color: #fff; }
 
 /* ───────── Mi cuarto: personaje, mascota y decoración ───────── */
-.cuarto { --a1: #8A70FA; --a2: #4527B8; --piso1: #C9A27A; --piso2: #8E6A47; container-type: inline-size; position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 22px; overflow: hidden; isolation: isolate;
+.cuarto { --a1: var(--violeta-400); --a2: var(--violeta-700); --piso1: #C9A27A; --piso2: #8E6A47; container-type: inline-size; position: relative; width: 100%; aspect-ratio: 16 / 10; border-radius: 22px; overflow: hidden; isolation: isolate;
   background: linear-gradient(180deg, color-mix(in srgb, var(--a1) 70%, #fff), color-mix(in srgb, var(--a2) 55%, #fff)); box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .35), inset 0 -20px 40px rgba(20, 10, 70, .25), 0 12px 24px -10px rgba(20, 10, 70, .5); }
 .cuarto[data-fondo="coral"] { --a1: #FF9A8A; --a2: #E84F3F; } .cuarto[data-fondo="menta"] { --a1: #5FE3C0; --a2: #0B8F6D; } .cuarto[data-fondo="sol"] { --a1: #FFD04A; --a2: #E39A00; }
 .cuarto[data-fondo="cielo"] { --a1: #6CC4FF; --a2: #1E78C8; } .cuarto[data-fondo="noche"] { --a1: #3A3F7A; --a2: #12163A; }
@@ -141,7 +141,7 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 .cuarto[data-escena="espacio"] { background: radial-gradient(circle at 20% 30%, #fff 0 .25%, transparent .5%), radial-gradient(circle at 70% 18%, #fff 0 .3%, transparent .6%), radial-gradient(circle at 85% 60%, #fff 0 .25%, transparent .5%), radial-gradient(circle at 40% 70%, #fff 0 .2%, transparent .45%), radial-gradient(ellipse at 80% 20%, #6B3FD1, transparent 55%), linear-gradient(180deg, #0B0B3A, #1B1370); --piso1: #3C3A78; --piso2: #1E1B55; }
 .cuarto[data-escena="playa"] { background: linear-gradient(180deg, #7FD3FF 0 45%, #38B6E8 45% 62%, #F6DFA6 62%); --piso1: #F6DFA6; --piso2: #E3B873; }
 .cuarto[data-escena="bosque"] { background: radial-gradient(circle at 15% 60%, #2E7D4F 0 14%, transparent 14.5%), radial-gradient(circle at 88% 55%, #256B43 0 16%, transparent 16.5%), linear-gradient(180deg, #BFEFD2, #7FCB9C); --piso1: #5FAE6E; --piso2: #3C8650; }
-.cuarto[data-escena="ciudad"] { background: linear-gradient(90deg, transparent 6%, #3B2F7A 6% 14%, transparent 14% 20%, #2B2166 20% 31%, transparent 31% 62%, #3B2F7A 62% 72%, transparent 72% 78%, #2B2166 78% 90%, transparent 90%) bottom / 100% 55% no-repeat, linear-gradient(180deg, #FF9A6B, #FF6B9A 55%, #7C5CFF); --piso1: #4A3D8F; --piso2: #2B2166; }
+.cuarto[data-escena="ciudad"] { background: linear-gradient(90deg, transparent 6%, #3B2F7A 6% 14%, transparent 14% 20%, #2B2166 20% 31%, transparent 31% 62%, #3B2F7A 62% 72%, transparent 72% 78%, #2B2166 78% 90%, transparent 90%) bottom / 100% 55% no-repeat, linear-gradient(180deg, #FF9A6B, #FF6B9A 55%, var(--violeta-400)); --piso1: #4A3D8F; --piso2: #2B2166; }
 .cuarto[data-escena="arcade"] { background: linear-gradient(180deg, #1A0B45, #3A1380); --piso1: #2B0F66; --piso2: #14063A; }
 .cuarto[data-escena="arcade"] .cuarto__piso { background: repeating-linear-gradient(90deg, rgba(0, 255, 240, .5) 0 .4%, transparent .4% 10%), repeating-linear-gradient(0deg, rgba(255, 0, 200, .45) 0 2%, transparent 2% 25%), linear-gradient(180deg, var(--piso1), var(--piso2)); }
 .cuarto[data-escena]:not([data-escena=""]) .cuarto__ventana { display: none; }

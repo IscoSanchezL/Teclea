@@ -5,7 +5,7 @@
 /* ───────── Escena 3D ───────── */
 .h3d { position: relative; width: 100%; max-width: 640px; aspect-ratio: 1.15; margin-inline: auto; perspective: 1400px; }
 .h3d__halo { position: absolute; inset: 8% 4%; border-radius: 50%; filter: blur(60px); opacity: .75;
-  background: conic-gradient(from var(--ang), #6C4CF5, #22D3EE, #A3E635, #FF6B5B, #6C4CF5); animation: ang-gira 18s linear infinite; }
+  background: conic-gradient(from var(--ang), var(--violeta-500), #22D3EE, #A3E635, #FF6B5B, var(--violeta-500)); animation: ang-gira 18s linear infinite; }
 .h3d__plano { position: absolute; inset: 0; display: grid; place-items: center; transform-style: preserve-3d; }
 .h3d__kb { display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 28px; transform: rotateX(58deg) rotateZ(-22deg) translateY(2%);
   transform-style: preserve-3d; background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); border: 1px solid rgba(255,255,255,.22);
@@ -14,10 +14,10 @@
 .h3d__fila--1 { margin-left: 22px; } .h3d__fila--2 { margin-left: 46px; }
 .h3d__k { display: grid; place-items: center; width: clamp(22px, 4vw, 40px); aspect-ratio: 1; border-radius: 22%;
   font: 700 clamp(.7rem, 1.7vw, 1.05rem) var(--fuente-titulo); color: #1D1A3A; transform: translateZ(12px);
-  background: linear-gradient(160deg, color-mix(in srgb, var(--dedo, #8A70FA) 55%, #fff), var(--dedo, #8A70FA));
-  box-shadow: 0 8px 0 color-mix(in srgb, var(--dedo, #8A70FA) 55%, #000), 0 14px 18px rgba(0,0,0,.3); transition: transform .12s, box-shadow .12s, filter .12s; }
+  background: linear-gradient(160deg, color-mix(in srgb, var(--dedo, var(--violeta-400)) 55%, #fff), var(--dedo, var(--violeta-400)));
+  box-shadow: 0 8px 0 color-mix(in srgb, var(--dedo, var(--violeta-400)) 55%, #000), 0 14px 18px rgba(0,0,0,.3); transition: transform .12s, box-shadow .12s, filter .12s; }
 .h3d__k--espacio { width: clamp(120px, 22vw, 220px); aspect-ratio: auto; height: clamp(22px, 4vw, 40px); border-radius: 14px; }
-.h3d__k--on { transform: translateZ(2px); box-shadow: 0 2px 0 color-mix(in srgb, var(--dedo, #8A70FA) 55%, #000), 0 0 26px var(--dedo, #8A70FA); filter: brightness(1.25); }
+.h3d__k--on { transform: translateZ(2px); box-shadow: 0 2px 0 color-mix(in srgb, var(--dedo, var(--violeta-400)) 55%, #000), 0 0 26px var(--dedo, var(--violeta-400)); filter: brightness(1.25); }
 .h3d__card { position: absolute; display: flex; flex-direction: column; gap: 2px; padding: .7rem .9rem; border-radius: 18px; color: #fff;
   background: linear-gradient(145deg, rgba(255,255,255,.2), rgba(255,255,255,.07)); border: 1px solid rgba(255,255,255,.28);
   backdrop-filter: blur(14px) saturate(1.4); box-shadow: 0 18px 40px rgba(0,0,0,.28); animation: flotar 6s ease-in-out infinite; }
@@ -66,7 +66,7 @@
 @media (min-width: 900px) { .bento { grid-template-columns: repeat(6, 1fr); } .bento__a { grid-column: span 3; } .bento__b { grid-column: span 3; } .bento__c, .bento__d, .bento__e { grid-column: span 2; } .bento__f { grid-column: span 6; } }
 .bento__t { display: flex; flex-direction: column; gap: .5rem; padding: 1.4rem; border-radius: 24px; background: var(--superficie); border: 1px solid var(--borde); box-shadow: var(--sombra-1); overflow: hidden; }
 .bento__t h3 { margin: 0; font-size: 1.2rem; } .bento__t p { margin: 0; color: var(--texto-suave); font-size: .95rem; }
-.bento__ic { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; border-radius: 14px; color: #fff; background: linear-gradient(135deg, var(--c1, #8A70FA), var(--c2, #4527B8)); box-shadow: 0 8px 18px -6px var(--c2, #4527B8); }
+.bento__ic { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; border-radius: 14px; color: #fff; background: linear-gradient(135deg, var(--c1, var(--violeta-400)), var(--c2, var(--violeta-700))); box-shadow: 0 8px 18px -6px var(--c2, var(--violeta-700)); }
 .bento__vis { margin-top: auto; padding-top: .8rem; }
 .bento__f { flex-direction: row; align-items: center; flex-wrap: wrap; justify-content: space-between; background: linear-gradient(120deg, var(--superficie), color-mix(in srgb, var(--primario) 10%, var(--superficie))); }
 
@@ -101,4 +101,4 @@
 
 .puntos { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; }
 .puntos i { aspect-ratio: 1; border-radius: 50%; background: var(--superficie-2); border: 1px solid var(--borde); }
-.puntos i.on { background: linear-gradient(135deg, #8A70FA, #22D3EE); border-color: transparent; box-shadow: 0 0 10px rgba(138,112,250,.5); }
+.puntos i.on { background: linear-gradient(135deg, var(--violeta-400), #22D3EE); border-color: transparent; box-shadow: 0 0 10px rgba(138,112,250,.5); }

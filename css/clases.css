@@ -58,7 +58,7 @@
 .boletin__tabla { width: 100%; border-collapse: collapse; margin: 4mm 0; }
 .boletin__tabla th, .boletin__tabla td { border: 1px solid #888; padding: 2mm 3mm; text-align: left; }
 .boletin__pie { font-size: .8rem; color: #444; margin-top: 8mm; }
-.certificado { text-align: center; border: 6px double #6C4CF5; padding: 16mm 10mm; min-height: 150mm; display: flex; flex-direction: column; justify-content: center; gap: 6mm; }
+.certificado { text-align: center; border: 6px double var(--violeta-500); padding: 16mm 10mm; min-height: 150mm; display: flex; flex-direction: column; justify-content: center; gap: 6mm; }
 .certificado h1 { font: 700 2.4rem Georgia, serif; }
 .certificado__nombre { font: italic 700 2.2rem Georgia, serif; border-bottom: 2px solid #000; display: inline-block; padding: 0 12mm 2mm; align-self: center; }
 

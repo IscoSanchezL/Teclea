@@ -5,6 +5,7 @@
 import { CONFIG, firebaseConfigurado } from '../../core/config.js';
 import { state } from '../../core/state.js';
 import { marca, guardarMarca } from '../../core/marca.js';
+import { PRESETS, PALETA_ORIGINAL, aplicarPaleta, hexValido, aHSL, deHSL, armonias, contraste } from '../../core/paleta.js';
 import { h, descargarJSON } from '../../core/utils.js';
 import * as A from '../../db/admin.js';
 import { imagenLibre } from '../imagen.js';
@@ -13,7 +14,7 @@ import { toast, confirmar, abrirCapa } from '../overlay.js';
 import { campo, interruptor } from '../componentes.js';
 import { textoUltima } from '../../db/analitica.js';
 
-const TABS = [['resumen', 'Resumen'], ['docentes', 'Docentes'], ['marca', 'Marca'], ['ajustes', 'Ajustes'], ['datos', 'Datos y respaldo']];
+const TABS = [['resumen', 'Resumen'], ['docentes', 'Docentes'], ['marca', 'Marca'], ['colores', 'Colores'], ['ajustes', 'Ajustes'], ['datos', 'Datos y respaldo']];
 const fila = (clave, valor, estado) => h('li', { class: 'estado-fila' }, h('span', {}, clave), h('strong', { class: estado ? `estado--${estado}` : '' }, valor));
 const fechaHora = (ms) => (ms ? new Date(ms).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
 
@@ -112,6 +113,67 @@ export async function render({ query }) {
       h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary', type: 'submit' }, 'Guardar marca'))));
   }
 
+  /* ═════ Colores de la interfaz (paleta avanzada) ═════ */
+  function coloresTab() {
+    const guardada = marca.colores && hexValido(marca.colores.primario) && hexValido(marca.colores.acento) ? { ...marca.colores } : null;
+    let c = { ...(guardada || PALETA_ORIGINAL) };
+    const salida = h('div', { class: 'pila' });
+    const vivo = () => aplicarPaleta(c.primario.toUpperCase() === PALETA_ORIGINAL.primario && c.acento.toUpperCase() === PALETA_ORIGINAL.acento ? null : c); // vista previa en toda la plataforma
+    const sync = (origen) => { vivo(); if (origen !== 'pintar') pintar(); };
+    const cambiar = (clave, valor) => { if (!hexValido(valor)) return; c[clave] = valor.toUpperCase(); sync(); };
+
+    const entradaColor = (clave, etiqueta, ayuda) => {
+      const sel = h('input', { type: 'color', value: c[clave], 'aria-label': `${etiqueta}: selector de color`, class: 'paleta__selector', oninput: (e) => { c[clave] = e.target.value.toUpperCase(); vivo(); hex.value = c[clave]; refrescar(); } });
+      const hex = h('input', { type: 'text', class: 'input paleta__hex', value: c[clave], maxlength: 7, spellcheck: false, 'aria-label': `${etiqueta}: código hexadecimal`, onchange: (e) => { let v = e.target.value.trim(); if (!v.startsWith('#')) v = `#${v}`; if (hexValido(v)) cambiar(clave, v); else { toast('Escribe un color como #6C4CF5', { tipo: 'error' }); e.target.value = c[clave]; } } });
+      return h('div', { class: 'pila paleta__color' }, h('strong', {}, etiqueta), h('div', { class: 'fila' }, sel, hex), h('small', { class: 'suave' }, ayuda));
+    };
+
+    const deslizador = (nombre, clave, max, valor, fondo) => h('label', { class: 'paleta__desliz' }, h('span', {}, nombre),
+      h('input', { type: 'range', min: 0, max, value: valor, style: { background: fondo }, 'aria-label': `${nombre} del color principal`, oninput: (e) => { const hsl = aHSL(c.primario); hsl[clave] = Number(e.target.value); c.primario = deHSL(hsl.h, hsl.s, hsl.l); vivo(); refrescar(false); } }),
+      h('output', {}, String(valor)));
+
+    const contenedorControles = h('div', { class: 'pila' }), contenedorSugerencias = h('div', { class: 'pila' }), indicador = h('div', { class: 'paleta__contraste', 'aria-live': 'polite' });
+    const refrescar = (rehacerControles = true) => {
+      const hsl = aHSL(c.primario);
+      if (rehacerControles) contenedorControles.replaceChildren(
+        deslizador('Matiz', 'h', 360, hsl.h, 'linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)'),
+        deslizador('Intensidad', 's', 100, hsl.s, `linear-gradient(90deg, ${deHSL(hsl.h, 0, hsl.l)}, ${deHSL(hsl.h, 100, hsl.l)})`),
+        deslizador('Luminosidad', 'l', 100, hsl.l, `linear-gradient(90deg,#000, ${deHSL(hsl.h, hsl.s, 50)}, #fff)`));
+      const arm = armonias(c.primario);
+      contenedorSugerencias.replaceChildren(...Object.entries(arm).map(([nombre, lista]) => h('div', { class: 'fila fila--envuelve' }, h('small', { class: 'paleta__arm' }, nombre),
+        ...lista.map((col) => h('button', { type: 'button', class: 'paleta__muestra', style: { background: col }, title: `Usar ${col} como color de acento`, 'aria-label': `Usar ${col} como acento (${nombre})`, onclick: () => cambiar('acento', col) })))));
+      const r = contraste(c.primario, '#FFFFFF'), ok = r >= 4.5;
+      indicador.className = `paleta__contraste ${ok ? 'paleta__contraste--ok' : 'paleta__contraste--alerta'}`;
+      indicador.textContent = ok ? `✔ Texto blanco sobre el color principal: ${r.toFixed(1)}:1 (se lee bien)` : `⚠ Este color es muy claro (${r.toFixed(1)}:1): el texto de los botones se pondrá oscuro automáticamente.`;
+    };
+
+    const presets = h('div', { class: 'paleta__presets', role: 'group', 'aria-label': 'Paletas listas' }, PRESETS.map((p) => h('button', { type: 'button', class: 'paleta__preset', 'aria-label': `Paleta ${p.nombre}`, onclick: () => { c = { primario: p.primario, acento: p.acento }; sync(); } },
+      h('span', { class: 'paleta__duo' }, h('i', { style: { background: p.primario } }), h('i', { style: { background: p.acento } })), h('span', {}, p.nombre))));
+
+    const principal = entradaColor('primario', 'Color principal', 'Botones, menús, encabezados y degradados.');
+    const acento = entradaColor('acento', 'Color de acento', 'Llamas de racha, destacados y detalles.');
+    const muestra = h('div', { class: 'paleta__vista card' }, h('strong', {}, 'Así se ve'), h('div', { class: 'fila fila--envuelve' },
+      h('button', { class: 'btn btn--primary btn--sm', type: 'button' }, 'Botón principal'), h('button', { class: 'btn btn--coral btn--sm', type: 'button' }, 'Acento'), h('span', { class: 'chip' }, '★ 1.250'), h('span', { class: 'etiqueta' }, 'Nivel 4')),
+      h('div', { class: 'paleta__barra' }, h('span', {})));
+
+    function pintar() { principal.querySelector('.paleta__selector').value = c.primario; principal.querySelector('.paleta__hex').value = c.primario; acento.querySelector('.paleta__selector').value = c.acento; acento.querySelector('.paleta__hex').value = c.acento; refrescar(); }
+    refrescar();
+
+    return h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, 'Colores de la interfaz'), h('span', { class: 'suave' }, 'cambian para todos los usuarios, en modo claro y oscuro')),
+      h('p', { class: 'suave' }, 'Elige una paleta lista o crea la tuya. Mientras ajustas, la plataforma completa se muestra con esos colores; solo se guarda para todos al pulsar “Guardar colores”. Los estudiantes que compraron un tema de color en la tienda conservan el suyo.'),
+      h('strong', {}, 'Paletas listas'), presets,
+      h('div', { class: 'rejilla-2' }, h('div', { class: 'pila' }, principal, h('strong', {}, 'Ajuste fino del color principal'), contenedorControles, indicador), h('div', { class: 'pila' }, acento, h('strong', {}, 'Sugerencias de acento'), contenedorSugerencias, muestra)),
+      h('div', { class: 'fila fila--fin fila--envuelve' },
+        h('button', { class: 'btn btn--suave', type: 'button', onclick: () => { c = { ...PALETA_ORIGINAL }; sync(); } }, 'Colores originales'),
+        h('button', { class: 'btn btn--suave', type: 'button', onclick: () => { c = { ...(guardada || PALETA_ORIGINAL) }; sync(); } }, 'Deshacer cambios'),
+        h('button', { class: 'btn btn--primary', type: 'button', onclick: async (e) => {
+          e.currentTarget.disabled = true;
+          const original = c.primario.toUpperCase() === PALETA_ORIGINAL.primario && c.acento.toUpperCase() === PALETA_ORIGINAL.acento;
+          try { await guardarMarca({ colores: original ? null : c }); A.auditar('Cambió los colores', original ? 'originales' : `${c.primario} / ${c.acento}`); toast('Colores guardados para todos'); } catch (er) { toast(er.message || 'No se pudo guardar', { tipo: 'error' }); }
+          e.currentTarget.disabled = false;
+        } }, 'Guardar colores')), salida);
+  }
+
   /* ═════ Ajustes ═════ */
   async function ajustesTab() {
     const aj = await A.leerAjustes();
@@ -149,7 +211,7 @@ export async function render({ query }) {
       !nube ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, 'Modo demostración: los cambios se guardan solo en este navegador. Conecta Firebase con el asistente de configuración.')) : null,
       h('div', { class: 'tabs tabs--5 tabs--staff', role: 'tablist' }, TABS.map(([id, t]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, t))),
       cargando].filter(Boolean));
-    const cont = tab === 'resumen' ? await resumen() : tab === 'docentes' ? await docentes() : tab === 'marca' ? marcaTab() : tab === 'ajustes' ? await ajustesTab() : await datosTab();
+    const cont = tab === 'resumen' ? await resumen() : tab === 'docentes' ? await docentes() : tab === 'marca' ? marcaTab() : tab === 'colores' ? coloresTab() : tab === 'ajustes' ? await ajustesTab() : await datosTab();
     cargando.replaceWith(...[].concat(cont).filter(Boolean));
   }
   await pintar();

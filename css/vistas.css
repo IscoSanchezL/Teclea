@@ -263,11 +263,11 @@
 .grado-card__tecla { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 30%; font: 700 1.2rem var(--fuente-titulo); }
 .grado-card__barra { flex: 1; height: .7rem; border-radius: 99px; background: currentColor; opacity: .35; }
 .grado-card__barra--corta { flex: .5; }
-.grado-card--ludico { background: linear-gradient(180deg, #8AD4FF, #D6F1FF); color: #12315A; border: 3px solid #2B1A7A; box-shadow: 0 6px 0 #2B1A7A; }
-.grado-card--ludico .grado-card__vista { background: #fff; border: 3px solid #2B1A7A; }
-.grado-card--ludico .grado-card__tecla { background: var(--sol-400); border: 3px solid #2B1A7A; box-shadow: 0 3px 0 #2B1A7A; }
-.grado-card--ludico .etiqueta { background: #fff; border: 2px solid #2B1A7A; color: #2B1A7A; }
-.grado-card--medio { background: linear-gradient(135deg, #7C5CFF, #B05CE8); color: #fff; box-shadow: var(--sombra-3); }
+.grado-card--ludico { background: linear-gradient(180deg, #8AD4FF, #D6F1FF); color: #12315A; border: 3px solid var(--violeta-800); box-shadow: 0 6px 0 var(--violeta-800); }
+.grado-card--ludico .grado-card__vista { background: #fff; border: 3px solid var(--violeta-800); }
+.grado-card--ludico .grado-card__tecla { background: var(--sol-400); border: 3px solid var(--violeta-800); box-shadow: 0 3px 0 var(--violeta-800); }
+.grado-card--ludico .etiqueta { background: #fff; border: 2px solid var(--violeta-800); color: var(--violeta-800); }
+.grado-card--medio { background: linear-gradient(135deg, var(--violeta-400), #B05CE8); color: #fff; box-shadow: var(--sombra-3); }
 .grado-card--medio .grado-card__vista { background: rgba(255,255,255,.18); }
 .grado-card--medio .grado-card__tecla { background: var(--menta-400); color: #06261D; }
 .grado-card--medio .etiqueta { background: rgba(255,255,255,.25); color: #fff; }

@@ -6,7 +6,7 @@
 
 /* ═══════════════ LÚDICO (2.º–3.º): cielo, nubes y pegatinas ═══════════════ */
 [data-estilo="ludico"] {
-  --contorno: #2B1A7A;
+  --contorno: var(--violeta-800);
   --borde-suave: rgba(76, 52, 190, .28); --sombra-color: rgba(43, 26, 122, .45);
   --realce: inset 0 1.5px 0 rgba(255, 255, 255, .7);
   --fuente-titulo: 'Fredoka', 'Baloo 2', ui-rounded, system-ui, sans-serif;
@@ -50,7 +50,7 @@
   background:
     radial-gradient(circle at 12% 18%, rgba(255,255,255,.35) 0 7%, transparent 7.5%),
     radial-gradient(circle at 88% 78%, rgba(255,255,255,.25) 0 10%, transparent 10.5%),
-    linear-gradient(135deg, #7C5CFF, #FF6B8B);
+    linear-gradient(135deg, var(--violeta-400), #FF6B8B);
 }
 [data-estilo="ludico"] h1, [data-estilo="ludico"] h2 { letter-spacing: .01em; }
 [data-estilo="ludico"] .vista { --ancho-max: 1100px; }
