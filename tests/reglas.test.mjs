@@ -63,6 +63,10 @@ await prueba('correo admin verificado puede crear perfil admin', () => assertSuc
 await prueba('NO crea perfil con 5000 XP inicial', () => assertFails(setDoc(doc(env.authenticatedContext('x5').firestore(), 'users/x5'), perfil('x5', { xp: 5000 }))));
 await prueba('estudiante lee su perfil', () => assertSucceeds(getDoc(doc(est1, 'users/est1'))));
 await prueba('estudiante NO lee el de otro', () => assertFails(getDoc(doc(est1, 'users/est2'))));
+await prueba('estudiante puede personalizar su avatar (mascota, accesorios, cuarto)', () => assertSucceeds(updateDoc(doc(est1, 'users/est1'), { avatar: { emoji: '🦊', fondo: 'violeta', mascota: 'panda', accesorios: ['🧢', '🕶️'], cuarto: { escena: 'espacio', deco: { izquierda: '🪴' } } } })));
+await prueba('NO puede llenar el avatar de basura (demasiados accesorios)', () => assertFails(updateDoc(doc(est1, 'users/est1'), { avatar: { emoji: '🦊', accesorios: Array.from({ length: 50 }, () => '🧢') } })));
+await prueba('NO puede guardar un avatar con texto enorme', () => assertFails(updateDoc(doc(est1, 'users/est1'), { avatar: { emoji: 'x'.repeat(5000) } })));
+await prueba('NO puede guardar un avatar con decenas de claves', () => assertFails(updateDoc(doc(est1, 'users/est1'), { avatar: Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`k${i}`, 1])) })));
 await prueba('docente NO lee perfiles ajenos', () => assertFails(getDoc(doc(prof1, 'users/est1'))));
 await prueba('admin lee cualquier perfil', () => assertSucceeds(getDoc(doc(adm1, 'users/est1'))));
 await prueba('estudiante NO se cambia el rol', () => assertFails(updateDoc(doc(est1, 'users/est1'), { rol: 'admin' })));

@@ -100,12 +100,21 @@ service cloud.firestore {
       );
       allow delete: if isAdmin();
 
+      // El avatar es un mapa libre (mascota, accesorios, cuarto…), pero acotado para que nadie llene su documento de basura.
+      function avatarOk(a) {
+        return a is map && a.size() <= 12
+          && isStr(a.get('emoji', '🦊'), 1, 16) && isStr(a.get('fondo', 'violeta'), 1, 16)
+          && (a.get('mascota', null) == null || isStr(a.get('mascota', ''), 1, 16))
+          && (a.get('accesorios', []) is list) && a.get('accesorios', []).size() <= 8
+          && (a.get('cuarto', {}) is map) && a.get('cuarto', {}).size() <= 4;
+      }
+
       function baseUserOk(d) {
         return isStr(d.nombre, 1, 80) && isStr(d.apodo, 1, 30)
           && (d.grado == null || isInt(d.grado, 2, 6))
           && d.xp == 0 && d.nivel == 1 && d.monedas == 0
           && d.racha == 0 && d.rachaMax == 0 && d.protectores == 0
-          && d.avatar is map && d.prefs is map;
+          && avatarOk(d.avatar) && d.prefs is map;
       }
       function validNewSelf(d) {
         return d.keys().hasOnly(['uid','nombre','apodo','email','rol','grado','avatar','xp','nivel','monedas',
@@ -137,7 +146,7 @@ service cloud.firestore {
           && isStr(n.apodo, 1, 30)
           && (!('foto' in n) || n.foto == null || (fotosPermitidas() && (n.foto is string) && n.foto.size() < 90000 && n.foto.matches('^data:image/(jpeg|webp|png);base64,.*')))
           && (o.grado == null ? (n.grado == null || isInt(n.grado, 2, 6)) : n.grado == o.grado)
-          && n.avatar is map && n.prefs is map && n.prefs.size() <= 30
+          && avatarOk(n.avatar) && n.prefs is map && n.prefs.size() <= 30
           && isInt(n.xp, 0, 1000000)    && n.xp >= o.xp          && n.xp - o.xp <= 600
           && isInt(n.nivel, 1, 50)      && n.nivel >= o.nivel
           && isInt(n.monedas, 0, 1000000) && n.monedas - o.monedas <= 300 && o.monedas - n.monedas <= 5000

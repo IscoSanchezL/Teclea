@@ -58,7 +58,7 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
       const e = await m.crear3D({ tipo: 'resultado', usuario: state.user, ancho: 230, alto: 250 });
       const slot = raiz.querySelector('.res__amigo');
       if (!e || !slot?.isConnected) { e?.destruir(); return; }
-      slot.classList.add('res__amigo--3d'); slot.replaceChildren(e.el);
+      const previos = [...slot.childNodes]; slot.classList.add('res__amigo--3d'); slot.replaceChildren(e.el); e.alLento = () => { slot.classList.remove('res__amigo--3d'); slot.replaceChildren(...previos); };
       setTimeout(() => e.reaccionar(estrellas == null || estrellas >= 3 ? 'baila' : estrellas === 2 ? 'gira' : estrellas === 1 ? 'salta' : 'ay'), 500);
     }).catch((er) => console.warn('[3d]', er));
   }

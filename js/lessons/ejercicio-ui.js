@@ -85,7 +85,7 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
         const e = await m.crear3D({ tipo: 'companero', usuario: u, ancho: 150, alto: 172 });
         if (!e) return;
         if (!amigo.isConnected && destruido) { e.destruir(); return; }
-        amigo.classList.add('ej__amigo--3d'); amigo.querySelector('.pj3d')?.remove(); amigo.prepend(e.el); escena3d = e;
+        const plano = amigo.querySelector('.pj3d'); amigo.classList.add('ej__amigo--3d'); plano?.remove(); amigo.prepend(e.el); escena3d = e; e.alLento = () => { escena3d = null; amigo.classList.remove('ej__amigo--3d'); if (plano) amigo.prepend(plano); };
       }).catch((er) => console.warn('[3d]', er));
     }
   }

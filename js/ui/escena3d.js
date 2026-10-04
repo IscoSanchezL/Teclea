@@ -292,6 +292,8 @@ export async function crear3D({ tipo = 'hero', usuario = null, ancho = 280, alto
   const dur = { salta: 0.85, ay: 0.55, saluda: 2.2, gira: 1.1, baila: 99 };
 
   let vivo = true, ultimo = performance.now(), invisible = 0, visible = true;
+  // Calidad adaptable: en equipos lentos baja la resolución, luego los cuadros por segundo y, si aun así no rinde, se retira el 3D
+  let medio = 16, cuadros = 0, nivelCalidad = 0, par = false; const api = { alLento: null };
   const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => { visible = es[0].isIntersecting; }) : null; io?.observe(canvas);
 
   function animar(ahora) {
@@ -299,6 +301,13 @@ export async function crear3D({ tipo = 'hero', usuario = null, ancho = 280, alto
     requestAnimationFrame(animar);
     if (document.hidden || !visible) { ultimo = ahora; return; }
     if (!canvas.isConnected) { if (++invisible > 90) destruir(); return; } invisible = 0;
+    const crudo = ahora - ultimo; medio += (Math.min(crudo, 250) - medio) * 0.08; cuadros++;
+    if (cuadros === 90 || cuadros === 240 || cuadros === 420) {
+      if (medio > 45 && nivelCalidad === 0) { nivelCalidad = 1; renderer.setPixelRatio(1); renderer.setSize(ancho, alto, false); }
+      else if (medio > 55 && nivelCalidad === 1) { nivelCalidad = 2; }
+      else if (medio > 70 && nivelCalidad === 2) { destruir(); canvas.remove(); api.alLento?.(); return; }
+    }
+    if (nivelCalidad === 2 && (par = !par)) { ultimo = ahora; return; } // 2.º nivel: mitad de cuadros
     const dt = Math.min(0.05, (ahora - ultimo) / 1000); ultimo = ahora; const s = ahora / 1000;
     tEstado += dt;
     if (estado !== 'idle' && estado !== 'baila' && tEstado > (dur[estado] || 1)) { estado = 'idle'; tEstado = 0; }
@@ -351,5 +360,5 @@ export async function crear3D({ tipo = 'hero', usuario = null, ancho = 280, alto
     renderer.dispose(); renderer.forceContextLoss?.();
   }
   if (tipo !== 'companero') setTimeout(() => reaccionar('saluda'), 600);
-  return { el: canvas, reaccionar, confeti, destruir };
+  return Object.assign(api, { el: canvas, reaccionar, confeti, destruir });
 }

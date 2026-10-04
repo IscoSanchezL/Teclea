@@ -139,7 +139,7 @@ export async function render() {
       const e = await m.crear3D({ tipo: 'hero', usuario: state.user, ancho: 300, alto: 300 });
       const slot = hero.querySelector('.inicio__hero-anillo');
       for (let i = 0; i < 80 && slot && !slot.isConnected; i++) await new Promise((r) => setTimeout(r, 50)); // el router aún puede estar montando la vista
-      if (e && slot?.isConnected) { slot.classList.add('inicio__hero-anillo--3d'); slot.replaceChildren(e.el); slot.addEventListener('click', () => e.reaccionar('gira')); }
+      if (e && slot?.isConnected) { const previos = [...slot.childNodes]; slot.classList.add('inicio__hero-anillo--3d'); slot.replaceChildren(e.el); slot.addEventListener('click', () => e.reaccionar('gira')); e.alLento = () => { slot.classList.remove('inicio__hero-anillo--3d'); slot.replaceChildren(...previos); }; }
       else e?.destruir();
     }).catch((er) => console.warn('[3d]', er));
   }

@@ -185,3 +185,16 @@ verificó que los tipos (`Timestamp`) y los valores volvieron iguales; con frase
 - [ ] Presupuesto y alertas creados; monitor de disponibilidad activo
 - [ ] Autorizaciones de acudientes y aviso de privacidad revisados por el colegio
 - [ ] Clase piloto de 5–10 estudiantes revisando el panel **Uso** de Firestore
+
+## Verificación con 25 estudiantes a la vez (octubre 2026)
+
+**Datos (Firestore, con las reglas reales):** `cd tests && firebase emulators:exec --only firestore --project demo-teclea "node carga-firestore.mjs 25 8"`
+25 estudiantes en procesos independientes × 8 actividades completas cada uno (200 actividades, ≈1 600 escrituras): **0 escrituras fallidas**, todos conservaron su XP. En el emulador (todo en una misma máquina) la mediana fue de ≈0,3 s por actividad; contra Firestore real la mediana esperada es de 0,1–0,4 s por actividad.
+
+**Interfaz:** `node carga.mjs 25 http://localhost:8123/` — 25 sesiones simultáneas: 25/25 completadas, 0 errores de consola. (En una sola máquina de pruebas con 4 núcleos los tiempos de arranque son altos porque corren 25 navegadores a la vez; en los equipos de los niños cada uno corre solo el suyo.)
+
+**Cuotas del plan Spark con 25 estudiantes:** ≈8 escrituras por actividad → una clase de 25 con 20 actividades cada uno ≈ 4 000 escrituras (tope diario 20 000) y unas 6 000 lecturas (tope 50 000). No hay documentos "calientes": cada estudiante escribe solo en sus propios documentos.
+
+**3D de 2.º grado:** la calidad se adapta sola (baja resolución, luego mitad de cuadros) y, si el equipo no rinde, se retira el 3D y queda la mascota 2D.
+
+**Seguridad:** el avatar (mascota, accesorios, cuarto) está acotado en las reglas (≤ 12 claves, ≤ 8 accesorios, textos cortos); nadie puede llenar su documento de basura. Sin `eval`, `document.write` ni datos del usuario inyectados como HTML. Los colores de la paleta se validan como `#RRGGBB` antes de usarlos en CSS.
