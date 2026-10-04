@@ -1,75 +1,86 @@
 {
- "version": 1,
+ "version": 2,
  "items": [
   {
    "id": "acc-0",
    "categoria": "accesorio",
    "nombre": "Sombrero de copa",
    "precio": 60,
-   "emoji": "🎩"
+   "emoji": "🎩",
+   "slot": "cabeza"
   },
   {
    "id": "acc-1",
    "categoria": "accesorio",
    "nombre": "Corona",
    "precio": 120,
-   "emoji": "👑"
+   "emoji": "👑",
+   "slot": "cabeza"
   },
   {
    "id": "acc-2",
    "categoria": "accesorio",
    "nombre": "Gafas de sol",
    "precio": 50,
-   "emoji": "🕶️"
+   "emoji": "🕶️",
+   "slot": "cara"
   },
   {
    "id": "acc-3",
    "categoria": "accesorio",
    "nombre": "Auriculares",
    "precio": 70,
-   "emoji": "🎧"
+   "emoji": "🎧",
+   "slot": "cabeza"
   },
   {
    "id": "acc-4",
    "categoria": "accesorio",
    "nombre": "Gorra",
    "precio": 40,
-   "emoji": "🧢"
+   "emoji": "🧢",
+   "slot": "cabeza"
   },
   {
    "id": "acc-5",
    "categoria": "accesorio",
    "nombre": "Birrete",
    "precio": 80,
-   "emoji": "🎓"
+   "emoji": "🎓",
+   "slot": "cabeza"
   },
   {
    "id": "acc-6",
    "categoria": "accesorio",
    "nombre": "Capa de héroe",
    "precio": 100,
-   "emoji": "🦸"
+   "emoji": "🦸",
+   "slot": "espalda",
+   "descripcion": "Se ve detrás de tu personaje."
   },
   {
    "id": "acc-7",
    "categoria": "accesorio",
    "nombre": "Lentes de sabio",
    "precio": 45,
-   "emoji": "🤓"
+   "emoji": "👓",
+   "slot": "cara"
   },
   {
    "id": "acc-8",
    "categoria": "accesorio",
    "nombre": "Parche pirata",
    "precio": 90,
-   "emoji": "🏴‍☠️"
+   "emoji": "🏴‍☠️",
+   "slot": "cara"
   },
   {
    "id": "acc-9",
    "categoria": "accesorio",
    "nombre": "Arcoíris",
    "precio": 150,
-   "emoji": "🌈"
+   "emoji": "🌈",
+   "slot": "espalda"
   },
   {
    "id": "fondo-coral",
@@ -154,6 +165,227 @@
    "nombre": "Protector de racha",
    "precio": 50,
    "descripcion": "Cubre un día en el que no practiques (máximo 3)."
+  },
+  {
+   "id": "escena-espacio",
+   "categoria": "escena",
+   "nombre": "Escena Espacio",
+   "precio": 140,
+   "emoji": "🌌",
+   "escena": "espacio",
+   "descripcion": "Tu cuarto flota entre las estrellas."
+  },
+  {
+   "id": "escena-playa",
+   "categoria": "escena",
+   "nombre": "Escena Playa",
+   "precio": 110,
+   "emoji": "🏖️",
+   "escena": "playa",
+   "descripcion": "Sol, arena y mar."
+  },
+  {
+   "id": "escena-bosque",
+   "categoria": "escena",
+   "nombre": "Escena Bosque",
+   "precio": 110,
+   "emoji": "🌳",
+   "escena": "bosque",
+   "descripcion": "Un rincón verde y tranquilo."
+  },
+  {
+   "id": "escena-ciudad",
+   "categoria": "escena",
+   "nombre": "Escena Ciudad",
+   "precio": 130,
+   "emoji": "🌆",
+   "escena": "ciudad",
+   "descripcion": "Atardecer sobre los edificios."
+  },
+  {
+   "id": "escena-arcade",
+   "categoria": "escena",
+   "nombre": "Salón de juegos",
+   "precio": 220,
+   "emoji": "🕹️",
+   "escena": "arcade",
+   "descripcion": "Luces de neón y diversión."
+  },
+  {
+   "id": "mas-perro",
+   "categoria": "mascota",
+   "nombre": "Perrito",
+   "precio": 90,
+   "emoji": "🐶",
+   "mascota": "🐶"
+  },
+  {
+   "id": "mas-gato",
+   "categoria": "mascota",
+   "nombre": "Gatito",
+   "precio": 90,
+   "emoji": "🐱",
+   "mascota": "🐱"
+  },
+  {
+   "id": "mas-conejo",
+   "categoria": "mascota",
+   "nombre": "Conejito",
+   "precio": 80,
+   "emoji": "🐰",
+   "mascota": "🐰"
+  },
+  {
+   "id": "mas-tortuga",
+   "categoria": "mascota",
+   "nombre": "Tortuga",
+   "precio": 70,
+   "emoji": "🐢",
+   "mascota": "🐢"
+  },
+  {
+   "id": "mas-loro",
+   "categoria": "mascota",
+   "nombre": "Loro",
+   "precio": 100,
+   "emoji": "🦜",
+   "mascota": "🦜"
+  },
+  {
+   "id": "mas-robot",
+   "categoria": "mascota",
+   "nombre": "Robot amigo",
+   "precio": 160,
+   "emoji": "🤖",
+   "mascota": "🤖"
+  },
+  {
+   "id": "mas-dragon",
+   "categoria": "mascota",
+   "nombre": "Dragoncito",
+   "precio": 240,
+   "emoji": "🐲",
+   "mascota": "🐲"
+  },
+  {
+   "id": "mas-unicornio",
+   "categoria": "mascota",
+   "nombre": "Unicornio",
+   "precio": 300,
+   "emoji": "🦄",
+   "mascota": "🦄"
+  },
+  {
+   "id": "deco-planta",
+   "categoria": "deco",
+   "nombre": "Planta",
+   "precio": 35,
+   "emoji": "🪴",
+   "slot": "izquierda"
+  },
+  {
+   "id": "deco-sofa",
+   "categoria": "deco",
+   "nombre": "Sofá",
+   "precio": 120,
+   "emoji": "🛋️",
+   "slot": "izquierda"
+  },
+  {
+   "id": "deco-cama",
+   "categoria": "deco",
+   "nombre": "Cama",
+   "precio": 150,
+   "emoji": "🛏️",
+   "slot": "izquierda"
+  },
+  {
+   "id": "deco-arcade",
+   "categoria": "deco",
+   "nombre": "Máquina arcade",
+   "precio": 200,
+   "emoji": "🕹️",
+   "slot": "derecha"
+  },
+  {
+   "id": "deco-tele",
+   "categoria": "deco",
+   "nombre": "Televisor",
+   "precio": 140,
+   "emoji": "📺",
+   "slot": "derecha"
+  },
+  {
+   "id": "deco-piano",
+   "categoria": "deco",
+   "nombre": "Piano",
+   "precio": 170,
+   "emoji": "🎹",
+   "slot": "derecha"
+  },
+  {
+   "id": "deco-cuadro",
+   "categoria": "deco",
+   "nombre": "Cuadro",
+   "precio": 45,
+   "emoji": "🖼️",
+   "slot": "pared"
+  },
+  {
+   "id": "deco-reloj",
+   "categoria": "deco",
+   "nombre": "Reloj",
+   "precio": 40,
+   "emoji": "🕰️",
+   "slot": "pared"
+  },
+  {
+   "id": "deco-bandera",
+   "categoria": "deco",
+   "nombre": "Bandera",
+   "precio": 50,
+   "emoji": "🚩",
+   "slot": "pared"
+  },
+  {
+   "id": "deco-lampara",
+   "categoria": "deco",
+   "nombre": "Lámpara",
+   "precio": 60,
+   "emoji": "💡",
+   "slot": "techo"
+  },
+  {
+   "id": "deco-disco",
+   "categoria": "deco",
+   "nombre": "Bola de discoteca",
+   "precio": 110,
+   "emoji": "🪩",
+   "slot": "techo"
+  },
+  {
+   "id": "deco-trofeo",
+   "categoria": "deco",
+   "nombre": "Trofeo",
+   "precio": 80,
+   "emoji": "🏆",
+   "slot": "estante"
+  },
+  {
+   "id": "deco-libros",
+   "categoria": "deco",
+   "nombre": "Libros",
+   "precio": 40,
+   "emoji": "📚",
+   "slot": "estante"
+  },
+  {
+   "id": "deco-globo",
+   "categoria": "deco",
+   "nombre": "Globo terráqueo",
+   "precio": 65,
+   "emoji": "🌍",
+   "slot": "estante"
   }
  ]
 }

@@ -43,26 +43,36 @@ export async function comprar(user, item) {
   return u;
 }
 
-/** Equipa o desequipa. Fondo, marco y tema son únicos; los accesorios admiten hasta 2. */
+/** Grupo de exclusión: en cada grupo solo cabe un artículo puesto (un accesorio por zona, una pieza por lugar del cuarto…). */
+const grupoDe = (it) => (['accesorio', 'deco'].includes(it.categoria) ? `${it.categoria}:${it.slot || ''}` : it.categoria);
+
+/** Equipa o desequipa. Fondo, marco, tema, escena y mascota son únicos; accesorios y decoración, uno por zona. */
 export async function equipar(user, item, activar = true) {
   const lista = await cargarInventario(user.uid);
   const registro = lista.find((x) => x.itemId === item.id);
   if (!registro) throw new Error('Primero compra este artículo.');
   const catalogoItems = await cargarTienda();
   const avatar = { ...(user.avatar || {}) };
+  const cuarto = { ...(avatar.cuarto || {}), deco: { ...(avatar.cuarto?.deco || {}) } };
   const prefs = { ...(user.prefs || {}) };
   const ops = [];
-  const desequipar = (cat) => lista.filter((x) => x.equipado && catalogoItems.find((c) => c.id === x.itemId)?.categoria === cat && x.itemId !== item.id);
+  const mismos = lista.filter((x) => x.equipado && x.itemId !== item.id && grupoDe(catalogoItems.find((c) => c.id === x.itemId) || {}) === grupoDe(item));
 
   if (item.categoria === 'fondo') avatar.fondo = activar ? item.fondo : 'violeta';
   if (item.categoria === 'marco') avatar.marco = activar ? item.marco : null;
   if (item.categoria === 'tema') { if (activar) prefs.temaColor = item.tema; else delete prefs.temaColor; }
   if (item.categoria === 'accesorio') {
+    // un accesorio por zona (cabeza, cara, espalda): se quitan los demás de la misma zona
     const acc = new Set(avatar.accesorios || []);
-    if (activar) { acc.add(item.emoji); while (acc.size > 2) acc.delete([...acc][0]); } else acc.delete(item.emoji);
+    for (const x of mismos) { const c = catalogoItems.find((k) => k.id === x.itemId); if (c?.emoji) acc.delete(c.emoji); }
+    if (activar) acc.add(item.emoji); else acc.delete(item.emoji);
     avatar.accesorios = [...acc];
   }
-  if (activar && ['fondo', 'marco', 'tema'].includes(item.categoria)) for (const x of desequipar(item.categoria)) { ops.push({ tipo: 'update', ruta: `inventory/${x.id}`, datos: { equipado: false } }); x.equipado = false; }
+  if (item.categoria === 'escena') cuarto.escena = activar ? item.escena : null;
+  if (item.categoria === 'mascota') cuarto.mascota = activar ? item.mascota : null;
+  if (item.categoria === 'deco') { if (activar) cuarto.deco[item.slot] = item.emoji; else delete cuarto.deco[item.slot]; }
+  if (['escena', 'mascota', 'deco'].includes(item.categoria)) avatar.cuarto = cuarto;
+  if (activar) for (const x of mismos) { ops.push({ tipo: 'update', ruta: `inventory/${x.id}`, datos: { equipado: false } }); x.equipado = false; }
   ops.push({ tipo: 'update', ruta: `inventory/${registro.id}`, datos: { equipado: activar } });
   ops.push({ tipo: 'update', ruta: `users/${user.uid}`, datos: { avatar, prefs } });
   await store.esperarMax(store.lote(ops));

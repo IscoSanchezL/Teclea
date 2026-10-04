@@ -82,6 +82,23 @@ await T.comprar(state.user, fondo); await T.comprar(state.user, tema);
 try { await T.equipar(state.user, gorra, true); await T.equipar(state.user, fondo, true); await T.equipar(state.user, tema, true); t('equipar accesorio, fondo y tema pasa las reglas', true); } catch (e) { t('equipar pasa las reglas', false, e.message); }
 const u2 = await store.leer('users/est1');
 t('avatar con accesorio y fondo; tema en prefs', u2.avatar.accesorios.includes('🧢') && u2.avatar.fondo === 'coral' && u2.prefs.temaColor === 'bosque');
+// Mi cuarto: mascota, decoración por zona, escena y un accesorio por zona
+{
+  const mascota = shop.find((x) => x.id === 'mas-perro'), sofa = shop.find((x) => x.id === 'deco-sofa'), planta = shop.find((x) => x.id === 'deco-planta'), escena = shop.find((x) => x.id === 'escena-espacio'), corona = shop.find((x) => x.id === 'acc-1');
+  await env.withSecurityRulesDisabled((ctx) => fs.updateDoc(fs.doc(ctx.firestore(), 'users/est1'), { monedas: 2000 }));
+  let ok = true, msg = '';
+  try {
+    let uu = await store.leer('users/est1');
+    for (const it of [mascota, sofa, planta, escena, corona]) { uu = await T.comprar(uu, it); uu = await T.equipar(uu, it, true); }
+  } catch (e) { ok = false; msg = e.message; }
+  t('comprar y poner mascota, decoración, escena y accesorio pasa las reglas', ok, msg);
+  await env.withSecurityRulesDisabled((ctx) => fs.updateDoc(fs.doc(ctx.firestore(), 'users/est1'), { monedas: 65 })); // deja el estado listo para las pruebas siguientes
+  const uc = await store.leer('users/est1');
+  t('cuarto: mascota, escena y decoración guardadas', uc.avatar.cuarto?.mascota === '🐶' && uc.avatar.cuarto?.escena === 'espacio' && uc.avatar.cuarto?.deco?.izquierda === '🪴');
+  t('un accesorio por zona: la corona reemplaza a la gorra (misma zona: cabeza)', uc.avatar.accesorios.includes('👑') && !uc.avatar.accesorios.includes('🧢'));
+  const inv = await store.consultar('inventory', { donde: [['uid', '==', 'est1']] });
+  t('solo una decoración puesta en el lado izquierdo', inv.filter((x) => x.equipado && ['deco-sofa', 'deco-planta'].includes(x.itemId)).length === 1);
+}
 const protector = shop.find((x) => x.id === 'protector-racha');
 await T.comprar(state.user, protector);
 t('protector de racha comprado (+1, −50)', (await store.leer('users/est1')).protectores === 1);

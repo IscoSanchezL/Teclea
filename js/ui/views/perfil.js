@@ -14,6 +14,8 @@ import { mascota } from '../art.js';
 import { avatar, EMOJIS_AVATAR, FONDOS_AVATAR } from '../avatar.js';
 import { fotoPerfil } from '../imagen.js';
 import { leer } from '../../db/store.js';
+import { cuarto } from '../cuarto.js';
+import { cargarTienda } from '../../db/tienda.js';
 import { icono } from '../icons.js';
 import { nivelPorXP } from '../../core/levels.js';
 
@@ -63,6 +65,9 @@ export async function render() {
     h('p', { class: 'suave pequeno' }, 'Tu foto solo la ven tú y el administrador del colegio. No aparece en rankings ni la ven tus compañeros. Se guarda reducida y puedes quitarla cuando quieras.'))
     : h('p', { class: 'suave pequeno' }, 'El colegio desactivó las fotos de perfil. Puedes usar un avatar.');
 
+  // Mi cuarto: ahí se ven las compras de la tienda (siempre con el emoji del personaje, aunque haya foto)
+  let catalogo = []; try { catalogo = await cargarTienda(); } catch { /* sin catálogo: se ve el cuarto básico */ }
+  const miCuarto = u.rol === 'estudiante' ? seccion('Mi cuarto', cuarto(u, catalogo), h('a', { class: 'btn btn--sun btn--sm', href: '#/tienda' }, icono('bag', { tam: 18 }), 'Ir a la tienda')) : null;
   const seccionAvatar = seccion('Mi avatar y mi foto',
     h('div', { class: 'avatar-editor' }, vista, h('div', { class: 'pila' }, apodo.nodo, bloqueFoto)),
     h('strong', {}, 'Elige un avatar'), emojis, h('strong', {}, 'Color de fondo'), fondos);
@@ -132,6 +137,6 @@ export async function render() {
   } }, icono('logout', { tam: 20 }), 'Cerrar sesión');
 
   return h('div', { class: 'perfil' }, cabecera,
-    h('div', { class: 'perfil__rejilla' }, seccionAvatar, apariencia, accesibilidad, sonido, escritura, privacidad),
+    h('div', { class: 'perfil__rejilla' }, seccionAvatar, miCuarto, apariencia, accesibilidad, sonido, escritura, privacidad),
     salir);
 }
