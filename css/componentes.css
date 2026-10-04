@@ -279,10 +279,18 @@
 [data-estilo="ludico"] .avatar { border: 2px solid rgba(255, 255, 255, .6); box-shadow: 0 4px 10px -3px var(--sombra-color); }
 
 /* ───────── Medallas ───────── */
-.medalla { display: inline-block; line-height: 0; filter: drop-shadow(0 6px 8px rgba(30, 20, 90, .25)); transition: transform var(--t-media) var(--resorte); }
-.medalla:hover { transform: translateY(-3px) rotate(-3deg) scale(1.04); }
+.medalla { display: inline-block; line-height: 0; filter: drop-shadow(0 8px 8px rgba(30, 20, 90, .3)); transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .35s var(--resorte), scale .2s; will-change: transform; }
+.medalla:not(.medalla--bloqueada):hover { scale: 1.07; }
+.medalla--viva { transition: transform .06s linear, scale .2s; }
 .medalla--bloqueada { filter: grayscale(1) brightness(.9) opacity(.45); }
-.medalla--bloqueada:hover { transform: none; }
+.medalla--bloqueada .medalla__brillo, .medalla--bloqueada .medalla__chispa { display: none; }
+.medalla__brillo { animation: med-brillo 4.8s ease-in-out infinite; }
+.medalla--viva .medalla__brillo { animation: none; transform: translateX(var(--gx, 0px)); }
+.medalla__chispa { transform-box: fill-box; transform-origin: center; animation: med-chispa 2.6s ease-in-out infinite; }
+.medalla__chispa--2 { animation-delay: -1.3s; }
+@keyframes med-brillo { 0%, 55% { transform: translateX(0); } 100% { transform: translateX(150px); } }
+@keyframes med-chispa { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
+@media (prefers-reduced-motion: reduce) { .medalla__brillo, .medalla__chispa { animation: none; } .medalla__chispa { opacity: .8; } }
 .tabs--3 { grid-template-columns: repeat(3, 1fr); }
 .tabs--3 .tab { font-size: .9rem; padding-inline: .3rem; }
 

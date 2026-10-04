@@ -183,8 +183,8 @@
 [data-motion="reducido"] .btn--listo { animation: none; }
 
 /* Medalla ganada: entra girando como una moneda y con destello */
-.res__medalla .medalla { animation: medalla-gira 1.1s cubic-bezier(.2, .9, .3, 1.2) both .9s; transform-style: preserve-3d; position: relative; }
+.res__medalla .medalla { animation: medalla-gira 1.1s cubic-bezier(.2, .9, .3, 1.2) backwards .9s; position: relative; }
 .res__medalla .medalla::after { content: ''; position: absolute; inset: -12%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 255, 255, .95), rgba(255, 220, 120, .35) 45%, transparent 70%); opacity: 0; animation: medalla-brillo 1.4s ease-out both 1.5s; pointer-events: none; }
-@keyframes medalla-gira { 0% { transform: perspective(500px) rotateY(-540deg) scale(.2); opacity: 0; } 70% { opacity: 1; } 100% { transform: perspective(500px) rotateY(0) scale(1); opacity: 1; } }
+@keyframes medalla-gira { 0% { transform: perspective(700px) rotateY(-540deg) scale(.2); opacity: 0; } 70% { opacity: 1; } 100% { transform: perspective(700px) rotateY(0) scale(1); opacity: 1; } }
 @keyframes medalla-brillo { 0% { opacity: 0; transform: scale(.5); } 35% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5); } }
 @media (prefers-reduced-motion: reduce) { .res__medalla .medalla, .res__medalla .medalla::after { animation: none; } }
