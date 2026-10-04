@@ -33,12 +33,17 @@ export function modalClase({ clase = null, alGuardar }) {
   const meta = campo({ etiqueta: 'Meta del reto de la clase (letras)', type: 'number', min: 1000, max: 1000000, step: 1000, value: clase?.config?.metaClase || 20000, ayuda: 'Entre todos suman letras escritas hasta llegar a la meta.' });
   const mundos = new Set(clase?.config?.mundosBloqueados || []);
   const abiertos = new Set(clase?.config?.mundosAbiertos || []);
+  const repintar = [];
   const chipsMundos = h('div', { class: 'filtros' }, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => {
     const b = h('button', { type: 'button', class: 'filtro', 'aria-pressed': 'false', title: 'Clic: normal → abierto → cerrado' }, `Mundo ${n}`);
     const pintar = () => { b.dataset.estado = mundos.has(n) ? 'cerrado' : abiertos.has(n) ? 'abierto' : ''; b.setAttribute('aria-pressed', String(mundos.has(n) || abiertos.has(n))); b.textContent = `Mundo ${n}${mundos.has(n) ? ' · cerrado' : abiertos.has(n) ? ' · abierto' : ''}`; };
     b.onclick = () => { if (mundos.has(n)) mundos.delete(n); else if (abiertos.has(n)) { abiertos.delete(n); mundos.add(n); } else abiertos.add(n); pintar(); };
-    pintar(); return b;
+    pintar(); repintar.push(pintar); return b;
   }));
+  // Acciones masivas: todos abiertos, todos cerrados o todos en su estado normal (sin selección)
+  const masivo = (texto, aplicar) => h('button', { type: 'button', class: 'btn btn--suave btn--sm', onclick: () => { for (let n = 1; n <= 10; n++) { abiertos.delete(n); mundos.delete(n); aplicar(n); } repintar.forEach((f) => f()); } }, texto);
+  const accionesMundos = h('div', { class: 'fila fila--envuelve' },
+    masivo('Seleccionar todos', (n) => abiertos.add(n)), masivo('Deseleccionar', () => {}), masivo('Cerrar todos', (n) => mundos.add(n)));
   const err = h('p', { class: 'mensaje-error', hidden: true });
   const form = h('form', { class: 'pila', onsubmit: async (e) => {
     e.preventDefault();
@@ -54,7 +59,7 @@ export function modalClase({ clase = null, alGuardar }) {
     nombre.nodo, h('div', { class: 'rejilla-campos' }, grado.nodo, grupo.nodo), h('div', { class: 'campo' }, h('span', { class: 'campo__etiqueta' }, 'Color'), colores),
     interruptor({ etiqueta: 'Mostrar ranking positivo', descripcion: 'Los estudiantes ven “más constantes” y “mayor mejora” (solo apodos).', activo: ranking, alCambiar: (v) => { ranking = v; } }),
     meta.nodo,
-    h('div', { class: 'campo' }, h('span', { class: 'campo__etiqueta' }, 'Mundos de lecciones'), chipsMundos, h('span', { class: 'campo__ayuda suave' }, 'Toca un mundo para abrirlo (sin esperar el desbloqueo) o cerrarlo para esta clase.')),
+    h('div', { class: 'campo' }, h('span', { class: 'campo__etiqueta' }, 'Mundos de lecciones'), accionesMundos, chipsMundos, h('span', { class: 'campo__ayuda suave' }, 'Toca un mundo para abrirlo (sin esperar el desbloqueo) o cerrarlo. “Seleccionar todos” abre todos; “Deseleccionar” los deja en su estado normal.')),
     err, h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary', type: 'submit' }, clase ? 'Guardar cambios' : 'Crear clase')));
   const capa = abrirCapa({ titulo: clase ? 'Editar clase' : 'Nueva clase', contenido: form, tipo: 'dialogo' });
 }
