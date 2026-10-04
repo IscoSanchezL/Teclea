@@ -1,5 +1,5 @@
 {
-  "version": "31d4f29e8348",
+  "version": "6e15750b2ee0",
   "archivos": [
     "assets/assets.json",
     "assets/img/apple-touch-icon.png",
@@ -93,6 +93,7 @@
     "js/ui/nav.js",
     "js/ui/overlay.js",
     "js/ui/paleta.js",
+    "js/ui/personaje.js",
     "js/ui/qr.js",
     "js/ui/resultado.js",
     "js/ui/retos-ui.js",

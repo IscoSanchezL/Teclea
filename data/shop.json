@@ -1,5 +1,5 @@
 {
- "version": 2,
+ "version": 3,
  "items": [
   {
    "id": "acc-0",
@@ -212,70 +212,6 @@
    "descripcion": "Luces de neón y diversión."
   },
   {
-   "id": "mas-perro",
-   "categoria": "mascota",
-   "nombre": "Perrito",
-   "precio": 90,
-   "emoji": "🐶",
-   "mascota": "🐶"
-  },
-  {
-   "id": "mas-gato",
-   "categoria": "mascota",
-   "nombre": "Gatito",
-   "precio": 90,
-   "emoji": "🐱",
-   "mascota": "🐱"
-  },
-  {
-   "id": "mas-conejo",
-   "categoria": "mascota",
-   "nombre": "Conejito",
-   "precio": 80,
-   "emoji": "🐰",
-   "mascota": "🐰"
-  },
-  {
-   "id": "mas-tortuga",
-   "categoria": "mascota",
-   "nombre": "Tortuga",
-   "precio": 70,
-   "emoji": "🐢",
-   "mascota": "🐢"
-  },
-  {
-   "id": "mas-loro",
-   "categoria": "mascota",
-   "nombre": "Loro",
-   "precio": 100,
-   "emoji": "🦜",
-   "mascota": "🦜"
-  },
-  {
-   "id": "mas-robot",
-   "categoria": "mascota",
-   "nombre": "Robot amigo",
-   "precio": 160,
-   "emoji": "🤖",
-   "mascota": "🤖"
-  },
-  {
-   "id": "mas-dragon",
-   "categoria": "mascota",
-   "nombre": "Dragoncito",
-   "precio": 240,
-   "emoji": "🐲",
-   "mascota": "🐲"
-  },
-  {
-   "id": "mas-unicornio",
-   "categoria": "mascota",
-   "nombre": "Unicornio",
-   "precio": 300,
-   "emoji": "🦄",
-   "mascota": "🦄"
-  },
-  {
    "id": "deco-planta",
    "categoria": "deco",
    "nombre": "Planta",
@@ -386,6 +322,42 @@
    "precio": 65,
    "emoji": "🌍",
    "slot": "estante"
+  },
+  {
+   "id": "mas-gato",
+   "categoria": "mascota",
+   "nombre": "Gato",
+   "precio": 120,
+   "emoji": "🐱",
+   "especie": "gato",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-conejo",
+   "categoria": "mascota",
+   "nombre": "Conejo",
+   "precio": 120,
+   "emoji": "🐰",
+   "especie": "conejo",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-dragon",
+   "categoria": "mascota",
+   "nombre": "Dragón",
+   "precio": 250,
+   "emoji": "🐲",
+   "especie": "dragon",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-robot",
+   "categoria": "mascota",
+   "nombre": "Robot",
+   "precio": 300,
+   "emoji": "🤖",
+   "especie": "robot",
+   "descripcion": "Una mascota nueva para personalizar."
   }
  ]
 }

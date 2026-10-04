@@ -84,7 +84,7 @@ const u2 = await store.leer('users/est1');
 t('avatar con accesorio y fondo; tema en prefs', u2.avatar.accesorios.includes('🧢') && u2.avatar.fondo === 'coral' && u2.prefs.temaColor === 'bosque');
 // Mi cuarto: mascota, decoración por zona, escena y un accesorio por zona
 {
-  const mascota = shop.find((x) => x.id === 'mas-perro'), sofa = shop.find((x) => x.id === 'deco-sofa'), planta = shop.find((x) => x.id === 'deco-planta'), escena = shop.find((x) => x.id === 'escena-espacio'), corona = shop.find((x) => x.id === 'acc-1');
+  const mascota = shop.find((x) => x.id === 'mas-gato'), sofa = shop.find((x) => x.id === 'deco-sofa'), planta = shop.find((x) => x.id === 'deco-planta'), escena = shop.find((x) => x.id === 'escena-espacio'), corona = shop.find((x) => x.id === 'acc-1');
   await env.withSecurityRulesDisabled((ctx) => fs.updateDoc(fs.doc(ctx.firestore(), 'users/est1'), { monedas: 2000 }));
   let ok = true, msg = '';
   try {
@@ -94,7 +94,7 @@ t('avatar con accesorio y fondo; tema en prefs', u2.avatar.accesorios.includes('
   t('comprar y poner mascota, decoración, escena y accesorio pasa las reglas', ok, msg);
   await env.withSecurityRulesDisabled((ctx) => fs.updateDoc(fs.doc(ctx.firestore(), 'users/est1'), { monedas: 65 })); // deja el estado listo para las pruebas siguientes
   const uc = await store.leer('users/est1');
-  t('cuarto: mascota, escena y decoración guardadas', uc.avatar.cuarto?.mascota === '🐶' && uc.avatar.cuarto?.escena === 'espacio' && uc.avatar.cuarto?.deco?.izquierda === '🪴');
+  t('cuarto: mascota, escena y decoración guardadas', uc.avatar.mascota === 'gato' && uc.avatar.cuarto?.escena === 'espacio' && uc.avatar.cuarto?.deco?.izquierda === '🪴');
   t('un accesorio por zona: la corona reemplaza a la gorra (misma zona: cabeza)', uc.avatar.accesorios.includes('👑') && !uc.avatar.accesorios.includes('🧢'));
   const inv = await store.consultar('inventory', { donde: [['uid', '==', 'est1']] });
   t('solo una decoración puesta en el lado izquierdo', inv.filter((x) => x.equipado && ['deco-sofa', 'deco-planta'].includes(x.itemId)).length === 1);

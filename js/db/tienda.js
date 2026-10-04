@@ -69,15 +69,24 @@ export async function equipar(user, item, activar = true) {
     avatar.accesorios = [...acc];
   }
   if (item.categoria === 'escena') cuarto.escena = activar ? item.escena : null;
-  if (item.categoria === 'mascota') cuarto.mascota = activar ? item.mascota : null;
+  if (item.categoria === 'mascota') avatar.mascota = activar ? item.especie : 'zorro';
   if (item.categoria === 'deco') { if (activar) cuarto.deco[item.slot] = item.emoji; else delete cuarto.deco[item.slot]; }
-  if (['escena', 'mascota', 'deco'].includes(item.categoria)) avatar.cuarto = cuarto;
+  if (['escena', 'deco'].includes(item.categoria)) avatar.cuarto = cuarto;
   if (activar) for (const x of mismos) { ops.push({ tipo: 'update', ruta: `inventory/${x.id}`, datos: { equipado: false } }); x.equipado = false; }
   ops.push({ tipo: 'update', ruta: `inventory/${registro.id}`, datos: { equipado: activar } });
   ops.push({ tipo: 'update', ruta: `users/${user.uid}`, datos: { avatar, prefs } });
   await store.esperarMax(store.lote(ops));
   registro.equipado = activar;
   const u = { ...user, avatar, prefs };
+  if (state.user?.uid === user.uid) setState({ user: u });
+  return u;
+}
+
+/** Elige una de las mascotas gratuitas (o una ya comprada) como tu personaje. */
+export async function elegirEspecie(user, especie) {
+  const avatar = { ...(user.avatar || {}), mascota: especie };
+  await store.esperarMax(store.actualizar(`users/${user.uid}`, { avatar }));
+  const u = { ...user, avatar };
   if (state.user?.uid === user.uid) setState({ user: u });
   return u;
 }

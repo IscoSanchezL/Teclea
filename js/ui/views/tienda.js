@@ -4,9 +4,11 @@
  */
 import { state } from '../../core/state.js';
 import { h } from '../../core/utils.js';
-import { cargarTienda, cargarInventario, comprar, equipar } from '../../db/tienda.js';
+import { cargarTienda, cargarInventario, comprar, equipar, elegirEspecie } from '../../db/tienda.js';
+import { personajeSVG, ESPECIES, especieDe } from '../personaje.js';
 import { avatar } from '../avatar.js';
 import { cuarto, ZONAS } from '../cuarto.js';
+import { zonaDeAccesorio } from '../personaje.js';
 import { icono } from '../icons.js';
 import { toast, confirmar } from '../overlay.js';
 import { sonido } from '../sonido.js';
@@ -26,6 +28,8 @@ export async function render() {
   const tengo = (it) => inv.find((x) => x.itemId === it.id);
 
   const vista = (it) => {
+    if (it.categoria === 'mascota') return h('span', { class: 'tienda__mini' }, personajeSVG(it.especie, { cabeza: true, tam: 84 }));
+    if (it.categoria === 'accesorio' && zonaDeAccesorio(it.emoji)) return h('span', { class: 'tienda__mini' }, personajeSVG(especieDe(u.avatar), { acc: [it.emoji], cabeza: true, tam: 84 }));
     if (it.categoria === 'escena') return h('div', { class: 'cuarto tienda__escena', dataset: { escena: it.escena }, 'aria-hidden': 'true' }, h('span', {}, it.emoji));
     if (it.categoria === 'fondo') return avatar({ ...u, foto: null, avatar: { ...u.avatar, fondo: it.fondo } }, { tam: 'lg' });
     if (it.categoria === 'marco') return avatar({ ...u, foto: null, avatar: { ...u.avatar, marco: it.marco } }, { tam: 'lg' });
@@ -48,7 +52,10 @@ export async function render() {
 
   function pintar() {
     cab.replaceChildren(cuarto(u, items, { probando }),
-      h('div', { class: 'tienda__txt' }, h('h1', {}, 'Tienda · Mi cuarto'), h('p', {}, 'Compra con tus monedas y mira cómo cambia tu personaje, tu mascota y tu cuarto. Toca “Probar” en un artículo para verlo antes de comprarlo.'),
+      h('div', { class: 'tienda__txt' }, h('h1', {}, 'Tienda · Mi cuarto'), h('p', {}, 'Elige tu mascota y vístela con lo que compres: todo se acomoda a su figura. Toca “Probar” en un artículo para verlo antes de comprarlo.'),
+        h('p', { class: 'mascotas__tit' }, 'Elige tu mascota'),
+        h('div', { class: 'mascotas', role: 'group', 'aria-label': 'Elegir mascota' }, Object.entries(ESPECIES).filter(([k, e]) => e.gratis || items.some((it) => it.especie === k && tengo(it))).map(([k, e]) =>
+          h('button', { class: 'mascotas__op', type: 'button', 'aria-pressed': String(especieDe(u.avatar) === k), onclick: async () => { try { u = await elegirEspecie(u, k); sonido.clic(); probando = null; } catch { toast('No se pudo cambiar la mascota.', { tipo: 'error' }); } pintar(); } }, personajeSVG(k, { cabeza: true, tam: 54 }), e.nombre))),
         probando ? h('div', { class: 'tienda__prueba' }, `Probando: ${probando.nombre}`, h('button', { class: 'btn btn--sm btn--suave', type: 'button', onclick: () => { probando = null; pintar(); } }, 'Quitar prueba')) : null,
         h('span', { class: 'tienda__monedas', 'aria-label': `${u.monedas || 0} monedas` }, icono('coin', { tam: 24 }), h('b', {}, u.monedas || 0))));
     filtros.replaceChildren(...Object.entries(CATS).map(([c, n]) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(c === sel), onclick: () => { sel = c; pintar(); } }, n)));

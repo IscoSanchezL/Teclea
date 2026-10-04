@@ -1,43 +1,33 @@
 /**
- * "Mi cuarto": el personaje del estudiante (siempre su emoji, nunca la foto) con los accesorios que compró,
- * su mascota y la decoración del cuarto. Es el lugar donde se ven las compras de la tienda.
+ * "Mi cuarto": la mascota del estudiante con los accesorios que compró y la decoración del cuarto.
+ * Las mascotas y las prendas están dibujadas juntas (js/ui/personaje.js), así que encajan siempre.
  * cuarto(usuario, catalogo, { probando }) → <div class="cuarto">. `probando` muestra un artículo sin comprarlo.
  */
 import { h } from '../core/utils.js';
+import { personajeSVG, especieDe, zonaDeAccesorio } from './personaje.js';
 
 export const ZONAS = { cabeza: 'En la cabeza', cara: 'En la cara', espalda: 'Detrás de ti', izquierda: 'Lado izquierdo', derecha: 'Lado derecho', pared: 'En la pared', techo: 'En el techo', estante: 'En el estante' };
 
 /** Devuelve el avatar con el artículo de prueba puesto (sin guardar nada). */
-export function conPrueba(av = {}, it, catalogo = []) {
+export function conPrueba(av = {}, it) {
   if (!it) return av;
   const a = { ...av, cuarto: { ...(av.cuarto || {}), deco: { ...(av.cuarto?.deco || {}) } } };
   if (it.categoria === 'fondo') a.fondo = it.fondo;
   if (it.categoria === 'marco') a.marco = it.marco;
   if (it.categoria === 'escena') a.cuarto.escena = it.escena;
-  if (it.categoria === 'mascota') a.cuarto.mascota = it.mascota;
+  if (it.categoria === 'mascota') a.mascota = it.especie;
   if (it.categoria === 'deco') a.cuarto.deco[it.slot] = it.emoji;
-  if (it.categoria === 'accesorio') {
-    const otros = (a.accesorios || []).filter((e) => (catalogo.find((c) => c.emoji === e && c.categoria === 'accesorio')?.slot || 'cabeza') !== it.slot);
-    a.accesorios = [...otros, it.emoji];
-  }
+  if (it.categoria === 'accesorio') a.accesorios = [...(a.accesorios || []).filter((e) => zonaDeAccesorio(e) !== it.slot), it.emoji];
   return a;
 }
 
 export function cuarto(u, catalogo = [], { probando = null, clase = '' } = {}) {
-  const a = conPrueba(u?.avatar || {}, probando, catalogo);
+  const a = conPrueba(u?.avatar || {}, probando);
   const c = a.cuarto || {};
-  const zonaDe = (e) => catalogo.find((x) => x.categoria === 'accesorio' && x.emoji === e)?.slot || 'cabeza';
-  const puestos = {}; (a.accesorios || []).forEach((e) => { puestos[zonaDe(e)] = e; });
   const piezas = Object.entries(c.deco || {}).map(([zona, emoji]) => h('span', { class: `cuarto__deco cuarto__deco--${zona}`, 'aria-hidden': 'true' }, emoji));
-  return h('div', { class: `cuarto ${clase}`, dataset: { escena: c.escena || '', fondo: a.fondo || 'violeta', marco: a.marco || '' }, role: 'img', 'aria-label': 'Tu personaje y tu cuarto' },
+  return h('div', { class: `cuarto ${clase}`, dataset: { escena: c.escena || '', fondo: a.fondo || 'violeta', marco: a.marco || '' }, role: 'img', 'aria-label': 'Tu mascota y tu cuarto' },
     h('span', { class: 'cuarto__ventana', 'aria-hidden': 'true' }),
     h('span', { class: 'cuarto__piso', 'aria-hidden': 'true' }),
     ...piezas,
-    h('div', { class: 'pj', 'aria-hidden': 'true' },
-      puestos.espalda ? h('span', { class: 'pj__acc pj__acc--espalda' }, puestos.espalda) : null,
-      h('span', { class: 'pj__sombra' }),
-      h('span', { class: 'pj__cuerpo' }, a.emoji || '🦊'),
-      puestos.cara ? h('span', { class: 'pj__acc pj__acc--cara' }, puestos.cara) : null,
-      puestos.cabeza ? h('span', { class: 'pj__acc pj__acc--cabeza' }, puestos.cabeza) : null),
-    c.mascota ? h('span', { class: 'cuarto__mascota', 'aria-hidden': 'true' }, c.mascota) : null);
+    h('div', { class: 'pj', 'aria-hidden': 'true' }, personajeSVG(especieDe(a), { acc: a.accesorios || [], tam: 200 })));
 }
