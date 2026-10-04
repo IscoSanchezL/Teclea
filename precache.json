@@ -1,5 +1,5 @@
 {
-  "version": "6e15750b2ee0",
+  "version": "e58cdb83b89b",
   "archivos": [
     "assets/assets.json",
     "assets/img/apple-touch-icon.png",
@@ -82,6 +82,7 @@
     "js/ui/confeti.js",
     "js/ui/cuarto.js",
     "js/ui/datos-demo.js",
+    "js/ui/decoracion.js",
     "js/ui/efectos.js",
     "js/ui/graficas.js",
     "js/ui/hero3d.js",

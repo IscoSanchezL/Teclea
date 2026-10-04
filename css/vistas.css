@@ -350,3 +350,6 @@
 .fondos__op { padding: 3px; border: 2px solid transparent; border-radius: 40%; background: none; }
 .fondos__op[aria-pressed="true"] { border-color: var(--primario); }
 .perfil__avatar { background: none !important; box-shadow: none !important; width: auto; height: auto; }
+.rejilla-avatares:has(.opcion-mascota) { grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr)); }
+.opcion-mascota { aspect-ratio: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 22px; padding: .6rem .4rem; gap: .2rem; font: 800 .9rem var(--fuente-titulo); }
+.opcion-mascota svg { display: block; width: 5rem; height: auto; margin-bottom: .35rem; }

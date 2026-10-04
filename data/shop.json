@@ -1,5 +1,5 @@
 {
- "version": 3,
+ "version": 4,
  "items": [
   {
    "id": "acc-0",
@@ -358,6 +358,82 @@
    "emoji": "🤖",
    "especie": "robot",
    "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-buho",
+   "categoria": "mascota",
+   "nombre": "Búho",
+   "precio": 150,
+   "emoji": "🦉",
+   "especie": "buho",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-pinguino",
+   "categoria": "mascota",
+   "nombre": "Pingüino",
+   "precio": 150,
+   "emoji": "🐧",
+   "especie": "pinguino",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-leon",
+   "categoria": "mascota",
+   "nombre": "León",
+   "precio": 200,
+   "emoji": "🦁",
+   "especie": "leon",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "mas-unicornio",
+   "categoria": "mascota",
+   "nombre": "Unicornio",
+   "precio": 320,
+   "emoji": "🦄",
+   "especie": "unicornio",
+   "descripcion": "Una mascota nueva para personalizar."
+  },
+  {
+   "id": "acc-10",
+   "categoria": "accesorio",
+   "nombre": "Moño",
+   "precio": 55,
+   "emoji": "🎀",
+   "slot": "cabeza"
+  },
+  {
+   "id": "acc-11",
+   "categoria": "accesorio",
+   "nombre": "Sombrero de mago",
+   "precio": 110,
+   "emoji": "🧙",
+   "slot": "cabeza"
+  },
+  {
+   "id": "acc-12",
+   "categoria": "accesorio",
+   "nombre": "Antifaz de héroe",
+   "precio": 65,
+   "emoji": "🥸",
+   "slot": "cara"
+  },
+  {
+   "id": "acc-13",
+   "categoria": "accesorio",
+   "nombre": "Bufanda",
+   "precio": 60,
+   "emoji": "🧣",
+   "slot": "cuello"
+  },
+  {
+   "id": "acc-14",
+   "categoria": "accesorio",
+   "nombre": "Alas de ángel",
+   "precio": 180,
+   "emoji": "🪽",
+   "slot": "espalda"
   }
  ]
 }

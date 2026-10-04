@@ -16,8 +16,12 @@ export const ESPECIES = {
   conejo: { nombre: 'Conejo', a: '#F6E9FF', b: '#CDB4F0', v: '#FFFFFF', o: '#FFB3CF', n: '#E86A8A' },
   dragon: { nombre: 'Dragón', a: '#6FE3B5', b: '#1FA67A', v: '#E8FFD9', o: '#FFE9A8', n: '#0F6B4D' },
   robot: { nombre: 'Robot', a: '#E8EEFF', b: '#8FA0D6', v: '#C9D4F5', o: '#4FC3F0', n: '#2B3A7A' },
+  buho: { nombre: 'Búho', a: '#C99A6B', b: '#7A5130', v: '#F6E3C5', o: '#FFB02E', n: '#FF9F1C' },
+  pinguino: { nombre: 'Pingüino', a: '#4A5BA8', b: '#1E2A5E', v: '#FFFFFF', o: '#FF9F1C', n: '#FF9F1C' },
+  leon: { nombre: 'León', a: '#FFC463', b: '#E3902B', v: '#FFF0D2', o: '#C26A1B', n: '#7A3E12' },
+  unicornio: { nombre: 'Unicornio', a: '#FFFFFF', b: '#E3D6FF', v: '#FFFFFF', o: '#FF8FD0', n: '#E86A8A' },
 };
-export const ESPECIE_POR_EMOJI = { '🦊': 'zorro', '🐼': 'panda', '🐯': 'gato', '🦁': 'gato', '🦄': 'conejo', '🐲': 'dragon', '🦖': 'dragon', '🤖': 'robot' };
+export const ESPECIE_POR_EMOJI = { '🦊': 'zorro', '🐼': 'panda', '🐯': 'gato', '🦁': 'gato', '🦄': 'conejo', '🐲': 'dragon', '🦖': 'dragon', '🤖': 'robot', '🦉': 'buho', '🐧': 'pinguino' };
 export const especieDe = (av = {}) => (ESPECIES[av.mascota] ? av.mascota : ESPECIE_POR_EMOJI[av.emoji] || 'zorro');
 
 let n = 0;
@@ -68,6 +72,32 @@ const ESP = {
     orejas: `<path d="M64 62C54 40 58 26 66 16C74 28 82 44 84 56z" fill="${p.o}"/><path d="M136 62C146 40 142 26 134 16C126 28 118 44 116 56z" fill="${p.o}"/><path d="M96 48L100 34L104 48z" fill="#FFD04A"/>`,
     cara: `${ojos()}<ellipse cx="100" cy="116" rx="22" ry="14" fill="${p.v}" opacity=".9"/><circle cx="93" cy="113" r="2.4" fill="${p.n}"/><circle cx="107" cy="113" r="2.4" fill="${p.n}"/><path d="M90 122Q100 130 110 122" fill="none" stroke="${p.n}" stroke-width="3" stroke-linecap="round"/><path d="M95 124L97 129L99 124M101 124L103 129L105 124" fill="#fff"/>${mejillas}`,
   }),
+  buho: (id, p) => ({
+    atras: '',
+    orejas: `<path d="M50 66L38 22L86 50z" fill="${p.b}"/><path d="M150 66L162 22L114 50z" fill="${p.b}"/>`,
+    extraCuerpo: `<path d="M84 160q4 7 8 0q4 7 8 0q4 7 8 0q4 7 8 0M80 176q4 7 8 0q4 7 8 0q4 7 8 0q4 7 8 0q4 7 8 0M84 192q4 7 8 0q4 7 8 0q4 7 8 0q4 7 8 0" fill="none" stroke="${p.b}" stroke-width="2.6" stroke-linecap="round" opacity=".55"/>`,
+    cara: `<circle cx="76" cy="98" r="24" fill="#FFF3DD"/><circle cx="124" cy="98" r="24" fill="#FFF3DD"/><circle cx="76" cy="98" r="15" fill="${p.o}"/><circle cx="124" cy="98" r="15" fill="${p.o}"/><circle cx="76" cy="98" r="8.5" fill="${OJO}"/><circle cx="124" cy="98" r="8.5" fill="${OJO}"/><circle cx="72.5" cy="94" r="3.4" fill="#fff"/><circle cx="120.5" cy="94" r="3.4" fill="#fff"/>
+      <path d="M92 108L108 108L100 128z" fill="${p.n}"/><path d="M52 78Q72 68 90 78M148 78Q128 68 110 78" fill="none" stroke="${p.b}" stroke-width="4" stroke-linecap="round"/>`,
+  }),
+  pinguino: (id, p) => ({
+    atras: '',
+    orejas: '',
+    extraCuerpo: `<ellipse cx="76" cy="219" rx="19" ry="9" fill="#FF9F1C"/><ellipse cx="124" cy="219" rx="19" ry="9" fill="#FF9F1C"/>`,
+    cara: `<path d="M50 100C50 76 76 72 100 90C124 72 150 76 150 100C150 130 124 144 100 144C76 144 50 130 50 100z" fill="#fff"/>${ojos()}<path d="M89 111Q100 103 111 111Q108 124 100 126Q92 124 89 111z" fill="#FF9F1C"/><path d="M92 112Q100 108 108 112" stroke="#E07A00" stroke-width="1.6" fill="none"/>${mejillas}`,
+  }),
+  leon: (id, p) => ({
+    atras: `<path d="M140 206C180 206 194 178 186 150" fill="none" stroke="${p.b}" stroke-width="10" stroke-linecap="round"/><circle cx="186" cy="146" r="11" fill="${p.o}"/>`,
+    orejas: `<circle cx="100" cy="98" r="74" fill="${p.o}"/><circle cx="46" cy="72" r="20" fill="${p.o}"/><circle cx="154" cy="72" r="20" fill="${p.o}"/><circle cx="100" cy="30" r="22" fill="${p.o}"/><circle cx="34" cy="108" r="20" fill="${p.o}"/><circle cx="166" cy="108" r="20" fill="${p.o}"/><circle cx="56" cy="140" r="20" fill="${p.o}"/><circle cx="144" cy="140" r="20" fill="${p.o}"/><circle cx="100" cy="150" r="20" fill="${p.o}"/>
+      <circle cx="62" cy="54" r="16" fill="url(#${id}a)"/><circle cx="138" cy="54" r="16" fill="url(#${id}a)"/><circle cx="62" cy="54" r="7" fill="#FFE0B8"/><circle cx="138" cy="54" r="7" fill="#FFE0B8"/>`,
+    cara: `${ojos()}<ellipse cx="100" cy="120" rx="25" ry="18" fill="${p.v}"/><path d="M92 109L108 109L100 119z" fill="${p.n}"/><path d="M100 119Q100 128 92 128M100 119Q100 128 108 128" fill="none" stroke="${OJO}" stroke-width="2.6" stroke-linecap="round"/>${mejillas}`,
+  }),
+  unicornio: (id, p) => ({
+    atras: `<path d="M142 202C192 198 198 160 176 138C180 170 160 184 140 186z" fill="${p.o}"/><path d="M150 206C184 204 190 176 182 160C176 184 160 194 148 196z" fill="#B58CFF"/>`,
+    orejas: `<path d="M92 52L100 2L108 52z" fill="#FFD04A" stroke="#E0A800" stroke-width="2" stroke-linejoin="round"/><path d="M94 40L106 34M95 28L105 22" stroke="#E0A800" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M52 62L46 22L84 46z" fill="url(#${id}a)"/><path d="M148 62L154 22L116 46z" fill="url(#${id}a)"/><path d="M54 54L52 32L72 46z" fill="${p.o}"/><path d="M146 54L148 32L128 46z" fill="${p.o}"/>
+      <path d="M50 66C14 76 14 132 40 154C44 132 48 112 56 98z" fill="${p.o}"/><path d="M48 80C26 92 28 128 44 146C44 128 48 110 54 98z" fill="#B58CFF"/>`,
+    cara: `<path d="M60 56C84 44 116 44 140 56C126 58 114 68 100 78C88 68 74 58 60 56z" fill="${p.o}"/>${ojos()}<path d="M94 112Q100 108 106 112Q104 118 100 118Q96 118 94 112z" fill="${p.n}"/>${sonrisa()}${mejillas}`,
+  }),
   robot: (id, p) => ({
     atras: '',
     orejas: `<rect x="34" y="84" width="16" height="36" rx="7" fill="${p.b}"/><rect x="150" y="84" width="16" height="36" rx="7" fill="${p.b}"/><rect x="96" y="30" width="8" height="22" fill="${p.b}"/><circle cx="100" cy="28" r="9" fill="#FF6B8B"/><circle cx="97" cy="25" r="3" fill="#fff" opacity=".8"/>`,
@@ -87,6 +117,11 @@ const ACC = {
   '🕶️': { zona: 'cara', svg: () => `<path d="M52 92Q76 84 98 92L102 92Q124 84 148 92" fill="none" stroke="#14142A" stroke-width="4"/><path d="M56 90H96V108Q96 122 76 122Q56 122 56 106z" fill="#14142A"/><path d="M104 90H144V106Q144 122 124 122Q104 122 104 108z" fill="#14142A"/><path d="M62 96L74 96L66 108z" fill="#fff" opacity=".35"/><path d="M110 96L122 96L114 108z" fill="#fff" opacity=".35"/>` },
   '👓': { zona: 'cara', svg: () => `<circle cx="76" cy="98" r="19" fill="#fff" fill-opacity=".18" stroke="#B8860B" stroke-width="4"/><circle cx="124" cy="98" r="19" fill="#fff" fill-opacity=".18" stroke="#B8860B" stroke-width="4"/><path d="M95 96Q100 92 105 96" stroke="#B8860B" stroke-width="4" fill="none"/><path d="M57 94L44 88M143 94L156 88" stroke="#B8860B" stroke-width="4" stroke-linecap="round"/><path d="M66 90Q72 86 80 88" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>` },
   '🏴‍☠️': { zona: 'cara', svg: () => `<path d="M46 72L154 92" stroke="#14142A" stroke-width="5"/><ellipse cx="76" cy="98" rx="19" ry="16" fill="#14142A"/><path d="M68 94L84 102M84 94L68 102" stroke="#fff" stroke-opacity=".35" stroke-width="2.4" stroke-linecap="round"/>` },
+  '🎀': { zona: 'cabeza', svg: () => `<path d="M140 58L112 38Q108 56 112 76z" fill="#FF5C9A"/><path d="M140 58L170 40Q174 58 168 78z" fill="#FF5C9A"/><path d="M140 58L116 46M140 58L116 70M140 58L168 48M140 58L166 72" stroke="#C2185B" stroke-width="1.6" opacity=".5"/><circle cx="140" cy="58" r="8" fill="#E91E7A"/><circle cx="137" cy="55" r="2.6" fill="#fff" opacity=".7"/>` },
+  '🧙': { zona: 'cabeza', svg: () => `<ellipse cx="100" cy="68" rx="64" ry="13" fill="#4B2FA3"/><path d="M54 68Q100 84 146 68Q132 50 124 30Q118 14 112 8Q106 4 108 14Q104 28 92 36Q70 52 54 68z" fill="#6C4CF5"/><path d="M68 62Q100 76 132 62L136 70Q100 86 64 70z" fill="#FFD04A"/><path d="M100 40l2.6 6 6 .6-4.6 4 1.4 6-5.4-3.2-5.4 3.2 1.4-6-4.6-4 6-.6z" fill="#FFD04A"/>` },
+  '🥸': { zona: 'cara', svg: () => `<path fill-rule="evenodd" d="M46 86Q100 74 154 86L154 110Q126 120 100 108Q74 120 46 110z M62 98a14 12 0 1 0 28 0a14 12 0 1 0-28 0z M110 98a14 12 0 1 0 28 0a14 12 0 1 0-28 0z" fill="#C2294A"/><path d="M46 86Q100 74 154 86" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2.4"/>` },
+  '🧣': { zona: 'cuello', svg: () => `<path d="M52 136Q100 160 148 136L150 156Q100 182 50 156z" fill="#E8463D"/><path d="M60 142Q100 162 140 142M58 150Q100 172 142 150" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="3"/><path d="M118 160L142 160L150 204L126 200z" fill="#C2294A"/><path d="M126 176L146 176M128 188L148 188" stroke="#fff" stroke-opacity=".5" stroke-width="3"/>` },
+  '🪽': { zona: 'espalda', svg: () => `<path d="M64 140C10 94 0 160 26 192C42 180 56 172 68 166z" fill="#fff" stroke="#BFD9FF" stroke-width="3" stroke-linejoin="round"/><path d="M136 140C190 94 200 160 174 192C158 180 144 172 132 166z" fill="#fff" stroke="#BFD9FF" stroke-width="3" stroke-linejoin="round"/><path d="M30 150Q44 154 54 166M24 168Q38 170 50 180M170 150Q156 154 146 166M176 168Q162 170 150 180" fill="none" stroke="#BFD9FF" stroke-width="2.4" stroke-linecap="round"/>` },
   '🦸': { zona: 'espalda', svg: () => `<path d="M62 132C40 170 30 200 24 228C60 236 140 236 176 228C170 200 160 170 138 132z" fill="url(#CAPA)"/><path d="M62 132C70 140 130 140 138 132L136 142C120 150 80 150 64 142z" fill="#8F1B38"/>`, delante: `<circle cx="100" cy="140" r="6" fill="#FFD04A" stroke="#B8860B" stroke-width="1.6"/>` },
   '🌈': { zona: 'espalda', svg: () => ['#FF5C7A', '#FFA24D', '#FFD04A', '#3DDBB0', '#4FC3F0', '#8A70FA'].map((c, i) => `<path d="M${14 + i * 7} 196A${86 - i * 7} ${86 - i * 7} 0 0 1 ${186 - i * 7} 196" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`).join('') },
 };
@@ -96,7 +131,7 @@ export const zonaDeAccesorio = (emoji) => ACC[emoji]?.zona || null;
 export function personajeSVG(especie = 'zorro', { acc = [], tam = 200, cabeza: soloCabeza = false, clase = '' } = {}) {
   const sp = ESPECIES[especie] ? especie : 'zorro', p = ESPECIES[sp], id = `pj${++n}`;
   const e = ESP[sp](id, p);
-  const puestos = { cabeza: null, cara: null, espalda: null };
+  const puestos = { cabeza: null, cara: null, cuello: null, espalda: null };
   for (const em of acc) { const z = ACC[em]?.zona; if (z) puestos[z] = em; }
   const dib = (em) => (em ? ACC[em].svg(id) : '');
   const capaDelante = puestos.espalda && ACC[puestos.espalda].delante ? ACC[puestos.espalda].delante : '';
@@ -111,7 +146,7 @@ export function personajeSVG(especie = 'zorro', { acc = [], tam = 200, cabeza: s
     ${e.atras}
     ${cuerpo(id, p)}${e.extraCuerpo || ''}${capaDelante}
     ${e.orejas}${e.cabezaPropia || cabeza(id)}${e.cara}
-    ${dib(puestos.cara)}${dib(puestos.cabeza)}`;
+    ${dib(puestos.cuello)}${dib(puestos.cara)}${dib(puestos.cabeza)}`;
   const vb = soloCabeza ? '24 6 152 148' : '0 0 200 240';
   const alto = soloCabeza ? tam * (148 / 152) : tam * 1.2;
   const el = h('span', { class: `pj3d pj3d--${sp} ${clase}`, role: 'img', 'aria-label': `Mascota ${p.nombre}` });

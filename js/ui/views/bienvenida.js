@@ -11,13 +11,15 @@ import { campo } from '../componentes.js';
 import { mascota } from '../art.js';
 import { icono } from '../icons.js';
 import { toast } from '../overlay.js';
+import { personajeSVG, ESPECIES, especieDe } from '../personaje.js';
 
-const AVATARES = ['🦊', '🐼', '🐯', '🦄', '🐙', '🦖', '🤖', '🐸'];
+const INICIALES = Object.keys(ESPECIES).filter((k) => ESPECIES[k].gratis);
+const EMOJI_DE = { zorro: '🦊', panda: '🐼' };
 
 export async function render() {
   const u = state.user;
   let grado = u.grado || null;
-  let avatar = u.avatar?.emoji || '🦊';
+  let especie = INICIALES.includes(especieDe(u.avatar)) ? especieDe(u.avatar) : 'zorro';
 
   const apodo = campo({ etiqueta: '¿Cómo quieres que te llamemos?', value: u.apodo || '', maxlength: 30, autocomplete: 'off',
     ayuda: 'Usa solo tu nombre o un apodo. No escribas apellidos ni datos personales.' });
@@ -37,10 +39,10 @@ export async function render() {
     actualizar();
   }
 
-  const botonesAvatar = AVATARES.map((e) => h('button', {
-    type: 'button', class: 'opcion-avatar', 'aria-pressed': String(e === avatar), 'aria-label': `Avatar ${e}`,
-    onclick: () => { avatar = e; botonesAvatar.forEach((b, i) => b.setAttribute('aria-pressed', String(AVATARES[i] === e))); },
-  }, e));
+  const botonesAvatar = INICIALES.map((k) => h('button', {
+    type: 'button', class: 'opcion-avatar opcion-mascota', 'aria-pressed': String(k === especie), 'aria-label': `Mascota ${ESPECIES[k].nombre}`,
+    onclick: () => { especie = k; botonesAvatar.forEach((b, i) => b.setAttribute('aria-pressed', String(INICIALES[i] === k))); },
+  }, personajeSVG(k, { cabeza: true, tam: 76 }), h('span', {}, ESPECIES[k].nombre)));
 
   const btn = h('button', { class: 'btn btn--primary btn--lg btn--bloque', type: 'button', onclick: guardar }, '¡Listo, vamos!', icono('arrow', { tam: 22 }));
   function actualizar() { btn.disabled = !grado || !apodo.input.value.trim(); }
@@ -49,7 +51,7 @@ export async function render() {
   async function guardar() {
     btn.classList.add('btn--cargando'); btn.disabled = true;
     try {
-      await guardarPerfil({ grado, apodo: apodo.input.value.trim().slice(0, 30), avatar: { ...(u.avatar || {}), emoji: avatar } });
+      await guardarPerfil({ grado, apodo: apodo.input.value.trim().slice(0, 30), avatar: { ...(u.avatar || {}), emoji: EMOJI_DE[especie] || '🦊', mascota: especie } });
       toast('¡Perfil listo! Vamos a tu aventura.', { tipo: 'ok' });
       navegar('/', { reemplazar: true });
     } catch (e) {
@@ -70,7 +72,7 @@ export async function render() {
       h('div', { class: 'rejilla-grados' }, botonesGrado), info),
     apodo.nodo,
     h('fieldset', { class: 'pila' },
-      h('legend', { class: 'campo__etiqueta' }, 'Elige tu avatar (luego habrá accesorios en la tienda)'),
+      h('legend', { class: 'campo__etiqueta' }, 'Elige tu mascota (en la tienda podrás vestirla y conseguir más)'),
       h('div', { class: 'rejilla-avatares' }, botonesAvatar)),
     btn);
 }

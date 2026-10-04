@@ -147,9 +147,9 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 .cuarto[data-escena]:not([data-escena=""]) .cuarto__ventana { display: none; }
 /* Decoración por zonas */
 .cuarto__deco { position: absolute; line-height: 1; filter: drop-shadow(0 .8cqw .6cqw rgba(0, 0, 0, .35)); z-index: 0; }
-.cuarto__deco--izquierda { left: 5%; bottom: 20%; font-size: 14cqw; } .cuarto__deco--derecha { right: 5%; bottom: 20%; font-size: 14cqw; }
-.cuarto__deco--pared { left: 50%; top: 9%; font-size: 9cqw; transform: translateX(-50%); } .cuarto__deco--techo { left: 62%; top: -1%; font-size: 8cqw; animation: cuarto-cuelga 4s ease-in-out infinite; transform-origin: 50% 0; }
-.cuarto__deco--estante { right: 8%; top: 24%; font-size: 8cqw; } .cuarto__deco--estante::after { content: ''; position: absolute; left: -20%; right: -20%; bottom: -6%; height: 1.2cqw; border-radius: 1cqw; background: linear-gradient(#C99A63, #8A6238); z-index: -1; }
+.cuarto__deco--izquierda { left: 4%; bottom: 22%; width: 19cqw; } .cuarto__deco--derecha { right: 4%; bottom: 22%; width: 19cqw; }
+.cuarto__deco--pared { left: 50%; top: 8%; width: 13cqw; transform: translateX(-50%); } .cuarto__deco--techo { left: 62%; top: -2%; width: 10cqw; animation: cuarto-cuelga 4s ease-in-out infinite; transform-origin: 50% 0; }
+.cuarto__deco--estante { right: 9%; top: 20%; width: 10cqw; } .cuarto__deco--estante::after { content: ''; position: absolute; left: -20%; right: -20%; bottom: -6%; height: 1.2cqw; border-radius: 1cqw; background: linear-gradient(#C99A63, #8A6238); z-index: -1; }
 @keyframes cuarto-cuelga { 50% { transform: rotate(5deg); } }
 /* Personaje (SVG) */
 .pj { position: absolute; left: 50%; bottom: 6%; width: 31cqw; margin-left: -15.5cqw; z-index: 1; animation: pj-respira 3.2s ease-in-out infinite; transform-origin: 50% 100%; }
@@ -176,3 +176,6 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 .mascotas__op[aria-pressed="true"] { border-color: #fff; background: rgba(255, 255, 255, .4); box-shadow: 0 4px 12px -4px rgba(20, 10, 70, .5); }
 .mascotas__tit { font-weight: 800; font-size: .85rem; margin: 0; }
 .tienda__mini { display: grid; place-items: center; width: 5.2rem; height: 5.2rem; border-radius: 30%; background: var(--superficie-2); overflow: hidden; }
+
+.deco3d { display: block; line-height: 0; } .deco3d svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tienda__mini .deco3d { width: 70%; }

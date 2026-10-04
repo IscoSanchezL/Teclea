@@ -5,8 +5,9 @@
  */
 import { h } from '../core/utils.js';
 import { personajeSVG, especieDe, zonaDeAccesorio } from './personaje.js';
+import { decoSVG } from './decoracion.js';
 
-export const ZONAS = { cabeza: 'En la cabeza', cara: 'En la cara', espalda: 'Detrás de ti', izquierda: 'Lado izquierdo', derecha: 'Lado derecho', pared: 'En la pared', techo: 'En el techo', estante: 'En el estante' };
+export const ZONAS = { cabeza: 'En la cabeza', cara: 'En la cara', cuello: 'En el cuello', espalda: 'Detrás de ti', izquierda: 'Lado izquierdo', derecha: 'Lado derecho', pared: 'En la pared', techo: 'En el techo', estante: 'En el estante' };
 
 /** Devuelve el avatar con el artículo de prueba puesto (sin guardar nada). */
 export function conPrueba(av = {}, it) {
@@ -24,7 +25,7 @@ export function conPrueba(av = {}, it) {
 export function cuarto(u, catalogo = [], { probando = null, clase = '' } = {}) {
   const a = conPrueba(u?.avatar || {}, probando);
   const c = a.cuarto || {};
-  const piezas = Object.entries(c.deco || {}).map(([zona, emoji]) => h('span', { class: `cuarto__deco cuarto__deco--${zona}`, 'aria-hidden': 'true' }, emoji));
+  const piezas = Object.entries(c.deco || {}).map(([zona, emoji]) => h('span', { class: `cuarto__deco cuarto__deco--${zona}`, 'aria-hidden': 'true' }, decoSVG(emoji)));
   return h('div', { class: `cuarto ${clase}`, dataset: { escena: c.escena || '', fondo: a.fondo || 'violeta', marco: a.marco || '' }, role: 'img', 'aria-label': 'Tu mascota y tu cuarto' },
     h('span', { class: 'cuarto__ventana', 'aria-hidden': 'true' }),
     h('span', { class: 'cuarto__piso', 'aria-hidden': 'true' }),
