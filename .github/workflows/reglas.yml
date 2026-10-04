@@ -1,0 +1,39 @@
+name: Publicar reglas de Firestore
+
+# Publica firestore.rules en Firebase (proyecto teclea-colegio). Corre solo cuando cambia ese archivo en main
+# y también a demanda (pestaña Actions → "Publicar reglas de Firestore" → Run workflow).
+# Usa el mismo secreto FIREBASE_SERVICE_ACCOUNT del respaldo: esa cuenta de servicio necesita el rol
+# "Administrador de reglas de Firebase" (Firebase Rules Admin) o "Editor".
+on:
+  push:
+    branches: [main]
+    paths: ['firestore.rules', 'firestore.indexes.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reglas
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Credenciales
+        run: |
+          test -n "$FIREBASE_SERVICE_ACCOUNT" || { echo "Falta el secreto FIREBASE_SERVICE_ACCOUNT"; exit 1; }
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/sa.json" >> "$GITHUB_ENV"
+      - name: Validar y publicar las reglas
+        run: npx --yes firebase-tools@13 deploy --only firestore:rules --project teclea-colegio --non-interactive
+      - name: Borrar credenciales
+        if: always()
+        run: rm -f "$RUNNER_TEMP/sa.json"
