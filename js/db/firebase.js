@@ -29,7 +29,9 @@ async function iniciar() {
   if (CONFIG.appCheckSiteKey) {
     try {
       const ac = await import(`${base}/firebase-app-check.js`);
-      ac.initializeAppCheck(miApp, { provider: new ac.ReCaptchaV3Provider(CONFIG.appCheckSiteKey), isTokenAutoRefreshEnabled: true });
+      // 'enterprise' = Fraud Defense (reCAPTCHA Enterprise, el vigente); 'v3' = reCAPTCHA clásico (obsoleto)
+      const proveedor = CONFIG.appCheckProveedor === 'v3' ? new ac.ReCaptchaV3Provider(CONFIG.appCheckSiteKey) : new ac.ReCaptchaEnterpriseProvider(CONFIG.appCheckSiteKey);
+      ac.initializeAppCheck(miApp, { provider: proveedor, isTokenAutoRefreshEnabled: true });
     } catch (e) { console.warn('[firebase] App Check no se pudo iniciar', e); }
   }
   const auth = au.getAuth(miApp);
