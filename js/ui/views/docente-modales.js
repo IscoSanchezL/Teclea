@@ -103,9 +103,11 @@ export function modalAlumnos({ clase, alTerminar }) {
     boton.disabled = true; area.disabled = true;
     const prog = h('p', { class: 'suave', 'aria-live': 'polite' }, 'Creando cuentas…'); cont.replaceChildren(prog);
     const lista = await C.crearEstudiantes(state.user, clase, nombres, { clave: clave.input.value, alProgreso: (i, t, n) => { prog.textContent = `Creando ${i} de ${t}: ${n}`; } });
+    const pendientes = lista.filter((a) => a.pendiente);
     alTerminar?.();
     const ok = lista.filter((a) => a.ok), mal = lista.filter((a) => !a.ok);
-    cont.replaceChildren(h('p', {}, `${ok.length} cuentas creadas${mal.length ? `, ${mal.length} con problemas` : ''}.`),
+    cont.replaceChildren(h('p', {}, `${ok.length} cuentas listas${mal.length ? `, ${mal.length} con problemas` : ''}.`),
+      pendientes.length ? h('div', { class: 'aviso pila', role: 'alert' }, h('p', {}, `⏳ Firebase limita cuántas cuentas se crean seguidas desde la misma conexión. Quedaron ${pendientes.length} pendientes. No pasa nada: espera unos 10 a 15 minutos y pulsa “Continuar con los pendientes”. Las que ya se crearon no se repiten.`), h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: () => { area.value = pendientes.map((a) => a.nombre).join('\n'); boton.disabled = false; area.disabled = false; cont.replaceChildren(h('p', { class: 'suave' }, 'Pendientes listos abajo. Cuando hayan pasado unos minutos, pulsa “Crear cuentas”.')); } }, 'Continuar con los pendientes')) : null,
       lista.errorLista ? h('p', { class: 'mensaje-error', role: 'alert' }, lista.errorLista === 'permiso' ? '⚠ Las cuentas se crearon, pero la lista de la clase NO se pudo publicar: faltan las reglas de seguridad nuevas en Firebase. El administrador debe pegarlas en Firestore → Reglas → Publicar. Después pulsa “Publicar lista” en la tarjeta de la clase.' : `⚠ Las cuentas se crearon, pero no se pudo publicar la lista (${lista.errorLista}). Revisa la conexión e inténtalo de nuevo.`) : h('p', { class: 'suave' }, `✔ Lista publicada. Los niños escriben ${clase.claveAlumnos} y tocan su nombre.`),
       h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, ['Estudiante', 'Aparece como', '', ''].map((t) => h('th', { scope: 'col' }, t)))),
         h('tbody', {}, lista.map((a) => h('tr', {}, h('th', { scope: 'row' }, a.nombre), h('td', {}, a.ok ? `${a.emoji} ${a.alias}` : '—'), h('td', {}, ''), h('td', { class: a.ok ? '' : 'mensaje-error' }, a.ok ? '' : a.error)))))),

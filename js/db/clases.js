@@ -148,23 +148,45 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
   }
   const previas = (await inscripcionesDocente(docente)).filter((i) => i.classId === clase.id);
   const usados = new Set(previas.map((i) => i.usuario).filter(Boolean));
-  let n = 0, indiceAnimal = previas.length;
+  const existentes = new Set(usados); // quienes ya estaban antes de esta tanda (para no duplicar si se repite la lista)
+  let n = 0, indiceAnimal = previas.length, pausa = false;
   const salida = [];
+  const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+  // Firebase limita cuántas cuentas se crean seguidas desde la misma conexión: se espera y se reintenta solo
+  const conEspera = async (fn, aviso) => {
+    for (const espera of [0, 20000, 45000, 90000]) {
+      if (espera) { aviso?.(`Firebase pidió esperar; reintentando en ${Math.round(espera / 1000)} s…`); await dormir(espera); }
+      try { return await fn(); } catch (e) { if (e?.code !== 'auth/too-many-requests') throw e; }
+    }
+    const e = new Error('limite'); e.code = 'auth/too-many-requests'; throw e;
+  };
   for (const bruto of nombres) {
     const nombre = bruto.trim().replace(/\s+/g, ' ').slice(0, 80);
     if (!nombre) continue;
     alProgreso(++n, nombres.length, nombre);
     const base = slugUsuario(nombre) || 'alumno';
+    const alias = nombreCorto(nombre);
+    if (pausa) { salida.push({ nombre, alias, usuario: base, emoji: '⏳', ok: false, pendiente: true, error: 'Pendiente: Firebase pidió esperar' }); continue; }
+    if (existentes.has(base)) { const prev = previas.find((i) => i.usuario === base); salida.push({ nombre, alias: prev?.alias || alias, usuario: base, emoji: prev?.avatar?.emoji || '🙂', ok: true, yaEstaba: true }); continue; }
     let usuario = base, k = 1;
     while (usados.has(usuario)) usuario = `${base.slice(0, 20)}${++k}`;
     usados.add(usuario);
-    const alias = nombreCorto(nombre), emoji = ANIMALES[indiceAnimal++ % ANIMALES.length];
+    const emoji = ANIMALES[indiceAnimal++ % ANIMALES.length];
     try {
       let uid;
       if (auth2) {
-        const cred = await fb.au.createUserWithEmailAndPassword(auth2, `${usuario}.${clave.toLowerCase()}@${CONFIG.dominioPin}`, clave);
-        uid = cred.user.uid;
+        const correo = `${usuario}.${clave.toLowerCase()}@${CONFIG.dominioPin}`;
+        try {
+          const cred = await conEspera(() => fb.au.createUserWithEmailAndPassword(auth2, correo, clave), (m) => alProgreso(n, nombres.length, `${nombre} · ${m}`));
+          uid = cred.user.uid;
+        } catch (e) {
+          if (e?.code !== 'auth/email-already-in-use') throw e;
+          // La cuenta quedó creada en un intento anterior (sin perfil): se recupera con el mismo código de acceso
+          const cred = await conEspera(() => fb.au.signInWithEmailAndPassword(auth2, correo, clave));
+          uid = cred.user.uid;
+        }
         await fb.au.signOut(auth2).catch(() => {});
+        await dormir(350); // ritmo suave: evita el límite de creación de cuentas
       } else uid = `demo-${nuevoId()}`;
       const perfil = { ...perfilNuevo({ uid, nombre, rol: 'estudiante', grado: clase.grado, authTipo: 'pin' }), apodo: alias, avatar: { emoji, fondo: 'violeta', marco: null, accesorios: [] },
         creadoPor: docente.uid, creadoEn: store.ahora(), consentimiento: { porDocente: true, en: Date.now() } };
@@ -176,7 +198,9 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
       ]));
       salida.push({ nombre, alias, usuario, emoji, ok: true });
     } catch (e) {
-      salida.push({ nombre, alias, usuario, emoji, ok: false, error: e?.code === 'auth/email-already-in-use' ? 'Ya existe' : (e?.code || e?.message || 'Error') });
+      const limite = e?.code === 'auth/too-many-requests';
+      if (limite) pausa = true;
+      salida.push({ nombre, alias, usuario, emoji, ok: false, pendiente: limite, error: limite ? 'Pendiente: Firebase pidió esperar' : e?.code === 'auth/email-already-in-use' ? 'Ya existe' : (e?.code || e?.message || 'Error') });
     }
   }
   try { await publicarLista(docente, clase); } catch (e) { console.warn('[lista] no se pudo publicar', e?.code || e); salida.errorLista = e?.code === 'permission-denied' ? 'permiso' : (e?.code || 'error'); }
