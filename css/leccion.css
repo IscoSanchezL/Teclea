@@ -188,3 +188,22 @@
 @keyframes medalla-gira { 0% { transform: perspective(700px) rotateY(-540deg) scale(.2); opacity: 0; } 70% { opacity: 1; } 100% { transform: perspective(700px) rotateY(0) scale(1); opacity: 1; } }
 @keyframes medalla-brillo { 0% { opacity: 0; transform: scale(.5); } 35% { opacity: 1; } 100% { opacity: 0; transform: scale(1.5); } }
 @media (prefers-reduced-motion: reduce) { .res__medalla .medalla, .res__medalla .medalla::after { animation: none; } }
+
+/* ───────── 2.º–3.º: la mascota acompaña el ejercicio y celebra ───────── */
+.ej__amigo { position: fixed; right: clamp(.6rem, 2.5vw, 2rem); bottom: clamp(.6rem, 3vh, 2rem); z-index: 20; width: clamp(5rem, 9vw, 7rem); pointer-events: none; animation: amigo-respira 3s ease-in-out infinite; transform-origin: 50% 100%; }
+.ej__amigo .pj3d, .ej__amigo svg { display: block; width: 100%; height: auto; }
+.ej__burbuja { position: absolute; right: 70%; bottom: 62%; min-width: 9rem; max-width: 14rem; padding: .55rem .9rem; border-radius: 22px 22px 6px 22px; background: #fff; color: #2B1A7A; font: 700 1rem var(--fuente-titulo); text-align: center; box-shadow: 0 8px 20px -8px rgba(20, 10, 70, .55); opacity: 0; transform: scale(.6) translateY(10px); transform-origin: 100% 100%; transition: opacity .2s, transform .3s var(--resorte); }
+.ej__burbuja--ver { opacity: 1; transform: none; }
+.ej__amigo[data-estado="salta"] { animation: amigo-salta .7s ease; }
+.ej__amigo[data-estado="ay"] { animation: amigo-ay .5s ease; }
+.ej__amigo[data-estado="baila"] { animation: amigo-baila .6s ease-in-out infinite; }
+@keyframes amigo-respira { 50% { transform: scale(1.04, .97); } }
+@keyframes amigo-salta { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-34px) rotate(-8deg) scale(1.08); } 65% { transform: translateY(-12px) rotate(6deg); } }
+@keyframes amigo-ay { 20% { transform: translateX(-8px) rotate(-6deg); } 40% { transform: translateX(8px) rotate(6deg); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
+@keyframes amigo-baila { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-22px) rotate(8deg); } }
+/* Resultado: la mascota baila según las estrellas */
+.res__amigo { flex: none; width: clamp(6.5rem, 14vw, 9.5rem); animation: amigo-baila .7s ease-in-out 6; }
+.res__amigo--0 { animation: amigo-respira 3s ease-in-out infinite; }
+.res__amigo .pj3d, .res__amigo svg { display: block; width: 100%; height: auto; }
+@media (max-width: 700px) { .ej__amigo { width: 4.2rem; bottom: 4.6rem; } .ej__burbuja { font-size: .85rem; min-width: 7rem; } }
+@media (prefers-reduced-motion: reduce) { .ej__amigo, .res__amigo { animation: none; } }

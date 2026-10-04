@@ -7,6 +7,8 @@ import { icono } from './icons.js';
 import { mascota } from './art.js';
 import { sonido } from './sonido.js';
 import { confeti } from './confeti.js';
+import { personajeSVG, especieDe } from './personaje.js';
+import { state } from '../core/state.js';
 import { medallaSVG } from './medallas.js';
 
 const MENSAJES = {
@@ -25,6 +27,7 @@ function estrella(llena) {
 
 export function panelResultado({ titulo, subtitulo = '', estrellas = null, resultado, resumen, acciones = [], sinMensaje = false }) {
   const pose = estrellas == null ? 'celebra' : POSES[estrellas];
+  const infantil = document.documentElement.dataset.estilo === 'ludico';
   const msg = estrellas == null ? '¡Buen trabajo! Cada práctica cuenta.' : elige(MENSAJES[estrellas], Math.round(resultado.ppm + resultado.precision));
 
   const fila = estrellas == null ? null : h('div', { class: 'res__estrellas', role: 'img', 'aria-label': `${estrellas} de 3 estrellas` },
@@ -43,7 +46,7 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
 
   const raiz = h('section', { class: 'res card card--vidrio', 'aria-live': 'polite' },
     h('div', { class: 'res__cab' },
-      mascota(pose, { tam: 'md' }),
+      infantil ? h('div', { class: `res__amigo res__amigo--${estrellas == null ? 3 : estrellas}`, 'aria-hidden': 'true' }, personajeSVG(especieDe(state.user?.avatar), { acc: state.user?.avatar?.accesorios || [], tam: 150 })) : mascota(pose, { tam: 'md' }),
       h('div', {}, subtitulo ? h('span', { class: 'etiqueta' }, subtitulo) : null, h('h1', {}, titulo), sinMensaje ? null : h('p', { class: 'res__msg' }, msg))),
     fila, grid, cola, zonaMedallas,
     h('div', { class: 'res__acciones fila fila--envuelve' }, acciones.map((a) => h('button', { class: `btn ${a.clase || 'btn--suave'}`, type: 'button', onclick: a.onclick, autofocus: a.principal ? true : null }, a.icono ? icono(a.icono, { tam: 18 }) : null, a.texto))));
@@ -52,7 +55,8 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
   if (estrellas != null) {
     const nodos = [...raiz.querySelectorAll('.res__estrella--llena')];
     nodos.forEach((n, i) => { n.classList.add('res__estrella--oculta'); setTimeout(() => { n.classList.remove('res__estrella--oculta'); n.classList.add('res__estrella--pop'); sonido.estrella(i); }, 500 + i * 380); });
-    if (estrellas === 3) setTimeout(() => confeti({ cantidad: 130 }), 500 + 3 * 380);
+    if (estrellas === 3) setTimeout(() => confeti({ cantidad: infantil ? 220 : 130 }), 500 + 3 * 380);
+    if (infantil && estrellas >= 1) { [1500, 2200].forEach((t, i) => setTimeout(() => { confeti({ cantidad: 70, duracion: 1800, origen: { x: innerWidth * (i ? 0.8 : 0.2), y: innerHeight * 0.3 } }); sonido.estrella(i + 3); }, t)); }
   } else if (resultado.precision >= 95) confeti({ cantidad: 60 });
 
   // Resumen asíncrono (XP, monedas, racha, medallas…)
@@ -60,7 +64,7 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
     if (!r) { cola.replaceChildren(); return; }
     const lineas = r.desglose.map(([motivo, pts], i) => h('li', { style: { '--i': i } }, h('span', {}, motivo), h('b', {}, `+${pts}`)));
     const mejora = r.mejorAnterior ? resultado.ppm - r.mejorAnterior : null;
-    cola.replaceChildren(
+    cola.replaceChildren(...[
       h('div', { class: 'res__xp' },
         h('div', { class: 'res__xp-tit' }, icono('star', { tam: 22 }), h('strong', {}, `+${r.xp} XP`), r.monedas ? h('span', { class: 'res__moneda' }, icono('coin', { tam: 18 }), `+${r.monedas}`) : null),
         h('ul', { class: 'res__xp-lista' }, lineas)),
@@ -70,7 +74,7 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
         mejora != null && !r.esRecord ? h('span', { class: 'chip' }, `Tu mejor: ${r.mejorAnterior} PPM`) : null,
         r.racha?.usoProtector ? h('span', { class: 'chip' }, icono('shield', { tam: 18 }), 'Protector de racha usado') : null,
         r.enCola ? h('span', { class: 'chip' }, icono('info', { tam: 18 }), 'Sin internet: se sincronizará al reconectar') : null),
-      r.subioNivel ? h('div', { class: 'res__nivel' }, icono('sparkle', { tam: 22 }), h('strong', {}, `¡Subiste al nivel ${r.nivel.nivel}: ${r.nivel.nombre}!`)) : null);
+      r.subioNivel ? h('div', { class: 'res__nivel' }, icono('sparkle', { tam: 22 }), h('strong', {}, `¡Subiste al nivel ${r.nivel.nivel}: ${r.nivel.nombre}!`)) : null].filter(Boolean));
     if (r.subioNivel) { sonido.nivel(); confeti({ cantidad: 160 }); }
     if (r.insignias?.length) {
       zonaMedallas.replaceChildren(h('h2', { class: 'res__tit2' }, r.insignias.length > 1 ? '¡Nuevas medallas!' : '¡Nueva medalla!'),

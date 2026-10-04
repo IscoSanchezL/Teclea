@@ -13,6 +13,8 @@ import { MotorEscritura } from './motor.js';
 import { vistaTexto } from './texto-vista.js';
 import { crearTeclado } from './teclado-virtual.js';
 import { vincularEntrada } from './entrada.js';
+import { personajeSVG, especieDe } from '../ui/personaje.js';
+import { confeti } from '../ui/confeti.js';
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -21,10 +23,30 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
   let intervalo = null, entrada = null, vista = null;
   const estrictoFinal = estricto || state.prefs.modoEstricto;
 
+  // ── Compañero (solo 2.º y 3.º): tu mascota anima, celebra cada racha de aciertos y consuela al fallar ──
+  const infantil = document.documentElement.dataset.estilo === 'ludico';
+  let amigo = null, burbuja = null, racha = 0, hablaFin = 0;
+  const FRASES_RACHA = ['¡Súper! 🌟', '¡Wow, qué rápido! 🚀', '¡Sigue así! 💪', '¡Eres genial! 🎉', '¡Increíble! ✨', '¡Qué bien escribes! 👏'];
+  const FRASES_ERROR = ['¡Casi! Tú puedes 💪', 'Sin problema, ¡otra vez! 😊', '¡Con calma, vas muy bien! 🌈'];
+  const azar = (l) => l[Math.floor(Math.random() * l.length)];
+  function decir(texto, estado, ms = 1600) {
+    if (!amigo) return;
+    burbuja.textContent = texto; burbuja.classList.add('ej__burbuja--ver');
+    amigo.dataset.estado = estado || ''; clearTimeout(hablaFin);
+    hablaFin = setTimeout(() => { burbuja.classList.remove('ej__burbuja--ver'); amigo.dataset.estado = ''; }, ms);
+  }
+  function animarAmigo(ev) {
+    if (!infantil || !amigo) return;
+    if (ev.tipo === 'inicio') decir('¡Vamos, tú puedes! 🚀', 'salta', 1400);
+    else if (ev.tipo === 'avance') { racha++; if (racha % 10 === 0) { decir(azar(FRASES_RACHA), 'salta'); sonido.acierto(); const r = amigo.getBoundingClientRect(); confeti({ cantidad: 28, duracion: 1300, origen: { x: r.left + r.width / 2, y: r.top + r.height / 2 } }); } }
+    else if (ev.tipo === 'error') { racha = 0; decir(azar(FRASES_ERROR), 'ay', 1500); }
+    else if (ev.tipo === 'fin') decir('¡Lo lograste! 🎊', 'baila', 2500);
+  }
+
   const motor = new MotorEscritura({
     texto, estricto: estrictoFinal, retroceso: state.prefs.permitirRetroceso, seg,
     alEvento: (ev) => {
-      vista?.alEvento(ev);
+      vista?.alEvento(ev); animarAmigo(ev);
       if (ev.tipo === 'avance' || ev.tipo === 'borrar') teclado.siguiente(motor.actual ?? null);
       if (ev.tipo === 'error' && ev.avanzo) teclado.siguiente(motor.actual ?? null);
       if (ev.tipo === 'inicio') raiz.classList.add('ej--en-curso');
@@ -52,7 +74,13 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
     h('strong', {}, 'En pausa'), h('p', {}, 'Haz clic o presiona una tecla para continuar.'),
     h('button', { class: 'btn btn--primary', type: 'button', onclick: () => reanudar() }, icono('play', { tam: 18 }), 'Continuar'));
   const zonaTexto = h('div', { class: `ej__texto card ${grande ? 'ej__texto--grande' : ''}` }, vista.el, pausaUI);
-  const raiz = h('section', { class: 'ej', 'aria-label': titulo || 'Ejercicio' }, hud, zonaTexto, aviso, teclado.el);
+  if (infantil) {
+    const u = state.user;
+    amigo = h('div', { class: 'ej__amigo', 'aria-hidden': 'true' }, personajeSVG(especieDe(u?.avatar), { acc: u?.avatar?.accesorios || [], cabeza: true, tam: 96 }));
+    burbuja = h('div', { class: 'ej__burbuja', 'aria-hidden': 'true' });
+    amigo.append(burbuja);
+  }
+  const raiz = h('section', { class: 'ej', 'aria-label': titulo || 'Ejercicio' }, hud, zonaTexto, aviso, teclado.el, amigo);
 
   entrada = vincularEntrada({
     motor, teclado, zona: zonaTexto,
