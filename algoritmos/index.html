@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Beto y los Algoritmos</title>
+  <meta name="description" content="Aprende qué es un algoritmo jugando con Beto el robot. Para primer grado.">
+  <meta name="theme-color" content="#5b3df5">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🤖%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="cielo" aria-hidden="true">
+    <div class="sol"></div>
+    <div class="nube n1"></div><div class="nube n2"></div><div class="nube n3"></div>
+    <div id="flotantes"></div>
+  </div>
+
+  <header class="barra" id="barra" hidden>
+    <button class="btn-icono" id="btnInicio" aria-label="Ir al mapa">🗺️</button>
+    <div class="jugador" id="jugador"></div>
+    <div class="total-estrellas" id="totalEstrellas" aria-label="Estrellas ganadas">⭐ 0</div>
+    <button class="btn-icono" id="btnSonido" aria-label="Voz y sonido">🔊</button>
+    <button class="btn-icono" id="btnAjustes" aria-label="Ajustes para la profe">⚙️</button>
+  </header>
+
+  <main id="app" aria-live="polite"></main>
+
+  <canvas id="confeti" aria-hidden="true"></canvas>
+
+  <dialog id="dlgAjustes" class="dialogo">
+    <form method="dialog" class="dialogo-cuerpo" id="formAjustes"></form>
+  </dialog>
+
+  <script src="js/core.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
