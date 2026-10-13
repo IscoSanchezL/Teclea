@@ -72,7 +72,7 @@ export async function iniciarAuth() {
   try {
     const fb = await obtenerFirebase();
     // Resultado de un inicio por redirección (respaldo cuando el navegador bloquea ventanas emergentes).
-    await fb.au.getRedirectResult(fb.auth).catch(() => null);
+    await Promise.race([fb.au.getRedirectResult(fb.auth).catch(() => null), new Promise((r) => setTimeout(r, 2500))]);
     await new Promise((resolver) => {
       let primera = true;
       fb.au.onAuthStateChanged(fb.auth, async (fbUser) => {
