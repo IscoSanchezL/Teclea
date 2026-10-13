@@ -12,7 +12,7 @@ import { ESPECIES, especieDe } from './personaje.js';
 let T = null, fallo = false;
 
 export function soporta3D() {
-  if (fallo) return false;
+  if (fallo || document.documentElement.dataset.ligero === '1') return false;
   if ((navigator.deviceMemory && navigator.deviceMemory < 2) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)) return false;
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
   try { const c = document.createElement('canvas'); return Boolean(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; }

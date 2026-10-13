@@ -15,8 +15,10 @@ import { iniciarConexion, registrarServiceWorker } from './ui/conexion.js';
 import { iniciarEfectos } from './ui/efectos.js';
 import { iniciarPaleta } from './ui/paleta.js';
 import { iniciarInactividad } from './core/inactividad.js';
+import { iniciarRendimiento, vigilarFluidez } from './core/rendimiento.js';
 
 async function arrancar() {
+  iniciarRendimiento();
   aplicarMarca();
   iniciarTema();
 
@@ -40,6 +42,7 @@ async function arrancar() {
   iniciarEfectos();
   iniciarPaleta();
   iniciarInactividad();
+  vigilarFluidez();
   registrarServiceWorker();
 }
 

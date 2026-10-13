@@ -21,7 +21,7 @@
   opacity: var(--blob-opacidad);
   filter: blur(8px);
   border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
-  animation: blob-morfa 18s ease-in-out infinite alternate, blob-flota 26s ease-in-out infinite alternate;
+  animation: blob-flota 26s ease-in-out infinite alternate;
 }
 .blob--1 { --c: var(--blob-1); top: -12%; left: -10%; }
 .blob--2 { --c: var(--blob-2); bottom: -18%; right: -8%; animation-delay: -6s; width: min(40vw, 460px); }

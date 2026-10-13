@@ -21,7 +21,6 @@
   background: linear-gradient(145deg, var(--violeta-300), var(--coral-400) 70%, var(--sol-400));
   opacity: .55; filter: blur(2px);
   border-radius: 55% 45% 50% 50% / 50% 55% 45% 50%;
-  animation: blob-morfa 14s ease-in-out infinite alternate;
 }
 .escena__mascota { position: absolute; inset: 0; display: grid; place-items: center; transition: translate .5s var(--suave); }
 .tecla-deco {

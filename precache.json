@@ -1,5 +1,5 @@
 {
-  "version": "a4ee9cf74dbf",
+  "version": "e4e9d83ddd41",
   "archivos": [
     "assets/assets.json",
     "assets/img/apple-touch-icon.png",
@@ -49,6 +49,7 @@
     "js/core/levels.js",
     "js/core/marca.js",
     "js/core/paleta.js",
+    "js/core/rendimiento.js",
     "js/core/router.js",
     "js/core/routes.js",
     "js/core/state.js",

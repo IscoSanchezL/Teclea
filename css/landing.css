@@ -5,7 +5,7 @@
 /* ───────── Escena 3D ───────── */
 .h3d { position: relative; width: 100%; max-width: 640px; aspect-ratio: 1.15; margin-inline: auto; perspective: 1400px; }
 .h3d__halo { position: absolute; inset: 8% 4%; border-radius: 50%; filter: blur(60px); opacity: .75;
-  background: conic-gradient(from var(--ang), var(--violeta-500), #22D3EE, #A3E635, #FF6B5B, var(--violeta-500)); animation: ang-gira 18s linear infinite; }
+  background: conic-gradient(from var(--ang), var(--violeta-500), #22D3EE, #A3E635, #FF6B5B, var(--violeta-500)); }
 .h3d__plano { position: absolute; inset: 0; display: grid; place-items: center; transform-style: preserve-3d; }
 .h3d__kb { display: flex; flex-direction: column; gap: 8px; padding: 18px; border-radius: 28px; transform: rotateX(58deg) rotateZ(-22deg) translateY(2%);
   transform-style: preserve-3d; background: linear-gradient(145deg, rgba(255,255,255,.14), rgba(255,255,255,.04)); border: 1px solid rgba(255,255,255,.22);

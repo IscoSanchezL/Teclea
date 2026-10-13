@@ -67,3 +67,19 @@
 ::view-transition-group(root) { animation-duration: 0s; }
 
 .confeti { position: fixed; inset: 0; z-index: 2500; pointer-events: none; width: 100vw; height: 100vh; }
+
+/* ── Modo ligero (equipos modestos): sin desenfoques, cristal ni animaciones decorativas infinitas ── */
+:root[data-ligero="1"] *, :root[data-ligero="1"] *::before, :root[data-ligero="1"] *::after {
+  backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
+:root[data-ligero="1"] .blob, :root[data-ligero="1"] .fondo__malla, :root[data-ligero="1"] .fondo__malla::after,
+:root[data-ligero="1"] .h3d__halo, :root[data-ligero="1"] .escena__halo { animation: none !important; filter: none !important; }
+:root[data-ligero="1"] .fondo__malla::after, :root[data-ligero="1"] .h3d__halo { display: none; }
+:root[data-ligero="1"]:not([data-estilo="ludico"]) .blob { filter: none !important; opacity: calc(var(--blob-opacidad, .3) * .6); }
+:root[data-ligero="1"] .nube { display: none !important; }
+:root[data-ligero="1"][data-estilo="ludico"] .blob, :root[data-ligero="1"][data-estilo="ludico"] .btn--lg.btn--primary, :root[data-ligero="1"] .btn--listo, :root[data-ligero="1"] .chip--racha .icono { animation: none !important; }
+:root[data-ligero="1"] .mascota--flota, :root[data-ligero="1"] .h3d__card, :root[data-ligero="1"] .h3d__medalla,
+:root[data-ligero="1"] .tecla-deco, :root[data-ligero="1"] .medalla__brillo, :root[data-ligero="1"] .medalla__chispa,
+:root[data-ligero="1"] .coach__ic, :root[data-ligero="1"] .nodo--actual { animation: none !important; }
+:root[data-ligero="1"] .medalla__chispa { opacity: .8; }
+:root[data-ligero="1"] .card, :root[data-ligero="1"] .tile, :root[data-ligero="1"] .modulo { filter: none !important; }

@@ -284,9 +284,11 @@
 .medalla--viva { transition: transform .06s linear, scale .2s; }
 .medalla--bloqueada { filter: grayscale(1) brightness(.9) opacity(.45); }
 .medalla--bloqueada .medalla__brillo, .medalla--bloqueada .medalla__chispa { display: none; }
-.medalla__brillo { animation: med-brillo 4.8s ease-in-out infinite; }
+.medalla__brillo { animation: med-brillo 4.8s ease-in-out 3; }
+.medalla:hover .medalla__brillo { animation-iteration-count: infinite; }
 .medalla--viva .medalla__brillo { animation: none; transform: translateX(var(--gx, 0px)); }
-.medalla__chispa { transform-box: fill-box; transform-origin: center; animation: med-chispa 2.6s ease-in-out infinite; }
+.medalla__chispa { transform-box: fill-box; transform-origin: center; animation: med-chispa 2.6s ease-in-out 2; }
+.medalla:hover .medalla__chispa { animation-iteration-count: infinite; }
 .medalla__chispa--2 { animation-delay: -1.3s; }
 @keyframes med-brillo { 0%, 55% { transform: translateX(0); } 100% { transform: translateX(150px); } }
 @keyframes med-chispa { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
