@@ -218,7 +218,8 @@ export function enSegundoPlano(promesa, etiqueta = 'escritura') {
 export function esperarMax(promesa, ms = 2500) {
   let fin = false;
   const p = Promise.resolve(promesa);
-  p.then(() => { fin = true; }, () => { fin = true; });
+  const avisar = (e) => { try { globalThis.document?.dispatchEvent(new CustomEvent('teclea:fallo-guardado', { detail: { codigo: e?.code || String(e?.message || e) } })); } catch { /* sin documento (pruebas) */ } };
+  p.then(() => { fin = true; }, (e) => { fin = true; avisar(e); });
   return Promise.race([
     p.then(() => 'listo'),
     new Promise((r) => setTimeout(() => r('en-cola'), ms)),

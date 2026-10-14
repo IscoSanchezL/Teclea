@@ -173,6 +173,7 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
   if (r.cambio) Object.assign(parche, { racha: r.racha, rachaMax: r.rachaMax, ultimoDia: r.ultimoDia, protectores: r.protectores });
   ops.push({ tipo: 'update', ruta: `users/${uid}`, datos: parche });
 
+  const opsEsenciales = ops.splice(0, ops.length); // sesión + progreso + perfil: lo que el estudiante no puede perder
   // ── Resumen para el docente (inscripciones) ──
   const minutos = Math.round((resultado.duracionSeg / 60) * 10) / 10;
   for (const i of inscripciones) {
@@ -198,7 +199,9 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
     ops.push({ tipo: 'set', ruta: `classes/${i.classId}/aportes/${uid}`, datos: { caracteres: Math.min(10000000, (s.caracteres || 0) + chars), sesiones: Math.min(100000, (s.sesiones || 0) + 1), actualizadoEn: store.ahora() } });
   }
 
-  const estadoEscritura = await store.esperarMax(store.lote(ops)); // sin red: queda en cola y se sincroniza al reconectar
+  const estadoEscritura = await store.esperarMax(store.lote(opsEsenciales)); // sin red: queda en cola y se sincroniza al reconectar
+  // Lo de la clase (resumen docente, ranking, reto) va aparte: si falla, el estudiante conserva igual sus estrellas y monedas
+  if (ops.length) store.enSegundoPlano(store.lote(ops), 'resumen de la clase');
 
   // ── Caché y estado local ──
   if (nuevoProg) progreso[leccion.id] = { ...nuevoProg, actualizadoEn: Date.now() };

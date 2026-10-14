@@ -33,3 +33,12 @@ export function registrarServiceWorker() {
     if (habiaControlador) toast('Hay una versión nueva de TECLEA. Se aplicará al recargar.', { tipo: 'info', ms: 6000 });
   });
 }
+
+/** Si el servidor rechaza guardar el avance, se avisa (antes fallaba en silencio). */
+let ultimoAviso = 0;
+document.addEventListener('teclea:fallo-guardado', (e) => {
+  if (Date.now() - ultimoAviso < 20000) return;
+  ultimoAviso = Date.now();
+  console.warn('[datos] no se pudo guardar', e.detail?.codigo);
+  toast('No se pudo guardar tu avance en este momento. Avisa a tu docente.', { tipo: 'error', ms: 9000 });
+});
