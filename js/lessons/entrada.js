@@ -42,7 +42,8 @@ export function vincularEntrada({ motor, teclado, zona, alPausar = () => {}, alF
 
   const onBeforeInput = (e) => {
     const t = e.inputType || '';
-    if (t === 'insertFromPaste' || t === 'insertFromDrop' || t === 'insertFromYank' || t === 'insertReplacementText') { e.preventDefault(); motor.marcarPegado(); return; }
+    if (t === 'insertReplacementText') { e.preventDefault(); return; }   // autocorrector del equipo: se bloquea, pero no es trampa del niño
+    if (t === 'insertFromPaste' || t === 'insertFromDrop' || t === 'insertFromYank') { e.preventDefault(); motor.marcarPegado(); return; }
     if (t === 'deleteContentBackward' && !componiendo) { e.preventDefault(); motor.borrar(); }
   };
   const onInput = () => {

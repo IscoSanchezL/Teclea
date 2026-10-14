@@ -105,7 +105,7 @@ export function calcularEstrellas({ ppm, precision, completo = true }, leccion, 
   if (!completo && !leccion.ejercicios?.at(-1)?.modo) return 0;
   if (precision >= reqPre && ppm >= p.ppmMax * f) return 3;
   if (precision >= reqPre - 4 && ppm >= p.ppmMin * f) return 2;
-  if (precision >= reqPre - 12) return 1;
+  if (precision >= Math.max(60, reqPre - 20)) return 1;   // terminar con esfuerzo razonable siempre suma y abre la siguiente lección
   return 0;
 }
 
