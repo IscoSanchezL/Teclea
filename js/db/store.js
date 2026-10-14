@@ -223,5 +223,14 @@ export function esperarMax(promesa, ms = 2500) {
   return Promise.race([
     p.then(() => 'listo'),
     new Promise((r) => setTimeout(() => r('en-cola'), ms)),
-  ]).then((v) => { if (v === 'en-cola' && !fin) p.catch((e) => console.warn('[datos] escritura pendiente falló', e?.code || e)); return v; });
+  ]).then((v) => {
+    if (v === 'en-cola' && !fin) {
+      p.catch((e) => console.warn('[datos] escritura pendiente falló', e?.code || e));
+      // Si en 12 s el servidor aún no confirmó, se avisa (antes el niño avanzaba sin saber que no se guardó)
+      const t = setTimeout(() => { if (!fin) emitir('teclea:guardado-lento'); }, 12000);
+      p.then(() => { clearTimeout(t); emitir('teclea:guardado-ok'); }, () => clearTimeout(t));
+    }
+    return v;
+  });
 }
+const emitir = (nombre) => { try { globalThis.document?.dispatchEvent(new CustomEvent(nombre)); } catch { /* sin documento (pruebas) */ } };

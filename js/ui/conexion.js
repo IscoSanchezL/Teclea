@@ -42,3 +42,14 @@ document.addEventListener('teclea:fallo-guardado', (e) => {
   console.warn('[datos] no se pudo guardar', e.detail?.codigo);
   toast('No se pudo guardar tu avance en este momento. Avisa a tu docente.', { tipo: 'error', ms: 9000 });
 });
+
+/** Avance pendiente: la escritura no llega al servidor (red del colegio, sin internet…). */
+let avisoLento = null;
+document.addEventListener('teclea:guardado-lento', () => {
+  if (avisoLento) return;
+  avisoLento = true;
+  toast('Tu avance todavía no llega al servidor. Quédate con la página abierta; si pasa mucho tiempo, avisa a tu docente.', { tipo: 'info', ms: 12000 });
+});
+document.addEventListener('teclea:guardado-ok', () => {
+  if (avisoLento) { avisoLento = null; toast('¡Avance guardado!', { tipo: 'ok', ms: 3000 }); }
+});

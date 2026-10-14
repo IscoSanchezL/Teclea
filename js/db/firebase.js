@@ -41,6 +41,8 @@ async function iniciar() {
   let db;
   try {
     db = fs.initializeFirestore(miApp, {
+      // Redes escolares con firewall/proxy bloquean el canal en tiempo real: sin esto las escrituras quedan colgadas sin error.
+      experimentalAutoDetectLongPolling: true,
       localCache: fs.persistentLocalCache({ tabManager: fs.persistentMultipleTabManager() }),
     });
   } catch (e) {
