@@ -127,13 +127,23 @@ export async function render({ query }) {
     ej.enfocar();
   }
 
+  // Premio por cada paso terminado (XP y monedas pequeños; las estrellas siguen siendo de la Prueba final)
+  const premiados = new Set();
   function entre(i, r) {
     const ultimoGuiado = i === 0;
+    const premio = h('p', { class: 'chip', hidden: true });
+    if (!premiados.has(i) && !r.banderas?.pegado && !r.banderas?.imposible) {
+      premiados.add(i);
+      registrarActividad({ user: state.user, tipo: 'practica', refId: `${leccion.id}:paso${i + 1}`, resultado: r })
+        .then((g) => { if (g?.xp) { premio.textContent = `+${g.xp} XP · +${g.monedas} monedas por este paso`; premio.hidden = false; } })
+        .catch((e) => console.warn('[leccion] premio del paso', e?.code || e));
+    }
     montar(cabecera(i === 0 ? 'guiado' : 'libre'),
       h('section', { class: 'entre card card--vidrio' },
         mascota(r.precision >= 90 ? 'celebra' : 'anima', { tam: 'md' }),
         h('h2', {}, r.precision >= 95 ? '¡Excelente!' : r.precision >= 85 ? '¡Muy bien!' : '¡Buen intento!'),
         h('p', {}, `${r.ppm} PPM · ${r.precision} % de precisión · ${r.errores} ${r.errores === 1 ? 'error' : 'errores'}`),
+        premio,
         h('p', { class: 'suave' }, ultimoGuiado ? 'Ahora vienen los mismos movimientos, pero sin ayudas.' : 'Último paso: la prueba final con estrellas.'),
         h('div', { class: 'fila fila--envuelve' },
           h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ejercicio(i) }, icono('refresh', { tam: 18 }), 'Repetir'),
