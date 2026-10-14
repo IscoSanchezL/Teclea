@@ -111,7 +111,7 @@ export async function render({ query }) {
   }
 
   /* ── Ejercicios ── */
-  const NOMBRES = [['guiado', 'Ejercicio guiado', 'Sigue la tecla iluminada y el dedo señalado.'], ['libre', 'Ejercicio sin ayuda', 'Ahora sin pistas: ¡confía en tus dedos!'], ['prueba', 'Prueba final', 'Consigue tus estrellas. ¡Tú puedes!']];
+  const NOMBRES = [['guiado', 'Ejercicio guiado', 'Sigue la tecla iluminada y el dedo señalado. ⭐ Las estrellas se ganan al terminar la Prueba final (paso 4).'], ['libre', 'Ejercicio sin ayuda', 'Ahora sin pistas: ¡confía en tus dedos! ⭐ Las estrellas llegan al terminar la Prueba final (paso 4).'], ['prueba', 'Prueba final', 'Consigue tus estrellas. ¡Tú puedes!']];
   function ejercicio(i, repetido = false) {
     const def = leccion.ejercicios[i];
     const [clave, titulo, ayuda] = NOMBRES[i];
