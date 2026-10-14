@@ -12,6 +12,7 @@ import { segmentado, interruptor, seccion, campo } from '../componentes.js';
 import { confirmar, toast } from '../overlay.js';
 import { mascota } from '../art.js';
 import { avatar, EMOJIS_AVATAR, FONDOS_AVATAR } from '../avatar.js';
+import { ESPECIES, personajeSVG } from '../personaje.js';
 import { fotoPerfil } from '../imagen.js';
 import { leer } from '../../db/store.js';
 import { cuarto } from '../cuarto.js';
@@ -45,9 +46,21 @@ export async function render() {
   const guardarAvatar = async (parche) => {
     try { await guardarPerfil(parche); pintarVista(); } catch (e) { console.warn(e); toast('No se pudo guardar el cambio', { tipo: 'error' }); }
   };
-  const emojis = h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': 'Elegir emoji de avatar' },
-    EMOJIS_AVATAR.map((e) => h('button', { type: 'button', class: 'opcion-avatar', 'aria-pressed': String(e === (state.user.avatar?.emoji || '🦊')), 'aria-label': `Avatar ${e}`,
-      onclick: (ev) => { emojis.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false')); ev.currentTarget.setAttribute('aria-pressed', 'true'); guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: e } }); } }, e)));
+  const refrescarMarcas = () => {
+    const av = state.user.avatar || {};
+    emojis.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(!av.mascota && b.dataset.emoji === (av.emoji || '🦊'))));
+    mascotas.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(av.mascota === b.dataset.especie)));
+  };
+  // Elegir un animal: quita la mascota dibujada (que tiene prioridad) para que se vea el elegido
+  const elegirEmoji = async (e) => { await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: e, mascota: null } }); refrescarMarcas(); };
+  const emojis = h('div', { class: 'rejilla-avatares rejilla-avatares--larga', role: 'group', 'aria-label': 'Elegir animal de avatar' },
+    EMOJIS_AVATAR.map((e) => h('button', { type: 'button', class: 'opcion-avatar', dataset: { emoji: e }, 'aria-pressed': 'false', 'aria-label': `Avatar ${e}`, onclick: () => elegirEmoji(e) }, e)));
+  const libres = Object.entries(ESPECIES).filter(([, v]) => v.gratis);
+  const mascotas = h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': 'Mascotas dibujadas' },
+    libres.map(([k, v]) => h('button', { type: 'button', class: 'opcion-avatar opcion-mascota', dataset: { especie: k }, 'aria-pressed': 'false', 'aria-label': `Mascota ${v.nombre}`,
+      onclick: async () => { await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: k === 'panda' ? '🐼' : '🦊', mascota: k } }); refrescarMarcas(); } },
+      personajeSVG(k, { cabeza: true, tam: 56 }), h('span', {}, v.nombre))));
+  refrescarMarcas();
   const fondos = h('div', { class: 'fondos', role: 'group', 'aria-label': 'Color de fondo del avatar' },
     FONDOS_AVATAR.map((f) => h('button', { type: 'button', class: 'fondos__op', dataset: { fondo: f }, 'aria-label': `Fondo ${f}`, 'aria-pressed': String(f === (state.user.avatar?.fondo || 'violeta')),
       onclick: (ev) => { fondos.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false')); ev.currentTarget.setAttribute('aria-pressed', 'true'); guardarAvatar({ avatar: { ...(state.user.avatar || {}), fondo: f } }); } },
@@ -70,7 +83,7 @@ export async function render() {
   const miCuarto = u.rol === 'estudiante' ? seccion('Mi cuarto', cuarto(u, catalogo), h('a', { class: 'btn btn--sun btn--sm', href: '#/tienda' }, icono('bag', { tam: 18 }), 'Ir a la tienda')) : null;
   const seccionAvatar = seccion('Mi avatar y mi foto',
     h('div', { class: 'avatar-editor' }, vista, h('div', { class: 'pila' }, apodo.nodo, bloqueFoto)),
-    h('strong', {}, 'Elige un avatar'), emojis, h('strong', {}, 'Color de fondo'), fondos);
+    h('strong', {}, 'Mi mascota dibujada (más en la tienda)'), mascotas, h('strong', {}, 'O elige un animal'), emojis, h('strong', {}, 'Color de fondo'), fondos);
 
   const cabecera = h('section', { class: 'card card--hero perfil__cab' },
     h('div', { class: 'perfil__avatar', 'aria-hidden': 'true' }, avatar(u, { tam: 'xl' })),

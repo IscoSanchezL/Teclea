@@ -6,7 +6,14 @@ import { h } from '../core/utils.js';
 import { personajeSVG, especieDe } from './personaje.js';
 
 export const FONDOS_AVATAR = ['violeta', 'coral', 'menta', 'sol', 'cielo', 'noche'];
-export const EMOJIS_AVATAR = ['🦊', '🐼', '🐯', '🦁', '🦄', '🐙', '🦖', '🐸', '🐬', '🦉', '🐲', '🤖', '🚀', '⚡', '🎮', '🌟'];
+export const EMOJIS_AVATAR = [
+  '🦊', '🐼', '🐯', '🦁', '🦄', '🐙', '🦖', '🐸', '🐬', '🦉', '🐲', '🤖',
+  '🐶', '🐱', '🐭', '🐹', '🐰', '🐻', '🐨', '🐮', '🐷', '🐵', '🐔', '🐧',
+  '🐦', '🐤', '🦆', '🦅', '🦇', '🐺', '🐗', '🐴', '🦓', '🦒', '🐘', '🦏',
+  '🦛', '🐪', '🦘', '🐊', '🐢', '🦎', '🐍', '🐳', '🐋', '🦈', '🐠', '🦀',
+  '🦞', '🦐', '🐌', '🦋', '🐝', '🐞', '🦜', '🦩', '🦚', '🦢', '🦔', '🦦',
+  '🦥', '🦨', '🦝', '🦌', '🐿️', '🦭', '🐡', '🦑', '🚀', '⚡', '🎮', '🌟',
+];
 
 export function avatar(u, { tam = 'md', clase = '' } = {}) {
   const a = u?.avatar || {};

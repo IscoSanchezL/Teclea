@@ -21,7 +21,7 @@ export const ESPECIES = {
   leon: { nombre: 'León', a: '#FFC463', b: '#E3902B', v: '#FFF0D2', o: '#C26A1B', n: '#7A3E12' },
   unicornio: { nombre: 'Unicornio', a: '#FFFFFF', b: '#E3D6FF', v: '#FFFFFF', o: '#FF8FD0', n: '#E86A8A' },
 };
-export const ESPECIE_POR_EMOJI = { '🦊': 'zorro', '🐼': 'panda', '🐯': 'gato', '🦁': 'gato', '🦄': 'conejo', '🐲': 'dragon', '🦖': 'dragon', '🤖': 'robot', '🦉': 'buho', '🐧': 'pinguino' };
+export const ESPECIE_POR_EMOJI = { '🦊': 'zorro', '🐼': 'panda', '🐯': 'gato', '🦁': 'gato', '🦄': 'conejo', '🐲': 'dragon', '🦖': 'dragon', '🤖': 'robot', '🦉': 'buho', '🐧': 'pinguino', '🐱': 'gato', '🐰': 'conejo', '🐺': 'zorro', '🦝': 'zorro', '🐻': 'leon', '🐨': 'panda', '🐦': 'buho', '🦅': 'buho', '🐤': 'pinguino', '🦆': 'pinguino' };
 export const especieDe = (av = {}) => (ESPECIES[av.mascota] ? av.mascota : ESPECIE_POR_EMOJI[av.emoji] || 'zorro');
 
 let n = 0;
