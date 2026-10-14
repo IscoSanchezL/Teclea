@@ -16,6 +16,7 @@ import { ESPECIES, personajeSVG } from '../personaje.js';
 import { textoVersion } from '../../core/version.js';
 import { fotoPerfil } from '../imagen.js';
 import { leer } from '../../db/store.js';
+import * as store from '../../db/store.js';
 import { cuarto } from '../cuarto.js';
 import { cargarTienda } from '../../db/tienda.js';
 import { icono } from '../icons.js';
@@ -82,6 +83,24 @@ export async function render() {
   // Mi cuarto: ahí se ven las compras de la tienda (siempre con el emoji del personaje, aunque haya foto)
   let catalogo = []; try { catalogo = await cargarTienda(); } catch { /* sin catálogo: se ve el cuarto básico */ }
   const miCuarto = u.rol === 'estudiante' ? seccion('Mi cuarto', cuarto(u, catalogo), h('a', { class: 'btn btn--sun btn--sm', href: '#/tienda' }, icono('bag', { tam: 18 }), 'Ir a la tienda')) : null;
+  // ── Diagnóstico de guardado: sirve a docentes/soporte para ver el error real en el equipo del estudiante ──
+  const diagSalida = h('p', { class: 'pequeno', role: 'status' }, '');
+  const diagBoton = h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => {
+    diagBoton.disabled = true; diagSalida.textContent = 'Probando…';
+    const t0 = Date.now();
+    try {
+      const r = await Promise.race([
+        store.actualizar(`users/${state.user.uid}`, { monedas: state.user.monedas || 0 }).then(() => 'ok'),
+        new Promise((res) => setTimeout(() => res('pendiente'), 9000)),
+      ]);
+      diagSalida.textContent = r === 'ok' ? `✓ Guardado funciona (${Date.now() - t0} ms).` : '⚠ El servidor no respondió en 9 s: el avance queda pendiente (red o firewall).';
+    } catch (e) { diagSalida.textContent = `✗ El servidor rechazó el guardado: ${e?.code || e?.message || e}`; }
+    let ult = ''; try { const f = JSON.parse(localStorage.getItem('teclea.ultimoFallo') || 'null'); if (f) ult = ` · Último fallo en este equipo: ${f.codigo} (${new Date(f.en).toLocaleString('es')})`; } catch { /* nada */ }
+    diagSalida.textContent += `${ult} · modo ${state.modo} · ${navigator.onLine ? 'con internet' : 'sin internet'}`;
+    diagBoton.disabled = false;
+  } }, 'Probar guardado');
+  const diagnostico = h('details', { class: 'pequeno' }, h('summary', {}, '¿No se guarda tu avance?'), h('p', { class: 'suave' }, 'Pulsa el botón y dile el resultado a tu docente.'), diagBoton, diagSalida);
+
   const seccionAvatar = seccion('Mi avatar y mi foto',
     h('div', { class: 'avatar-editor' }, vista, h('div', { class: 'pila' }, apodo.nodo, bloqueFoto)),
     h('strong', {}, 'Mi mascota dibujada (más en la tienda)'), mascotas, h('strong', {}, 'O elige un animal'), emojis, h('strong', {}, 'Color de fondo'), fondos);
@@ -152,6 +171,7 @@ export async function render() {
 
   return h('div', { class: 'perfil' }, cabecera,
     h('div', { class: 'perfil__rejilla' }, seccionAvatar, miCuarto, apariencia, accesibilidad, sonido, escritura, privacidad),
+    diagnostico,
     textoVersion(h('p', { class: 'suave pequeno', style: { opacity: .6, textAlign: 'center' } }, '')),
     salir);
 }

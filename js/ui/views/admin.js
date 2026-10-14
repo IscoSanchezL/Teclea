@@ -69,11 +69,11 @@ export async function render({ query }) {
     const pintarFilas = (filas) => {
       const malos = filas.filter((f) => f.faltan.length), sin = filas.filter((f) => f.estado === 'sin-avance');
       const chip = (f) => f.estado === 'incompleto' ? h('span', { class: 'pill pill--inactivo' }, `Perfil incompleto (${f.faltan.join(', ')})`) : f.estado === 'sin-avance' ? h('span', { class: 'pill' }, 'Sin avance') : h('span', { class: 'pill pill--ok' }, 'Bien');
-      cuerpo.replaceChildren(
+      cuerpo.replaceChildren(...[
         h('p', {}, h('strong', {}, `${filas.length} estudiantes · ${malos.length} con perfil incompleto · ${sin.length} sin avance`)),
         malos.length ? h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.repararPerfiles(filas); toast(`${n} perfiles reparados`); pintarFilas(await A.revisarEstudiantes()); } catch (er) { toast(er.message || 'No se pudo reparar', { tipo: 'error' }); e.currentTarget.disabled = false; } } }, `Reparar ${malos.length} perfiles`) : null,
         filas.length ? h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, ['Estudiante', 'Grado', 'Entra con', 'XP', 'Monedas', 'Lecciones', 'Estrellas', 'Estado'].map((t) => h('th', {}, t)))),
-          h('tbody', {}, filas.map((f) => h('tr', {}, h('td', {}, f.nombre), h('td', {}, f.grado ? `${f.grado}.º` : '—'), h('td', {}, f.entra), h('td', {}, String(f.xp)), h('td', {}, String(f.monedas)), h('td', {}, String(f.lecciones)), h('td', {}, String(f.estrellas)), h('td', {}, chip(f))))))) : h('p', { class: 'suave' }, 'No hay estudiantes todavía.'));
+          h('tbody', {}, filas.map((f) => h('tr', {}, h('td', {}, f.nombre), h('td', {}, f.grado ? `${f.grado}.º` : '—'), h('td', {}, f.entra), h('td', {}, String(f.xp)), h('td', {}, String(f.monedas)), h('td', {}, String(f.lecciones)), h('td', {}, String(f.estrellas)), h('td', {}, chip(f))))))) : h('p', { class: 'suave' }, 'No hay estudiantes todavía.')].filter(Boolean));
     };
     const boton = h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; cuerpo.replaceChildren(h('p', { class: 'suave' }, 'Revisando…')); try { pintarFilas(await A.revisarEstudiantes()); } catch (er) { cuerpo.replaceChildren(h('p', { class: 'mensaje-error' }, er.message || 'No se pudo revisar')); } e.currentTarget.disabled = false; } }, 'Revisar cuentas');
     return h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, 'Revisión de cuentas de estudiantes'), boton), cuerpo);
