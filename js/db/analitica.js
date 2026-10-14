@@ -89,3 +89,20 @@ export async function sesionesDocente(docente, dias = 7) {
   const lista = await store.consultar('sessions', { donde: [['docenteId', '==', docente.uid], ['dia', 'in', fechas]] }).catch(() => []);
   return lista.sort((a, b) => (b.creadoEn || 0) - (a.creadoEn || 0));
 }
+
+/**
+ * Combina lo que dice la inscripción con las sesiones reales de los últimos días: si el resumen de la inscripción
+ * no se actualizó (una escritura fallida), la última práctica y las sesiones se ven igual. Nunca baja un dato.
+ */
+export function conSesiones(insc, sesiones = []) {
+  const mias = sesiones.filter((x) => x.uid === insc.uid);
+  if (!mias.length) return insc;
+  const s = { ...(insc.stats || {}) };
+  const ult = Math.max(...mias.map((x) => Number(x.creadoEn) || 0));
+  if (ult > (s.ultimaPractica || 0)) s.ultimaPractica = ult;
+  s.sesiones = Math.max(s.sesiones || 0, mias.length);
+  s.mejorWpm = Math.max(s.mejorWpm || 0, ...mias.map((x) => x.wpm || 0));
+  if (!s.precisionProm) s.precisionProm = Math.round(mias.reduce((a, x) => a + (x.precision || 0), 0) / mias.length * 10) / 10;
+  s.minutos = Math.max(s.minutos || 0, Math.round(mias.reduce((a, x) => a + (x.duracionSeg || 0), 0) / 6) / 10);
+  return { ...insc, stats: s };
+}
