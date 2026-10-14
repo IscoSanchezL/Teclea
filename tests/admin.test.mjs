@@ -28,6 +28,16 @@ state.modo = 'firebase'; state.user = { uid: 'adm', rol: 'admin' };
 
 console.log('Administrador (correo verificado)');
 usar('adm', { email: 'franksanlo@gmail.com', email_verified: true });
+await env.withSecurityRulesDisabled((ctx) => fs.setDoc(fs.doc(ctx.firestore(), 'users/viejo'), { uid: 'viejo', nombre: 'Est Viejo', apodo: 'Viejo', rol: 'estudiante', grado: 3, authTipo: 'google', avatar: { emoji: '🦊', fondo: 'violeta' }, xp: 10, nivel: 1, monedas: 100 }));
+{
+  let filas = await A.revisarEstudiantes(); const v = filas.find((f) => f.uid === 'viejo');
+  t('revisión: detecta el perfil antiguo (faltan protectores, racha…)', v && v.estado === 'incompleto' && v.faltan.includes('protectores') && v.faltan.includes('rachaMax'));
+  t('revisión: un perfil completo sale bien', filas.find((f) => f.uid === 'est1').faltan.length === 0);
+  const n = await A.repararPerfiles(filas);
+  const u = await store.leer('users/viejo');
+  t('repara solo lo que falta y no pisa XP ni monedas', n === 1 && u.protectores === 0 && u.rachaMax === 0 && u.xp === 10 && u.monedas === 100);
+  t('tras reparar ya no hay incompletos', (await A.revisarEstudiantes()).every((f) => !f.faltan.length));
+}
 let c = await A.estadoCatalogos(); t('catálogos vacíos al inicio', !c.completo && c.badges === 0);
 try { const n = await A.sembrarCatalogos(); t(`publica catálogos (${n} documentos)`, n >= 70); } catch (e) { t('publica catálogos', false, e.message); }
 c = await A.estadoCatalogos(); t('catálogos completos', c.completo);

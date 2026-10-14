@@ -84,3 +84,30 @@ export async function borrarDatosUsuario(uid) {
   auditar('Eliminó datos de un usuario', uid, `${ops.length} documentos`);
   return ops.length;
 }
+
+/* ── Revisión de cuentas de estudiantes (perfiles antiguos que no guardan el avance) ── */
+const DEFECTOS = { xp: 0, nivel: 1, monedas: 0, racha: 0, rachaMax: 0, protectores: 0 };   // los que las reglas leen al guardar avance
+const faltantesDe = (u) => [...Object.keys(DEFECTOS).filter((k) => !(k in u)), ...(u.prefs && typeof u.prefs === 'object' ? [] : ['prefs']), ...(u.avatar && typeof u.avatar === 'object' ? [] : ['avatar'])];
+
+export async function revisarEstudiantes() {
+  const [us, prog] = await Promise.all([usuariosPorRol('estudiante'), store.consultar('lessons_progress', {}).catch(() => [])]);
+  const porUid = new Map();
+  for (const p of prog) { const a = porUid.get(p.uid) || { lecciones: 0, estrellas: 0 }; if (p.completada) a.lecciones++; a.estrellas += p.estrellas || 0; porUid.set(p.uid, a); }
+  return us.map((u) => {
+    const uid = u.uid || u.id, p = porUid.get(uid) || { lecciones: 0, estrellas: 0 }, faltan = faltantesDe(u);
+    return { uid, nombre: u.nombre || u.apodo || uid, grado: u.grado ?? null, entra: u.authTipo === 'google' ? 'Google' : 'Código', xp: u.xp ?? 0, monedas: u.monedas ?? 0,
+      lecciones: p.lecciones, estrellas: p.estrellas, faltan, estado: faltan.length ? 'incompleto' : (p.estrellas === 0 && !(u.xp > 0) ? 'sin-avance' : 'ok') };
+  }).sort((a, b) => (b.estado === 'incompleto') - (a.estado === 'incompleto') || a.nombre.localeCompare(b.nombre));
+}
+
+/** Completa SOLO los campos que faltan (no pisa nada). Devuelve cuántos perfiles se repararon. */
+export async function repararPerfiles(filas) {
+  let n = 0;
+  for (const f of filas.filter((x) => x.faltan.length)) {
+    const parche = {};
+    for (const k of f.faltan) parche[k] = k === 'prefs' ? {} : k === 'avatar' ? { emoji: '🦊', fondo: 'violeta' } : DEFECTOS[k];
+    await store.esperarMax(store.actualizar(`users/${f.uid}`, parche)); n++;
+  }
+  auditar('Reparó perfiles de estudiantes', `${n} perfiles`, '');
+  return n;
+}
