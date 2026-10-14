@@ -162,7 +162,7 @@ export function redibujarNav() {
 export function iniciarNav() {
   let ultimo = '';
   subscribe((s) => {
-    const firma = `${s.user?.uid}|${s.user?.rol}|${s.user?.xp}|${s.user?.monedas}|${s.user?.racha}|${s.user?.apodo}|${s.user?.avatar?.emoji}|${s.user?.avatar?.fondo}|${s.user?.foto ? 1 : 0}|${s.prefs.tema}|${document.documentElement.dataset.estilo}`;
+    const firma = `${s.user?.uid}|${s.user?.rol}|${s.user?.xp}|${s.user?.monedas}|${s.user?.racha}|${s.user?.apodo}|${s.user?.avatar?.emoji}|${s.user?.avatar?.mascota}|${(s.user?.avatar?.accesorios || []).join('')}|${s.user?.avatar?.fondo}|${s.user?.foto ? 1 : 0}|${s.prefs.tema}|${document.documentElement.dataset.estilo}`;
     if (firma !== ultimo) { ultimo = firma; redibujarNav(); }
   });
   redibujarNav();

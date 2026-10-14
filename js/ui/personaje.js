@@ -12,6 +12,16 @@ import { h } from '../core/utils.js';
 export const ESPECIES = {
   zorro: { nombre: 'Zorro', gratis: true, a: '#FFA24D', b: '#E8641B', v: '#FFF1DE', o: '#3B2314', n: '#2B1A3A' },
   panda: { nombre: 'Panda', gratis: true, a: '#FFFFFF', b: '#DADCE8', v: '#FFFFFF', o: '#2B2B3A', n: '#2B2B3A' },
+  perro: { nombre: 'Perro', gratis: true, a: '#E2B27A', b: '#B97A3E', v: '#FFF1DC', o: '#7A4521', n: '#2B1A3A' },
+  oso: { nombre: 'Oso', gratis: true, a: '#B98458', b: '#80532F', v: '#F1D5B0', o: '#5E3A1E', n: '#2B1A3A' },
+  tigre: { nombre: 'Tigre', gratis: true, a: '#FFB347', b: '#E8801B', v: '#FFFFFF', o: '#3B2314', n: '#E86A8A' },
+  rana: { nombre: 'Rana', gratis: true, a: '#8FE36B', b: '#3FA83A', v: '#E9FFC9', o: '#2E7D32', n: '#1F5E26' },
+  cerdito: { nombre: 'Cerdito', gratis: true, a: '#FFC4D6', b: '#F58FB0', v: '#FFE3EC', o: '#E8789C', n: '#C2476F' },
+  mono: { nombre: 'Mono', gratis: true, a: '#B07A4F', b: '#7A4B28', v: '#F6D9B8', o: '#F6D9B8', n: '#3B2314' },
+  koala: { nombre: 'Koala', gratis: true, a: '#C9CFDD', b: '#8D96AE', v: '#F4F5FA', o: '#E9EBF3', n: '#2B2B3A' },
+  elefante: { nombre: 'Elefante', gratis: true, a: '#B8C7E6', b: '#7F93BF', v: '#DDE6F7', o: '#F2B6C8', n: '#5E6E99' },
+  jirafa: { nombre: 'Jirafa', gratis: true, a: '#FFD86B', b: '#F0A726', v: '#FFF3CF', o: '#B8681B', n: '#7A3E12' },
+  pollito: { nombre: 'Pollito', gratis: true, a: '#FFE96B', b: '#F5C21B', v: '#FFF6B8', o: '#FF9F1C', n: '#FF9F1C' },
   gato: { nombre: 'Gato', a: '#B7C3E0', b: '#7B89B5', v: '#EEF1FA', o: '#FF9FB5', n: '#E86A8A' },
   conejo: { nombre: 'Conejo', a: '#F6E9FF', b: '#CDB4F0', v: '#FFFFFF', o: '#FFB3CF', n: '#E86A8A' },
   dragon: { nombre: 'Dragón', a: '#6FE3B5', b: '#1FA67A', v: '#E8FFD9', o: '#FFE9A8', n: '#0F6B4D' },
@@ -21,7 +31,10 @@ export const ESPECIES = {
   leon: { nombre: 'León', a: '#FFC463', b: '#E3902B', v: '#FFF0D2', o: '#C26A1B', n: '#7A3E12' },
   unicornio: { nombre: 'Unicornio', a: '#FFFFFF', b: '#E3D6FF', v: '#FFFFFF', o: '#FF8FD0', n: '#E86A8A' },
 };
-export const ESPECIE_POR_EMOJI = { '🦊': 'zorro', '🐼': 'panda', '🐯': 'gato', '🦁': 'gato', '🦄': 'conejo', '🐲': 'dragon', '🦖': 'dragon', '🤖': 'robot', '🦉': 'buho', '🐧': 'pinguino', '🐱': 'gato', '🐰': 'conejo', '🐺': 'zorro', '🦝': 'zorro', '🐻': 'leon', '🐨': 'panda', '🐦': 'buho', '🦅': 'buho', '🐤': 'pinguino', '🦆': 'pinguino' };
+export const ESPECIE_POR_EMOJI = { '🦊': 'zorro', '🐼': 'panda', '🐯': 'tigre', '🦁': 'leon', '🦄': 'unicornio', '🐲': 'dragon', '🦖': 'dragon', '🤖': 'robot', '🦉': 'buho', '🐧': 'pinguino',
+  '🐱': 'gato', '🐰': 'conejo', '🐺': 'zorro', '🦝': 'zorro', '🐶': 'perro', '🐻': 'oso', '🐨': 'koala', '🐸': 'rana', '🐷': 'cerdito', '🐵': 'mono', '🐘': 'elefante', '🦒': 'jirafa', '🐤': 'pollito', '🐔': 'pollito', '🐦': 'buho', '🦅': 'buho', '🦆': 'pinguino' };
+/** Emoji "oficial" de cada mascota dibujada (el que se guarda junto a ella). */
+export const EMOJI_ESPECIE = Object.fromEntries(Object.entries({ zorro: '🦊', panda: '🐼', perro: '🐶', oso: '🐻', tigre: '🐯', rana: '🐸', cerdito: '🐷', mono: '🐵', koala: '🐨', elefante: '🐘', jirafa: '🦒', pollito: '🐤', gato: '🐱', conejo: '🐰', dragon: '🐲', robot: '🤖', buho: '🦉', pinguino: '🐧', leon: '🦁', unicornio: '🦄' }));
 export const especieDe = (av = {}) => (ESPECIES[av.mascota] ? av.mascota : ESPECIE_POR_EMOJI[av.emoji] || 'zorro');
 
 let n = 0;
@@ -54,6 +67,57 @@ const ESP = {
       <circle cx="76" cy="98" r="8.5" fill="#fff"/><circle cx="124" cy="98" r="8.5" fill="#fff"/><circle cx="77" cy="99" r="5.2" fill="${OJO}"/><circle cx="123" cy="99" r="5.2" fill="${OJO}"/><circle cx="75" cy="96.5" r="2" fill="#fff"/><circle cx="121" cy="96.5" r="2" fill="#fff"/>
       <ellipse cx="100" cy="116" rx="8" ry="5.6" fill="${p.n}"/>${sonrisa('#2B2B3A')}${mejillas}`,
     extraCuerpo: `<ellipse cx="55" cy="170" rx="11" ry="21" transform="rotate(16 55 170)" fill="${p.o}"/><ellipse cx="145" cy="170" rx="11" ry="21" transform="rotate(-16 145 170)" fill="${p.o}"/><ellipse cx="76" cy="219" rx="19" ry="9" fill="${p.o}"/><ellipse cx="124" cy="219" rx="19" ry="9" fill="${p.o}"/>`,
+  }),
+  perro: (id, p) => ({
+    atras: `<path d="M140 200C182 196 194 164 182 140C176 160 162 176 140 184z" fill="url(#${id}b)"/>`,
+    orejas: `<ellipse cx="42" cy="86" rx="17" ry="36" transform="rotate(14 42 86)" fill="${p.o}"/><ellipse cx="158" cy="86" rx="17" ry="36" transform="rotate(-14 158 86)" fill="${p.o}"/>`,
+    cara: `<ellipse cx="76" cy="96" rx="22" ry="24" fill="${p.o}" opacity=".55"/>${ojos()}<ellipse cx="100" cy="119" rx="26" ry="19" fill="${p.v}"/><ellipse cx="100" cy="110" rx="9" ry="6" fill="${p.n}"/><path d="M100 116V124M100 124Q92 132 85 126M100 124Q108 132 115 126" fill="none" stroke="${OJO}" stroke-width="2.6" stroke-linecap="round"/><ellipse cx="100" cy="132" rx="6" ry="5" fill="#FF8FA8"/>${mejillas}`,
+  }),
+  oso: (id, p) => ({
+    atras: '',
+    orejas: `<circle cx="54" cy="56" r="21" fill="url(#${id}a)"/><circle cx="146" cy="56" r="21" fill="url(#${id}a)"/><circle cx="54" cy="57" r="10" fill="${p.v}"/><circle cx="146" cy="57" r="10" fill="${p.v}"/>`,
+    cara: `${ojos()}<ellipse cx="100" cy="118" rx="25" ry="18" fill="${p.v}"/><ellipse cx="100" cy="110" rx="9" ry="6" fill="${p.n}"/><path d="M100 116V121M100 121Q94 128 88 123M100 121Q106 128 112 123" fill="none" stroke="${OJO}" stroke-width="2.6" stroke-linecap="round"/>${mejillas}`,
+  }),
+  tigre: (id, p) => ({
+    atras: `<path d="M140 204C186 204 198 160 182 128C176 130 182 154 168 172C158 184 148 188 140 188z" fill="url(#${id}a)"/><path d="M170 150L184 154M176 136L188 138" stroke="${p.o}" stroke-width="5" stroke-linecap="round"/>`,
+    orejas: `<circle cx="52" cy="58" r="20" fill="url(#${id}a)"/><circle cx="148" cy="58" r="20" fill="url(#${id}a)"/><circle cx="52" cy="59" r="9" fill="${p.v}"/><circle cx="148" cy="59" r="9" fill="${p.v}"/>`,
+    cara: `<path d="M100 48V68M86 52L90 68M114 52L110 68" stroke="${p.o}" stroke-width="5" stroke-linecap="round"/><path d="M44 96L62 100M42 112L62 112M156 96L138 100M158 112L138 112" stroke="${p.o}" stroke-width="5" stroke-linecap="round"/>${ojos()}<ellipse cx="100" cy="120" rx="25" ry="17" fill="${p.v}"/><path d="M92 109L108 109L100 118z" fill="${p.n}"/><path d="M100 118Q100 128 92 128M100 118Q100 128 108 128" fill="none" stroke="${OJO}" stroke-width="2.6" stroke-linecap="round"/>`,
+  }),
+  rana: (id, p) => ({
+    atras: '',
+    orejas: `<circle cx="64" cy="52" r="24" fill="url(#${id}a)"/><circle cx="136" cy="52" r="24" fill="url(#${id}a)"/><circle cx="64" cy="52" r="17" fill="#fff"/><circle cx="136" cy="52" r="17" fill="#fff"/><circle cx="66" cy="54" r="9.5" fill="${OJO}"/><circle cx="134" cy="54" r="9.5" fill="${OJO}"/><circle cx="62" cy="50" r="3.6" fill="#fff"/><circle cx="130" cy="50" r="3.6" fill="#fff"/>`,
+    cara: `<path d="M56 110Q100 150 144 110" fill="none" stroke="${p.n}" stroke-width="4" stroke-linecap="round"/><ellipse cx="90" cy="96" rx="3" ry="2.4" fill="${p.n}"/><ellipse cx="110" cy="96" rx="3" ry="2.4" fill="${p.n}"/>${mejillas}<ellipse cx="100" cy="132" rx="30" ry="9" fill="${p.v}" opacity=".6"/>`,
+  }),
+  cerdito: (id, p) => ({
+    atras: `<path d="M142 198C170 196 176 172 160 166C170 176 160 186 142 188z" fill="none" stroke="${p.b}" stroke-width="5" stroke-linecap="round"/>`,
+    orejas: `<path d="M50 70L42 26L88 52z" fill="url(#${id}a)"/><path d="M150 70L158 26L112 52z" fill="url(#${id}a)"/><path d="M56 58L52 38L74 52z" fill="${p.o}"/><path d="M144 58L148 38L126 52z" fill="${p.o}"/>`,
+    cara: `${ojos()}<ellipse cx="100" cy="116" rx="22" ry="16" fill="${p.o}"/><ellipse cx="91" cy="116" rx="4.2" ry="6" fill="${p.n}"/><ellipse cx="109" cy="116" rx="4.2" ry="6" fill="${p.n}"/>${mejillas}`,
+  }),
+  mono: (id, p) => ({
+    atras: `<path d="M140 204C192 206 200 150 176 128" fill="none" stroke="${p.b}" stroke-width="10" stroke-linecap="round"/>`,
+    orejas: `<circle cx="42" cy="98" r="19" fill="url(#${id}a)"/><circle cx="158" cy="98" r="19" fill="url(#${id}a)"/><circle cx="42" cy="98" r="10" fill="${p.v}"/><circle cx="158" cy="98" r="10" fill="${p.v}"/>`,
+    cara: `<path d="M100 70C78 56 50 76 54 104C58 132 82 146 100 146C118 146 142 132 146 104C150 76 122 56 100 70z" fill="${p.v}"/>${ojos()}<ellipse cx="93" cy="114" rx="2.6" ry="3.4" fill="${p.n}"/><ellipse cx="107" cy="114" rx="2.6" ry="3.4" fill="${p.n}"/><path d="M86 125Q100 138 114 125" fill="none" stroke="${p.n}" stroke-width="3" stroke-linecap="round"/>`,
+  }),
+  koala: (id, p) => ({
+    atras: '',
+    orejas: `<circle cx="46" cy="64" r="28" fill="url(#${id}a)"/><circle cx="154" cy="64" r="28" fill="url(#${id}a)"/><circle cx="46" cy="65" r="16" fill="${p.o}"/><circle cx="154" cy="65" r="16" fill="${p.o}"/>`,
+    cara: `${ojos()}<ellipse cx="100" cy="112" rx="13" ry="17" fill="${p.n}"/><ellipse cx="96" cy="106" rx="3.6" ry="2.6" fill="#fff" opacity=".5"/><path d="M100 128V132M100 132Q94 138 88 133M100 132Q106 138 112 133" fill="none" stroke="${OJO}" stroke-width="2.4" stroke-linecap="round"/>${mejillas}`,
+  }),
+  elefante: (id, p) => ({
+    atras: `<path d="M142 206C170 208 176 188 168 176" fill="none" stroke="${p.b}" stroke-width="6" stroke-linecap="round"/>`,
+    orejas: `<ellipse cx="34" cy="92" rx="30" ry="38" fill="url(#${id}b)"/><ellipse cx="166" cy="92" rx="30" ry="38" fill="url(#${id}b)"/><ellipse cx="36" cy="94" rx="19" ry="27" fill="${p.o}"/><ellipse cx="164" cy="94" rx="19" ry="27" fill="${p.o}"/>`,
+    cara: `${ojos()}<path d="M86 108Q100 100 114 108C118 134 112 152 102 156C94 160 90 152 96 146C100 140 98 132 96 126C92 122 86 120 86 108z" fill="${p.v}" stroke="${p.b}" stroke-width="2.4" stroke-linejoin="round"/><path d="M92 132H100M92 140H99" stroke="${p.b}" stroke-width="2" stroke-linecap="round" opacity=".6"/>${mejillas}`,
+  }),
+  jirafa: (id, p) => ({
+    atras: `<path d="M142 202C170 200 178 182 172 168" fill="none" stroke="${p.b}" stroke-width="6" stroke-linecap="round"/><circle cx="172" cy="166" r="6" fill="${p.o}"/>`,
+    orejas: `<path d="M84 52L82 22" stroke="${p.b}" stroke-width="7" stroke-linecap="round"/><circle cx="82" cy="20" r="8" fill="${p.o}"/><path d="M116 52L118 22" stroke="${p.b}" stroke-width="7" stroke-linecap="round"/><circle cx="118" cy="20" r="8" fill="${p.o}"/><ellipse cx="42" cy="78" rx="18" ry="11" transform="rotate(-24 42 78)" fill="url(#${id}a)"/><ellipse cx="158" cy="78" rx="18" ry="11" transform="rotate(24 158 78)" fill="url(#${id}a)"/>`,
+    cara: `<circle cx="74" cy="66" r="7" fill="${p.o}" opacity=".75"/><circle cx="132" cy="70" r="9" fill="${p.o}" opacity=".75"/><circle cx="54" cy="104" r="6" fill="${p.o}" opacity=".7"/><circle cx="148" cy="108" r="6" fill="${p.o}" opacity=".7"/>${ojos()}<ellipse cx="100" cy="120" rx="26" ry="18" fill="${p.v}"/><ellipse cx="91" cy="116" rx="3" ry="4" fill="${p.n}"/><ellipse cx="109" cy="116" rx="3" ry="4" fill="${p.n}"/>${sonrisa()}`,
+  }),
+  pollito: (id, p) => ({
+    atras: '',
+    orejas: `<path d="M92 50Q88 30 96 24Q98 38 104 26Q110 34 108 50z" fill="${p.b}"/>`,
+    extraCuerpo: `<ellipse cx="54" cy="170" rx="12" ry="24" transform="rotate(16 54 170)" fill="${p.b}"/><ellipse cx="146" cy="170" rx="12" ry="24" transform="rotate(-16 146 170)" fill="${p.b}"/><ellipse cx="76" cy="221" rx="16" ry="6" fill="${p.o}"/><ellipse cx="124" cy="221" rx="16" ry="6" fill="${p.o}"/>`,
+    cara: `${ojos()}<path d="M88 112Q100 104 112 112Q108 126 100 128Q92 126 88 112z" fill="${p.o}"/><path d="M92 114Q100 118 108 114" fill="none" stroke="#C26A1B" stroke-width="2" stroke-linecap="round"/>${mejillas}`,
   }),
   gato: (id, p) => ({
     atras: `<path d="M140 206C190 206 200 160 184 128C178 128 182 150 170 170C160 186 148 190 140 190z" fill="url(#${id}b)"/>`,

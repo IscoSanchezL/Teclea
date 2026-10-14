@@ -12,7 +12,7 @@ import { segmentado, interruptor, seccion, campo } from '../componentes.js';
 import { confirmar, toast } from '../overlay.js';
 import { mascota } from '../art.js';
 import { avatar, EMOJIS_AVATAR, FONDOS_AVATAR } from '../avatar.js';
-import { ESPECIES, personajeSVG } from '../personaje.js';
+import { ESPECIES, EMOJI_ESPECIE, personajeSVG } from '../personaje.js';
 import { textoVersion } from '../../core/version.js';
 import { fotoPerfil } from '../imagen.js';
 import { leer } from '../../db/store.js';
@@ -43,24 +43,28 @@ export async function render() {
   let fotosOk = true;
   try { fotosOk = (await leer('config/app'))?.permitirFotos !== false; } catch { /* sin permiso: se asume permitido */ }
   const vista = h('div', { class: 'avatar-editor__vista' });
-  const pintarVista = () => vista.replaceChildren(avatar(state.user, { tam: 'xl' }));
+  const pintarVista = () => { vista.replaceChildren(avatar(state.user, { tam: 'xl' })); document.querySelector('.perfil__avatar')?.replaceChildren(avatar(state.user, { tam: 'xl' })); };
   pintarVista();
   const guardarAvatar = async (parche) => {
     try { await guardarPerfil(parche); pintarVista(); } catch (e) { console.warn(e); toast('No se pudo guardar el cambio', { tipo: 'error' }); }
   };
   const refrescarMarcas = () => {
     const av = state.user.avatar || {};
-    emojis.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(!av.mascota && b.dataset.emoji === (av.emoji || '🦊'))));
+    emojis.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.emoji === (av.emoji || '🦊') && (!av.mascota || EMOJI_ESPECIE[av.mascota] === av.emoji))));
     mascotas.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(av.mascota === b.dataset.especie)));
   };
   // Elegir un animal: quita la mascota dibujada (que tiene prioridad) para que se vea el elegido
-  const elegirEmoji = async (e) => { await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: e, mascota: null } }); refrescarMarcas(); };
+  const elegirEmoji = async (e) => {
+    // Si hay una mascota dibujada GRATIS de ese animal, se usa dibujada; si no, queda el emoji
+    const dibujada = Object.keys(ESPECIES).find((k) => ESPECIES[k].gratis && EMOJI_ESPECIE[k] === e) || null;
+    await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: e, mascota: dibujada } }); refrescarMarcas();
+  };
   const emojis = h('div', { class: 'rejilla-avatares rejilla-avatares--larga', role: 'group', 'aria-label': 'Elegir animal de avatar' },
     EMOJIS_AVATAR.map((e) => h('button', { type: 'button', class: 'opcion-avatar', dataset: { emoji: e }, 'aria-pressed': 'false', 'aria-label': `Avatar ${e}`, onclick: () => elegirEmoji(e) }, e)));
   const libres = Object.entries(ESPECIES).filter(([, v]) => v.gratis);
   const mascotas = h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': 'Mascotas dibujadas' },
     libres.map(([k, v]) => h('button', { type: 'button', class: 'opcion-avatar opcion-mascota', dataset: { especie: k }, 'aria-pressed': 'false', 'aria-label': `Mascota ${v.nombre}`,
-      onclick: async () => { await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: k === 'panda' ? '🐼' : '🦊', mascota: k } }); refrescarMarcas(); } },
+      onclick: async () => { await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: EMOJI_ESPECIE[k] || '🦊', mascota: k } }); refrescarMarcas(); } },
       personajeSVG(k, { cabeza: true, tam: 56 }), h('span', {}, v.nombre))));
   refrescarMarcas();
   const fondos = h('div', { class: 'fondos', role: 'group', 'aria-label': 'Color de fondo del avatar' },

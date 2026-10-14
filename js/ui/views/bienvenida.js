@@ -11,10 +11,10 @@ import { campo } from '../componentes.js';
 import { mascota } from '../art.js';
 import { icono } from '../icons.js';
 import { toast } from '../overlay.js';
-import { personajeSVG, ESPECIES, especieDe } from '../personaje.js';
+import { personajeSVG, ESPECIES, EMOJI_ESPECIE, especieDe } from '../personaje.js';
 
 const INICIALES = Object.keys(ESPECIES).filter((k) => ESPECIES[k].gratis);
-const EMOJI_DE = { zorro: '🦊', panda: '🐼' };
+const EMOJI_DE = EMOJI_ESPECIE;
 
 export async function render() {
   const u = state.user;
