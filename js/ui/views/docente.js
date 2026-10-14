@@ -2,6 +2,7 @@
  * Clases y estudiantes (vista sobria, datos reales): estudiantes, clases y tareas.
  */
 import { state } from '../../core/state.js';
+import { textoVersion } from '../../core/version.js';
 import { h } from '../../core/utils.js';
 import * as C from '../../db/clases.js';
 import { estadoDe, textoUltima, aCSV, descargar, ETIQUETAS, sembrarEjemplo, sesionesDocente } from '../../db/analitica.js';
@@ -36,7 +37,7 @@ export async function render({ query }) {
     if (tab === 'estudiantes' && inscs.length) acciones.push(h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: exportarCSV }, icono('download', { tam: 16 }), 'Exportar CSV'));
     acciones.push(h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: () => modalClase({ alGuardar: refrescar }) }, icono('plus', { tam: 16 }), 'Nueva clase'));
     return h('header', { class: 'pagina__cab' },
-      h('div', {}, h('h1', {}, 'Clases y estudiantes'), h('p', { class: 'suave' }, `${clases.length} ${clases.length === 1 ? 'clase' : 'clases'} · ${inscs.length} estudiantes`)),
+      h('div', {}, h('h1', {}, 'Clases y estudiantes'), h('p', { class: 'suave' }, `${clases.length} ${clases.length === 1 ? 'clase' : 'clases'} · ${inscs.length} estudiantes · `, textoVersion(h('span', { style: { opacity: .6 } }, '')))),
       h('div', { class: 'fila' }, acciones));
   }
   const tabs = () => h('div', { class: 'tabs tabs--3 tabs--staff', role: 'tablist' }, TABS.map(([id, t]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, t)));

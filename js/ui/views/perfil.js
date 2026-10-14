@@ -13,6 +13,7 @@ import { confirmar, toast } from '../overlay.js';
 import { mascota } from '../art.js';
 import { avatar, EMOJIS_AVATAR, FONDOS_AVATAR } from '../avatar.js';
 import { ESPECIES, personajeSVG } from '../personaje.js';
+import { textoVersion } from '../../core/version.js';
 import { fotoPerfil } from '../imagen.js';
 import { leer } from '../../db/store.js';
 import { cuarto } from '../cuarto.js';
@@ -151,5 +152,6 @@ export async function render() {
 
   return h('div', { class: 'perfil' }, cabecera,
     h('div', { class: 'perfil__rejilla' }, seccionAvatar, miCuarto, apariencia, accesibilidad, sonido, escritura, privacidad),
+    textoVersion(h('p', { class: 'suave pequeno', style: { opacity: .6, textAlign: 'center' } }, '')),
     salir);
 }
