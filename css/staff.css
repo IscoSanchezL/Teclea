@@ -220,3 +220,64 @@
 .paleta__contraste--ok { background: var(--ok-fondo); color: var(--ok-texto); } .paleta__contraste--alerta { background: var(--aviso-fondo, #FEF3C7); color: var(--aviso-texto, #92400E); }
 .paleta__vista { display: flex; flex-direction: column; gap: .7rem; padding: 1rem; }
 .paleta__barra { height: .6rem; border-radius: 99px; background: var(--superficie-2); overflow: hidden; } .paleta__barra span { display: block; width: 62%; height: 100%; background: linear-gradient(90deg, var(--violeta-400), var(--violeta-600)); }
+
+/* ═════════ Capa de cristal (docentes y administración) ═════════
+   Superficies translúcidas con desenfoque sobre una aurora suave. Solo en las superficies grandes
+   (menú, barra superior, paneles); el modo ligero quita el desenfoque y deja superficies sólidas. */
+[data-estilo="staff"] {
+  --cristal: color-mix(in srgb, var(--superficie) 70%, transparent);
+  --cristal-fuerte: color-mix(in srgb, var(--superficie) 76%, transparent);
+  --cristal-borde: color-mix(in srgb, #fff 70%, var(--borde));
+  --cristal-brillo: inset 0 1px 0 rgba(255, 255, 255, .85);
+  --cristal-sombra: 0 10px 34px -14px rgba(40, 52, 120, .22), 0 1px 2px rgba(15, 23, 42, .05);
+}
+[data-estilo="staff"][data-theme="dark"] {
+  --cristal: color-mix(in srgb, var(--superficie) 62%, transparent);
+  --cristal-fuerte: color-mix(in srgb, var(--superficie) 80%, transparent);
+  --cristal-borde: rgba(255, 255, 255, .09);
+  --cristal-brillo: inset 0 1px 0 rgba(255, 255, 255, .07);
+  --cristal-sombra: 0 12px 36px -14px rgba(0, 0, 0, .6);
+}
+/* Aurora de fondo (estática: no cuesta rendimiento) */
+[data-estilo="staff"] body::before {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60rem 38rem at 8% -8%, color-mix(in srgb, var(--primario) 30%, transparent), transparent 62%),
+    radial-gradient(52rem 34rem at 96% 4%, color-mix(in srgb, var(--coral-500, #FF6B5B) 20%, transparent), transparent 60%),
+    radial-gradient(46rem 30rem at 70% 108%, color-mix(in srgb, #22D3EE 22%, transparent), transparent 62%);
+}
+[data-estilo="staff"][data-theme="dark"] body::before {
+  background:
+    radial-gradient(60rem 38rem at 8% -8%, color-mix(in srgb, var(--primario) 26%, transparent), transparent 62%),
+    radial-gradient(52rem 34rem at 96% 4%, color-mix(in srgb, var(--coral-500, #FF6B5B) 14%, transparent), transparent 60%),
+    radial-gradient(46rem 30rem at 70% 108%, color-mix(in srgb, #22D3EE 12%, transparent), transparent 62%);
+}
+[data-estilo="staff"] body { background: var(--fondo); }
+@media (min-width: 900px) {
+  [data-estilo="staff"] .app[data-shell="app"] .sidebar {
+    background: var(--cristal); border-right: 1px solid var(--cristal-borde);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
+  }
+}
+[data-estilo="staff"] .topbar {
+  background: var(--cristal); border-bottom: 1px solid var(--cristal-borde);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5);
+}
+[data-estilo="staff"] .card, [data-estilo="staff"] .panel {
+  border-radius: 16px; background: var(--cristal-fuerte); border: 1px solid var(--cristal-borde);
+  box-shadow: var(--cristal-brillo), var(--cristal-sombra);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3); backdrop-filter: blur(12px) saturate(1.3);
+}
+[data-estilo="staff"] .panel__cab { border-bottom-color: color-mix(in srgb, var(--borde) 70%, transparent); }
+[data-estilo="staff"] .tabs { background: var(--cristal); border: 1px solid var(--cristal-borde); border-radius: 12px; box-shadow: var(--cristal-brillo); }
+[data-estilo="staff"] .tab { border-radius: 9px; }
+[data-estilo="staff"] .tab[aria-selected="true"] { background: var(--cristal-fuerte); box-shadow: var(--cristal-brillo), 0 2px 8px -3px rgba(40, 52, 120, .25); }
+[data-estilo="staff"] .nav-item[aria-current="page"] { background: color-mix(in srgb, var(--primario) 12%, var(--cristal-fuerte)); box-shadow: var(--cristal-brillo); border: 1px solid color-mix(in srgb, var(--primario) 18%, transparent); }
+[data-estilo="staff"] .btn--primary { background: linear-gradient(180deg, color-mix(in srgb, var(--primario) 88%, #fff), var(--primario)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 6px 14px -6px color-mix(in srgb, var(--primario) 70%, transparent); }
+[data-estilo="staff"] .btn--suave { background: var(--cristal-fuerte); border-color: var(--cristal-borde); box-shadow: var(--cristal-brillo); }
+[data-estilo="staff"] .input, [data-estilo="staff"] .buscar { background: var(--cristal-fuerte); border-color: var(--cristal-borde); }
+[data-estilo="staff"] .tabla-scroll { border-radius: 12px; }
+[data-estilo="staff"] .aviso { border-radius: 12px; }
+/* Modo ligero: superficies sólidas, sin desenfoque */
+:root[data-ligero="1"][data-estilo="staff"] { --cristal: var(--superficie); --cristal-fuerte: var(--superficie); }
+:root[data-ligero="1"][data-estilo="staff"] body::before { display: none; }
