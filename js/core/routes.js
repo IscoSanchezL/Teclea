@@ -8,6 +8,7 @@
  *          `solo: 'estudiante'` oculta la ruta del menú del personal.
  */
 import { state } from './state.js';
+import { t } from '../i18n/index.js';
 
 const placeholder = (clave) => () =>
   import('../ui/views/proximamente.js').then((m) => ({ render: (ctx) => m.render({ ...ctx, clave }) }));
@@ -16,57 +17,57 @@ const esStaff = (u) => u && (u.rol === 'docente' || u.rol === 'admin');
 
 export const RUTAS = [
   {
-    path: '/', acceso: 'publica', titulo: 'Inicio',
+    path: '/', acceso: 'publica', get titulo() { return t('ruta.inicio'); },
     load: () => (!state.user ? import('../ui/views/portada.js') : esStaff(state.user) ? import('../ui/views/panel.js') : import('../ui/views/inicio.js')),
-    nav: { icono: 'home', etiqueta: 'Inicio', orden: 1, movil: true, staff: { icono: 'chart', etiqueta: 'Resumen', grupo: 'General' } },
+    nav: { icono: 'home', get etiqueta() { return t('ruta.inicio'); }, orden: 1, movil: true, staff: { icono: 'chart', get etiqueta() { return t('ruta.resumen'); }, get grupo() { return t('nav.grupo.general'); } } },
   },
-  { path: '/pendiente', acceso: 'sesion', titulo: 'Solicitud en revisión', load: () => import('../ui/views/pendiente.js') },
-  { path: '/entrar', acceso: 'publica', titulo: 'Entrar', load: () => import('../ui/views/entrar.js') },
-  { path: '/unirse', acceso: 'sesion', solo: 'estudiante', titulo: 'Unirme a mi clase', load: () => import('../ui/views/unirse.js') },
-  { path: '/bienvenida', acceso: 'sesion', titulo: 'Bienvenida', load: () => import('../ui/views/bienvenida.js') },
-  { path: '/leccion', acceso: 'sesion', solo: 'estudiante', titulo: 'Lección', load: () => import('../ui/views/leccion.js'), padre: '/aprende' },
-  { path: '/introduccion', acceso: 'sesion', solo: 'estudiante', titulo: 'Postura y manos', load: () => import('../ui/views/introduccion.js'), padre: '/aprende' },
+  { path: '/pendiente', acceso: 'sesion', get titulo() { return t('ruta.pendiente'); }, load: () => import('../ui/views/pendiente.js') },
+  { path: '/entrar', acceso: 'publica', get titulo() { return t('ruta.entrar'); }, load: () => import('../ui/views/entrar.js') },
+  { path: '/unirse', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.unirse'); }, load: () => import('../ui/views/unirse.js') },
+  { path: '/bienvenida', acceso: 'sesion', get titulo() { return t('ruta.bienvenida'); }, load: () => import('../ui/views/bienvenida.js') },
+  { path: '/leccion', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.leccion'); }, load: () => import('../ui/views/leccion.js'), padre: '/aprende' },
+  { path: '/introduccion', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.introduccion'); }, load: () => import('../ui/views/introduccion.js'), padre: '/aprende' },
   {
-    path: '/aprende', acceso: 'sesion', solo: 'estudiante', titulo: 'Aprende a teclear', load: () => import('../ui/views/aprende.js'),
-    nav: { icono: 'keyboard', etiqueta: 'Aprende', orden: 2, movil: true },
-  },
-  {
-    path: '/practica', acceso: 'sesion', solo: 'estudiante', titulo: 'Práctica libre', load: () => import('../ui/views/practica.js'),
-    nav: { icono: 'target', etiqueta: 'Práctica', orden: 3, movil: false },
+    path: '/aprende', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.aprende'); }, load: () => import('../ui/views/aprende.js'),
+    nav: { icono: 'keyboard', get etiqueta() { return t('ruta.aprende.nav'); }, orden: 2, movil: true },
   },
   {
-    path: '/juegos', acceso: 'sesion', solo: 'estudiante', titulo: 'Juegos', load: () => import('../ui/views/juegos.js'),
-    nav: { icono: 'gamepad', etiqueta: 'Juegos', orden: 4, movil: true },
+    path: '/practica', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.practica'); }, load: () => import('../ui/views/practica.js'),
+    nav: { icono: 'target', get etiqueta() { return t('ruta.practica.nav'); }, orden: 3, movil: false },
   },
   {
-    path: '/logros', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis logros', load: () => import('../ui/views/logros.js'),
-    nav: { icono: 'trophy', etiqueta: 'Logros', orden: 5, movil: true },
+    path: '/juegos', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.juegos'); }, load: () => import('../ui/views/juegos.js'),
+    nav: { icono: 'gamepad', get etiqueta() { return t('ruta.juegos'); }, orden: 4, movil: true },
   },
   {
-    path: '/tienda', acceso: 'sesion', solo: 'estudiante', titulo: 'Tienda', load: () => import('../ui/views/tienda.js'),
-    nav: { icono: 'bag', etiqueta: 'Tienda', orden: 5.5, movil: false },
+    path: '/logros', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.logros'); }, load: () => import('../ui/views/logros.js'),
+    nav: { icono: 'trophy', get etiqueta() { return t('ruta.logros.nav'); }, orden: 5, movil: true },
   },
   {
-    path: '/clases', acceso: 'sesion', solo: 'estudiante', titulo: 'Mis clases', load: () => import('../ui/views/clases.js'),
-    nav: { icono: 'users', etiqueta: 'Mis clases', orden: 6, movil: false },
+    path: '/tienda', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.tienda'); }, load: () => import('../ui/views/tienda.js'),
+    nav: { icono: 'bag', get etiqueta() { return t('ruta.tienda'); }, orden: 5.5, movil: false },
   },
   {
-    path: '/docente', acceso: ['docente', 'admin'], titulo: 'Clases y estudiantes', load: () => import('../ui/views/docente.js'),
-    nav: { icono: 'users', etiqueta: 'Clases', orden: 7, movil: true, staff: { icono: 'users', etiqueta: 'Clases y estudiantes', grupo: 'General' } },
+    path: '/clases', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.clases'); }, load: () => import('../ui/views/clases.js'),
+    nav: { icono: 'users', get etiqueta() { return t('ruta.clases'); }, orden: 6, movil: false },
   },
   {
-    path: '/admin', acceso: ['admin'], titulo: 'Administración', load: () => import('../ui/views/admin.js'),
-    nav: { icono: 'shield', etiqueta: 'Admin', orden: 8, movil: true, staff: { icono: 'shield', etiqueta: 'Administración', grupo: 'Sistema' } },
+    path: '/docente', acceso: ['docente', 'admin'], get titulo() { return t('ruta.docente'); }, load: () => import('../ui/views/docente.js'),
+    nav: { icono: 'users', get etiqueta() { return t('ruta.docente.nav'); }, orden: 7, movil: true, staff: { icono: 'users', get etiqueta() { return t('ruta.docente'); }, get grupo() { return t('nav.grupo.general'); } } },
   },
   {
-    path: '/perfil', acceso: 'sesion', titulo: 'Perfil y ajustes', load: () => import('../ui/views/perfil.js'),
-    nav: { icono: 'user', etiqueta: 'Perfil', orden: 9, movil: true, staff: { icono: 'user', etiqueta: 'Cuenta y ajustes', grupo: 'Sistema' } },
+    path: '/admin', acceso: ['admin'], get titulo() { return t('ruta.admin'); }, load: () => import('../ui/views/admin.js'),
+    nav: { icono: 'shield', get etiqueta() { return t('ruta.admin.nav'); }, orden: 8, movil: true, staff: { icono: 'shield', get etiqueta() { return t('ruta.admin'); }, get grupo() { return t('nav.grupo.sistema'); } } },
   },
-  { path: '/privacidad', acceso: 'publica', titulo: 'Aviso de privacidad', load: () => import('../ui/views/privacidad.js') },
+  {
+    path: '/perfil', acceso: 'sesion', get titulo() { return t('ruta.perfil'); }, load: () => import('../ui/views/perfil.js'),
+    nav: { icono: 'user', get etiqueta() { return t('ruta.perfil.nav'); }, orden: 9, movil: true, staff: { icono: 'user', get etiqueta() { return t('ruta.perfil.staff'); }, get grupo() { return t('nav.grupo.sistema'); } } },
+  },
+  { path: '/privacidad', acceso: 'publica', get titulo() { return t('ruta.privacidad'); }, load: () => import('../ui/views/privacidad.js') },
 ];
 
 export const RUTA_404 = {
-  path: '*', acceso: 'publica', titulo: 'No encontrada', load: () => import('../ui/views/no-encontrada.js'),
+  path: '*', acceso: 'publica', get titulo() { return t('ruta.nf'); }, load: () => import('../ui/views/no-encontrada.js'),
 };
 
 export const buscarRuta = (path) => RUTAS.find((r) => r.path === path) || RUTA_404;

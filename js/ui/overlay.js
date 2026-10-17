@@ -3,6 +3,7 @@
  */
 import { h } from '../core/utils.js';
 import { icono } from './icons.js';
+import { t } from '../i18n/index.js';
 
 /** Mensaje flotante. tipo: ok | error | info */
 export function toast(mensaje, { tipo = 'ok', ms = 3600 } = {}) {
@@ -35,7 +36,7 @@ export function abrirCapa({ titulo, contenido, tipo = 'hoja', alCerrar }) {
   const panel = h('div', { class: `capa__panel capa__panel--${tipo}`, role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': idTitulo },
     h('div', { class: 'capa__cabecera' },
       h('h2', { id: idTitulo, class: 'capa__titulo' }, titulo),
-      h('button', { class: 'btn btn--icono btn--suave', 'aria-label': 'Cerrar', onclick: cerrar }, icono('x', { tam: 20 }))),
+      h('button', { class: 'btn btn--icono btn--suave', 'aria-label': t('capa.cerrar'), onclick: cerrar }, icono('x', { tam: 20 }))),
     h('div', { class: 'capa__cuerpo' }, contenido));
   const fondo = h('div', { class: 'capa', onclick: (e) => { if (e.target === fondo) cerrar(); } }, panel);
 
@@ -55,7 +56,7 @@ export function abrirCapa({ titulo, contenido, tipo = 'hoja', alCerrar }) {
 }
 
 /** Confirmación con promesa: if (await confirmar({...})) ... */
-export function confirmar({ titulo, mensaje, si = 'Sí, continuar', no = 'Cancelar', peligro = false }) {
+export function confirmar({ titulo, mensaje, si = t('confirmar.si'), no = t('confirmar.no'), peligro = false }) {
   return new Promise((resolver) => {
     let decidido = false;
     const fin = (v) => { decidido = true; capa.cerrar(); resolver(v); };

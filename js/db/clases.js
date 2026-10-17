@@ -9,6 +9,7 @@ import * as store from './store.js';
 import { obtenerFirebase } from './firebase.js';
 import { perfilNuevo } from './users.js';
 import { nuevoId, cargarInscripciones, refrescarInscripciones } from './progreso.js';
+import { t } from '../i18n/index.js';
 
 /** Sin I, O, 0, 1 (se confunden). Debe coincidir con la regex de class_codes en firestore.rules. */
 const ALFABETO = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -25,7 +26,7 @@ export const CONFIG_CLASE = { rankingVisible: true, metaClase: 20000, mundosBloq
 export async function crearClase(docente, { nombre, grado, grupo = '', color = COLORES_CLASE[0] }) {
   let codigo = '';
   for (let i = 0; i < 6; i++) { const c = generarCodigo(); if (!(await store.leer(`class_codes/${c}`))) { codigo = c; break; } }
-  if (!codigo) throw new Error('No se pudo generar un código único. Inténtalo otra vez.');
+  if (!codigo) throw new Error(t('err.codigoUnico'));
   const id = nuevoId();
   await store.esperarMax(store.lote([
     { tipo: 'set', ruta: `classes/${id}`, datos: { docenteId: docente.uid, nombre: nombre.trim().slice(0, 60), grado, grupo: grupo.trim().slice(0, 20), color, codigo, config: { ...CONFIG_CLASE }, activa: true, creadoEn: store.ahora() } },
@@ -47,7 +48,7 @@ export async function actualizarClase(clase, parche) {
 export async function regenerarCodigo(clase) {
   let codigo = '';
   for (let i = 0; i < 6; i++) { const c = generarCodigo(); if (!(await store.leer(`class_codes/${c}`))) { codigo = c; break; } }
-  if (!codigo) throw new Error('No se pudo generar un código único.');
+  if (!codigo) throw new Error(t('err.codigoUnico2'));
   await store.esperarMax(store.lote([
     { tipo: 'delete', ruta: `class_codes/${clase.codigo}` },
     { tipo: 'set', ruta: `class_codes/${codigo}`, datos: { classId: clase.id, docenteId: clase.docenteId } },
@@ -71,11 +72,11 @@ const statsVacias = () => ({ xp: 0, sesiones: 0, minutos: 0, mejorWpm: 0, precis
 /** El estudiante se une con el código de la clase. */
 export async function unirse(user, codigoTexto) {
   const codigo = String(codigoTexto || '').trim().toUpperCase();
-  if (!codigoValido(codigo)) throw new Error('El código tiene 6 letras o números (sin I, O, 0 ni 1). Revísalo con tu profe.');
+  if (!codigoValido(codigo)) throw new Error(t('err.codigoInvalido'));
   const cc = await store.leer(`class_codes/${codigo}`).catch(() => null);
-  if (!cc) throw new Error('No encontré ninguna clase con ese código. Revísalo e inténtalo otra vez.');
+  if (!cc) throw new Error(t('err.noClase'));
   const ya = await cargarInscripciones(user.uid);
-  if (ya.some((i) => i.classId === cc.classId)) throw new Error('Ya estás en esa clase.');
+  if (ya.some((i) => i.classId === cc.classId)) throw new Error(t('err.yaEnClase'));
   const id = `${cc.classId}_${user.uid}`;
   await store.esperarMax(store.escribir(`enrollments/${id}`, {
     uid: user.uid, classId: cc.classId, docenteId: cc.docenteId, codigo, alias: user.apodo, avatar: { emoji: user.avatar?.emoji || '🦊', fondo: user.avatar?.fondo || 'violeta' },
@@ -135,9 +136,9 @@ export async function publicarLista(docente, clase) {
  */
 export async function crearEstudiantes(docente, clase, nombres, { alProgreso = () => {}, clave: claveElegida } = {}) {
   const clave = String(clase.claveAlumnos || claveElegida || claveSugerida(clase)).trim().toUpperCase();
-  if (!claveValida(clave)) throw new Error('El código de acceso debe tener de 6 a 12 letras o números, sin espacios ni tildes.');
-  const ocupada = await store.leer(`class_access/${clave}`).catch((e) => { if (e?.code === 'permission-denied') throw new Error('Faltan publicar las reglas de seguridad nuevas en Firebase (Firestore → Reglas). Pídele al administrador que las actualice.'); return null; });
-  if (ocupada && ocupada.classId !== clase.id) throw new Error('Ese código de acceso ya lo usa otra clase. Elige otro (por ejemplo, agrega el nombre del colegio).');
+  if (!claveValida(clave)) throw new Error(t('err.claveInvalida'));
+  const ocupada = await store.leer(`class_access/${clave}`).catch((e) => { if (e?.code === 'permission-denied') throw new Error(t('err.reglasFaltan')); return null; });
+  if (ocupada && ocupada.classId !== clase.id) throw new Error(t('err.claveUsada'));
   if (!clase.claveAlumnos) { await actualizarClase(clase, { claveAlumnos: clave }); clase.claveAlumnos = clave; }
   const fb = state.modo === 'firebase' ? await obtenerFirebase() : null;
   let auth2 = null;
@@ -166,7 +167,7 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
     alProgreso(++n, nombres.length, nombre);
     const base = slugUsuario(nombre) || 'alumno';
     const alias = nombreCorto(nombre);
-    if (pausa) { salida.push({ nombre, alias, usuario: base, emoji: '⏳', ok: false, pendiente: true, error: 'Pendiente: Firebase pidió esperar' }); continue; }
+    if (pausa) { salida.push({ nombre, alias, usuario: base, emoji: '⏳', ok: false, pendiente: true, error: t('err.pendienteFirebase') }); continue; }
     if (existentes.has(base)) { const prev = previas.find((i) => i.usuario === base); salida.push({ nombre, alias: prev?.alias || alias, usuario: base, emoji: prev?.avatar?.emoji || '🙂', ok: true, yaEstaba: true }); continue; }
     let usuario = base, k = 1;
     while (usados.has(usuario)) usuario = `${base.slice(0, 20)}${++k}`;
@@ -200,7 +201,7 @@ export async function crearEstudiantes(docente, clase, nombres, { alProgreso = (
     } catch (e) {
       const limite = e?.code === 'auth/too-many-requests';
       if (limite) pausa = true;
-      salida.push({ nombre, alias, usuario, emoji, ok: false, pendiente: limite, error: limite ? 'Pendiente: Firebase pidió esperar' : e?.code === 'auth/email-already-in-use' ? 'Ya existe' : (e?.code || e?.message || 'Error') });
+      salida.push({ nombre, alias, usuario, emoji, ok: false, pendiente: limite, error: limite ? t('err.pendienteFirebase') : e?.code === 'auth/email-already-in-use' ? t('err.yaExiste') : (e?.code || e?.message || t('err.generico')) });
     }
   }
   try { await publicarLista(docente, clase); } catch (e) { console.warn('[lista] no se pudo publicar', e?.code || e); salida.errorLista = e?.code === 'permission-denied' ? 'permiso' : (e?.code || 'error'); }

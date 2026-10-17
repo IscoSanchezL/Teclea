@@ -3,10 +3,11 @@
  * cursor parpadeante y desplazamiento automático. Solo actualiza los caracteres que cambian (O(1) por tecla).
  */
 import { h } from '../core/utils.js';
+import { t } from '../i18n/index.js';
 
 export function vistaTexto(motor) {
   const spans = motor.chars.map((c) => h('span', { class: `t t--pend ${c === ' ' ? 't--esp' : ''}` }, c));
-  const cont = h('div', { class: 'texto', 'aria-label': 'Texto para escribir', role: 'img' }, spans);
+  const cont = h('div', { class: 'texto', 'aria-label': t('ej.textoAria'), role: 'img' }, spans);
   let anterior = 0;
 
   const marcarActual = () => {

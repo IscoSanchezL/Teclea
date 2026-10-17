@@ -7,6 +7,7 @@
 import { h } from '../core/utils.js';
 import { icono } from './icons.js';
 import { toast } from './overlay.js';
+import { t } from '../i18n/index.js';
 
 let banner, ocultar;
 
@@ -20,9 +21,9 @@ function mostrar(clase, icon, texto, ms) {
 export function iniciarConexion() {
   banner = h('div', { class: 'red', role: 'status', 'aria-live': 'polite' });
   document.body.append(banner);
-  window.addEventListener('offline', () => mostrar('off', 'info', 'Sin internet: sigue practicando, guardamos todo en este dispositivo.'));
-  window.addEventListener('online', () => mostrar('on', 'check', '¡Conectado! Sincronizando tu progreso…', 3500));
-  if (!navigator.onLine) mostrar('off', 'info', 'Sin internet: sigue practicando, guardamos todo en este dispositivo.');
+  window.addEventListener('offline', () => mostrar('off', 'info', t('red.sinInternet')));
+  window.addEventListener('online', () => mostrar('on', 'check', t('red.conectado'), 3500));
+  if (!navigator.onLine) mostrar('off', 'info', t('red.sinInternet'));
 }
 
 export function registrarServiceWorker() {
@@ -30,7 +31,7 @@ export function registrarServiceWorker() {
   const habiaControlador = Boolean(navigator.serviceWorker.controller);
   navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[sw] no se registró', e));
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (habiaControlador) toast('Hay una versión nueva de TECLEA. Se aplicará al recargar.', { tipo: 'info', ms: 6000 });
+    if (habiaControlador) toast(t('red.versionNueva'), { tipo: 'info', ms: 6000 });
   });
 }
 
@@ -40,7 +41,7 @@ document.addEventListener('teclea:fallo-guardado', (e) => {
   if (Date.now() - ultimoAviso < 20000) return;
   ultimoAviso = Date.now();
   console.warn('[datos] no se pudo guardar', e.detail?.codigo);
-  toast('No se pudo guardar tu avance en este momento. Avisa a tu docente.', { tipo: 'error', ms: 9000 });
+  toast(t('red.falloGuardado'), { tipo: 'error', ms: 9000 });
 });
 
 /** Avance pendiente: la escritura no llega al servidor (red del colegio, sin internet…). */
@@ -48,8 +49,8 @@ let avisoLento = null;
 document.addEventListener('teclea:guardado-lento', () => {
   if (avisoLento) return;
   avisoLento = true;
-  toast('Tu avance todavía no llega al servidor. Quédate con la página abierta; si pasa mucho tiempo, avisa a tu docente.', { tipo: 'info', ms: 12000 });
+  toast(t('red.guardadoLento'), { tipo: 'info', ms: 12000 });
 });
 document.addEventListener('teclea:guardado-ok', () => {
-  if (avisoLento) { avisoLento = null; toast('¡Avance guardado!', { tipo: 'ok', ms: 3000 }); }
+  if (avisoLento) { avisoLento = null; toast(t('red.guardadoOk'), { tipo: 'ok', ms: 3000 }); }
 });

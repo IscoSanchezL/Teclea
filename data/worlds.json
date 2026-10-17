@@ -5,121 +5,145 @@
       "id": 1,
       "clave": "fila-base",
       "nombre": "Fila base",
+      "nombre_en": "Home row",
       "emoji": "🏠",
       "color": [
         "#8A70FA",
         "#6C4CF5"
       ],
       "descripcion": "Tus dedos llegan a casa: A S D F · J K L Ñ",
+      "descripcion_en": "Your fingers come home: A S D F · J K L Ñ",
       "teclas": "A S D F J K L Ñ"
     },
     {
       "id": 2,
       "clave": "fila-superior",
       "nombre": "Fila superior",
+      "nombre_en": "Top row",
       "emoji": "🚀",
       "color": [
         "#4FB6FF",
         "#6C4CF5"
       ],
       "descripcion": "Despega hacia Q W E R T Y U I O P",
+      "descripcion_en": "Take off toward Q W E R T Y U I O P",
       "teclas": "Q W E R T Y U I O P"
     },
     {
       "id": 3,
       "clave": "fila-inferior",
       "nombre": "Fila inferior",
+      "nombre_en": "Bottom row",
       "emoji": "🌊",
       "color": [
         "#3DDBB0",
         "#4FB6FF"
       ],
       "descripcion": "Navega por Z X C V B N M",
+      "descripcion_en": "Sail through Z X C V B N M",
       "teclas": "Z X C V B N M , ."
     },
     {
       "id": 4,
       "clave": "alfabeto",
       "nombre": "Todas las letras y la Ñ",
+      "nombre_en": "All the letters and Ñ",
       "emoji": "🗺️",
       "color": [
         "#FFD04A",
         "#FF8A7A"
       ],
       "descripcion": "Domina el abecedario completo",
+      "descripcion_en": "Master the whole alphabet",
       "teclas": "A–Z Ñ"
     },
     {
       "id": 5,
       "clave": "mayusculas",
       "nombre": "Mayúsculas y Shift",
+      "nombre_en": "Capitals and Shift",
       "emoji": "🏔️",
       "color": [
         "#A794FF",
         "#4FB6FF"
       ],
       "descripcion": "Sube la montaña con Shift",
-      "teclas": "⇧ + letras"
+      "descripcion_en": "Climb the mountain with Shift",
+      "teclas": "⇧ + letras",
+      "teclas_en": "⇧ + letters"
     },
     {
       "id": 6,
       "clave": "tildes-signos",
       "nombre": "Tildes y signos",
+      "nombre_en": "Accents and punctuation",
       "emoji": "✨",
       "color": [
         "#FF8A7A",
         "#FFD04A"
       ],
       "descripcion": "á é í ó ú ü · ¿ ? ¡ ! , . ; :",
+      "descripcion_en": "á é í ó ú ü · ¿ ? ¡ ! , . ; :",
       "teclas": "á é í ó ú ü ¿ ¡ ? !"
     },
     {
       "id": 7,
       "clave": "numeros",
       "nombre": "Números y símbolos",
+      "nombre_en": "Numbers and symbols",
       "emoji": "🔢",
       "color": [
         "#3DDBB0",
         "#18BE94"
       ],
       "descripcion": "1 2 3 … @ # % y más",
+      "descripcion_en": "1 2 3 … @ # % and more",
       "teclas": "1 2 3 … @ # %"
     },
     {
       "id": 8,
       "clave": "frases",
       "nombre": "Palabras y frases",
+      "nombre_en": "Words and sentences",
       "emoji": "💬",
       "color": [
         "#6C4CF5",
         "#FF8A7A"
       ],
       "descripcion": "Escribe ideas completas",
-      "teclas": "palabras y frases"
+      "descripcion_en": "Write complete ideas",
+      "teclas": "palabras y frases",
+      "teclas_en": "words and sentences"
     },
     {
       "id": 9,
       "clave": "parrafos",
       "nombre": "Párrafos y textos reales",
+      "nombre_en": "Paragraphs and real texts",
       "emoji": "📖",
       "color": [
         "#4FB6FF",
         "#3DDBB0"
       ],
       "descripcion": "Cuentos, noticias y datos curiosos",
-      "teclas": "párrafos"
+      "descripcion_en": "Stories, news and fun facts",
+      "teclas": "párrafos",
+      "teclas_en": "paragraphs"
     },
     {
       "id": 10,
       "clave": "retos",
       "nombre": "Velocidad y precisión",
+      "nombre_en": "Speed and accuracy",
       "emoji": "🏆",
       "color": [
         "#FFB800",
         "#FF6B5B"
       ],
       "descripcion": "Retos de campeones",
-      "teclas": "retos"
+      "descripcion_en": "Challenges for champions",
+      "teclas": "retos",
+      "teclas_en": "challenges"
     }
   ]
 }

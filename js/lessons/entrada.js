@@ -6,13 +6,14 @@
  *   - paste / drop → se bloquean y se marcan como sospechosos
  */
 import { sonido } from '../ui/sonido.js';
+import { t } from '../i18n/index.js';
 
 const CENTINELA = '​'; // permite detectar el retroceso en teclados móviles aunque el campo esté "vacío"
 
 export function vincularEntrada({ motor, teclado, zona, alPausar = () => {}, alFoco = () => {} }) {
   const ta = document.createElement('textarea');
   ta.className = 'entrada-oculta';
-  ta.setAttribute('aria-label', 'Escribe aquí el texto que ves en pantalla');
+  ta.setAttribute('aria-label', t('ej.entradaAria'));
   ta.setAttribute('autocomplete', 'off'); ta.setAttribute('autocapitalize', 'off'); ta.setAttribute('autocorrect', 'off');
   ta.setAttribute('spellcheck', 'false'); ta.rows = 1; ta.value = CENTINELA;
   zona.append(ta);

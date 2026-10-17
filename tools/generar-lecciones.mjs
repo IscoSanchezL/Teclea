@@ -14,20 +14,28 @@
  * es estable entre ejecuciones. Para cambiar el currículo edita las listas de este archivo o los
  * corpus en tools/fuentes/, vuelve a ejecutarlo y haz commit.
  */
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PALABRAS, PALABRAS_TILDE, NOMBRES, LUGARES } from './fuentes/palabras.mjs';
-import { SIN_TILDE, CON_TILDE, PARRAFOS } from './fuentes/frases.mjs';
+import * as P_ES from './fuentes/palabras.mjs';
+import * as F_ES from './fuentes/frases.mjs';
+import * as EN_SRC from './fuentes/en.mjs';
 import { sospechosas } from './fuentes/verificar-ortografia.mjs';
 import { DEDOS, dedoDeCaracter, existeCaracter } from '../js/lessons/teclado-datos.js';
+import { poner } from '../js/i18n/index.js';
 
 const RAIZ = join(fileURLToPath(new URL('.', import.meta.url)), '..');
+
+/* Idioma de salida: `node tools/generar-lecciones.mjs` (español, data/) o `node tools/generar-lecciones.mjs en` (inglés, data/en/). */
+const EN = process.argv[2] === 'en';
+const { PALABRAS, PALABRAS_TILDE, NOMBRES, LUGARES } = EN ? EN_SRC : P_ES;
+const { SIN_TILDE, CON_TILDE, PARRAFOS } = EN ? EN_SRC : F_ES;
+poner('es'); // los nombres de los dedos de teclado-datos.js se leen en español (se traducen abajo para el inglés)
 
 /* ═════════════ Azar determinista ═════════════ */
 function hashStr(s) { let h = 1779033703 ^ s.length; for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); } return h >>> 0; }
 function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-const pick = (rng, a) => a[Math.floor(rng() * a.length)];
+const pick = (rng, a) => (a.length ? a[Math.floor(rng() * a.length)] : ''); // vacío solo en inglés, en lecciones propias del español
 const mezclar = (rng, a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 
 /* ═════════════ Utilidades de texto ═════════════ */
@@ -330,7 +338,7 @@ const MUNDOS = [
 const DERECHA = new Set('yuiophjklñnm'.split(''));
 const IZQUIERDA = new Set('qwertasdfgzxcvb'.split(''));
 const SIGLAS = ['ONU', 'OEA', 'TIC', 'USB', 'PC', 'CD', 'DVD', 'LED', 'OMS', 'FIFA', 'TV', 'ADN', 'UNICEF', 'NASA', 'ISBN', 'SOS', 'VIP', 'GPS'];
-const TITULOS = ['El Gato con Botas', 'La Isla del Tesoro', 'Mi Perro Max', 'El Bosque Mágico', 'La Gran Carrera', 'Un Dia de Playa', 'El Zorro y la Luna', 'Piratas del Caribe', 'La Casa del Arbol', 'Viaje a la Luna'].filter((t) => !/[áéíóú]/i.test(t) && !/Dia|Arbol/.test(t));
+const TITULOS = EN ? EN_SRC.TITULOS : (['El Gato con Botas', 'La Isla del Tesoro', 'Mi Perro Max', 'El Bosque Mágico', 'La Gran Carrera', 'Un Dia de Playa', 'El Zorro y la Luna', 'Piratas del Caribe', 'La Casa del Arbol', 'Viaje a la Luna'].filter((t) => !/[áéíóú]/i.test(t) && !/Dia|Arbol/.test(t)));
 const DOMINIOS = ['colegio.edu.co', 'correo.com', 'mail.co', 'escuela.edu.co', 'tecla.com'];
 const USUARIOS = ['sofia', 'juan', 'luis', 'ana', 'mateo', 'valen', 'dani', 'camila', 'tomas', 'isa'];
 
@@ -353,7 +361,7 @@ function numerosTexto(rng, alcanceCompleto, n, soloDigitos = false) {
   if (tiene('$') && tiene('.')) plantillas.push(() => `$${digitos(rng, D, 1 + Math.floor(rng() * 2))}.${digitos(rng, D, 3)}`);
   if (tiene('%')) plantillas.push(() => `${digitos(rng, D, 2)}%`);
   if (tiene('(') && tiene(')')) plantillas.push(() => `(${digitos(rng, D, 2)})`);
-  if (tiene('"')) plantillas.push(() => `"${pick(rng, ['hola', 'ala', 'sal', 'casa'].filter((w) => valido(w, alcance, true)).concat(['a']))}"`);
+  if (tiene('"')) plantillas.push(() => `"${pick(rng, (EN ? EN_SRC.COMILLADAS : ['hola', 'ala', 'sal', 'casa']).filter((w) => valido(w, alcance, true)).concat(['a']))}"`);
   if (tiene('#')) plantillas.push(() => `#${digitos(rng, D, 3)}`);
   if (tiene('&')) plantillas.push(() => `${pick(rng, ['a', 'e', 'o'])}&${pick(rng, ['a', 'e', 'o'])}${digitos(rng, D, 1)}`);
   if (tiene('@')) plantillas.push(() => `${pick(rng, USUARIOS.filter((u) => valido(u, alcance, true)).concat(['ana']))}${digitos(rng, D, 2)}@${pick(rng, DOMINIOS)}`);
@@ -363,7 +371,7 @@ function numerosTexto(rng, alcanceCompleto, n, soloDigitos = false) {
 }
 
 const CLAVES_EJEMPLO = (rng, alcance, n) => {
-  const palabras = ['sol', 'luna', 'gato', 'rio', 'mar', 'pato', 'cielo', 'nube', 'tigre', 'oso', 'lobo', 'casa'];
+  const palabras = EN ? EN_SRC.CLAVES_PALABRAS : ['sol', 'luna', 'gato', 'rio', 'mar', 'pato', 'cielo', 'nube', 'tigre', 'oso', 'lobo', 'casa'];
   const D = [...alcance].filter((c) => /[0-9]/.test(c)), S = [...alcance].filter((c) => '#@$%&*+='.includes(c));
   const out = []; let len = 0;
   while (len < n) {
@@ -577,23 +585,50 @@ function objetivo(spec, nuevas, dedos) {
   }
 }
 
+/* ═════════════ Versión en inglés de títulos y objetivos ═════════════ */
+const SOLO_ES = new Set(['Palabras con Ñ', 'Refuerzo de meñiques: Q A Z P Ñ', 'Repaso de todas las tildes', 'Palabras con tilde', 'Repaso de tildes y signos',
+  'Precisión con tildes', 'Velocidad con tildes', 'Jefe: el mago de las tildes', 'Sprint 3: tildes y signos']);
+/** Una lección conserva sus ejercicios en español cuando enseña teclas propias del español (ñ, tildes, ¿ ¡ ü). */
+const esSoloEspanol = (spec) => SOLO_ES.has(spec.titulo) || spec.nuevas.some((c) => /[áéíóúüñ¿¡]/.test(c));
+function objetivoEN(spec, nuevas, dedos, es) {
+  if (EN_SRC.OBJETIVOS_LECCION[es]) return EN_SRC.OBJETIVOS_LECCION[es];
+  if (spec.tipo === 'nueva' && nuevas.some((c) => 'áéíóú'.includes(c))) return `Type ${nuevas[0]}: press the ´ key (with the right pinky) and then the vowel, without holding any key.`;
+  const lista = nuevas.map((c) => c.toUpperCase()).join(', ');
+  switch (spec.tipo) {
+    case 'nueva': return nuevas.length ? `Learn the keys ${lista} with the ${[...new Set(dedos.map((d) => EN_SRC.DEDOS_EN[nombreDedo(d)] || nombreDedo(d)))].join(' and the ')}. Without looking at the keyboard.` : 'Practice the Shift technique with both hands.';
+    case 'repaso': return 'Review what you learned so your fingers remember it on their own.';
+    case 'palabras': return 'Type real words and sentences with accuracy and an even rhythm.';
+    case 'ritmo': return 'Keep a steady rhythm, like a metronome, between every key.';
+    case 'tema': return 'Type real texts with rhythm and without mistakes.';
+    case 'precision': return 'Get the highest accuracy you can: every key counts!';
+    case 'velocidad': return 'Raise your speed without losing accuracy. You have a time limit.';
+    case 'jefe': return 'Show everything you learned in this world. You can do it!';
+    case 'reto': return 'A challenge for keyboard champions.';
+    default: return '';
+  }
+}
+
 /* ═════════════ Ejecución ═════════════ */
 const resumen = [];
+const resumenEN = [];
 const alcanceGlobal = new Set();
 let verificacion = 0;
+const SALIDA = EN ? join(RAIZ, 'data', 'en') : join(RAIZ, 'data');
 
-await mkdir(join(RAIZ, 'data', 'lessons'), { recursive: true });
+await mkdir(join(SALIDA, 'lessons'), { recursive: true });
 for (const mundo of MUNDOS) {
   const lecciones = [];
+  const lecEN = [];
   if (mundo.id === 4) for (const c of 'abcdefghijklmnñopqrstuvwxyz') alcanceGlobal.add(c);
   if (mundo.id === 5) { /* ya conoce todas las letras */ }
+  const esMundo = EN ? JSON.parse(await readFile(join(RAIZ, 'data', 'lessons', `m${mundo.id}.json`), 'utf8')) : null;
   mundo.lecciones.forEach((spec, i) => {
     spec.titulo = spec.titulo;
     const l = construirLeccion(mundo, spec, i + 1, alcanceGlobal, null);
-    // Validaciones de calidad
-    for (const e of l.ejercicios) {
+    // Validaciones de calidad (en inglés, las lecciones propias del español conservan sus ejercicios en español)
+    for (const e of (EN && esSoloEspanol(spec) ? [] : l.ejercicios)) {
       if (!e.texto || e.texto.length < 12) throw new Error(`Texto demasiado corto en ${l.id} (${e.t}): "${e.texto}"`);
-      if (mundo.id <= 5) { const s = sospechosas(e.texto); if (s.length) throw new Error(`Ortografía dudosa en ${l.id}: ${s.join(', ')}`); }
+      if (mundo.id <= 5 && !EN) { const s = sospechosas(e.texto); if (s.length) throw new Error(`Ortografía dudosa en ${l.id}: ${s.join(', ')}`); }
       if (/\s{2,}/.test(e.texto) || e.texto !== e.texto.trim()) throw new Error(`Espacios sobrantes en ${l.id}`);
       if (mundo.id <= 4 && /[^a-zñ ,.\-]/.test(e.texto)) throw new Error(`Carácter fuera del alcance en ${l.id}: "${e.texto}"`);
       for (const c of e.texto) if (!existeCaracter(c, 'es-LA')) throw new Error(`Carácter imposible de teclear en ${l.id}: “${c}”`);
@@ -601,24 +636,37 @@ for (const mundo of MUNDOS) {
     }
     lecciones.push(l);
     resumen.push({ id: l.id, mundo: l.mundo, n: l.n, tipo: l.tipo, titulo: l.titulo, nuevas: l.nuevas });
+    if (EN) {
+      const titulo = EN_SRC.TITULOS_LECCION[spec.titulo];
+      if (!titulo) throw new Error(`Falta el título en inglés de “${spec.titulo}”`);
+      const es = esMundo.lecciones[i];
+      const dedos = l.nuevas.map((c) => dedoDeCaracter(c)).filter(Boolean);
+      const o = { id: l.id, titulo, objetivo: objetivoEN(spec, l.nuevas, dedos, es.objetivo), tip: l.tip ? (EN_SRC.TIPS_LECCION[l.tip] || (() => { throw new Error(`Falta el tip en inglés: ${l.tip}`); })()) : null };
+      // Los ejercicios en inglés solo se incluyen si cambian el texto (las prácticas de teclas sueltas no dependen del idioma).
+      if (!esSoloEspanol(spec) && l.ejercicios.some((e, k) => e.texto !== es.ejercicios[k].texto)) o.ejercicios = l.ejercicios;
+      lecEN.push(o);
+      resumenEN.push({ id: l.id, titulo });
+    }
   });
   // Al terminar el mundo 2 el alcance ya incluye todas las letras de la fila superior, etc. (alcanceGlobal es acumulativo)
-  await writeFile(join(RAIZ, 'data', 'lessons', `m${mundo.id}.json`), JSON.stringify({ mundo: mundo.id, nombre: mundo.nombre, lecciones }));
+  if (EN) await writeFile(join(SALIDA, 'lessons', `m${mundo.id}.json`), JSON.stringify({ mundo: mundo.id, lecciones: lecEN }));
+  else await writeFile(join(SALIDA, 'lessons', `m${mundo.id}.json`), JSON.stringify({ mundo: mundo.id, nombre: mundo.nombre, lecciones }));
 }
-await writeFile(join(RAIZ, 'data', 'lessons', 'index.json'), JSON.stringify({ version: 1, total: resumen.length, lecciones: resumen }));
+if (EN) await writeFile(join(SALIDA, 'lessons', 'index.json'), JSON.stringify({ version: 1, total: resumenEN.length, lecciones: resumenEN }));
+else await writeFile(join(SALIDA, 'lessons', 'index.json'), JSON.stringify({ version: 1, total: resumen.length, lecciones: resumen }));
 
 /* ═════════════ Vocabulario para juegos y refuerzo ═════════════ */
-const palabrasJSON = { sinTilde: [...new Set(PALABRAS.filter((w) => w.length >= 3 && w.length <= 10 && !sospechosas(w).length))], conTilde: PALABRAS_TILDE.filter((w) => w.length >= 3) };
-await writeFile(join(RAIZ, 'data', 'palabras.json'), JSON.stringify(palabrasJSON));
+const palabrasJSON = { sinTilde: [...new Set(PALABRAS.filter((w) => w.length >= 3 && w.length <= 10 && (EN || !sospechosas(w).length)))], conTilde: PALABRAS_TILDE.filter((w) => w.length >= 3) };
+await writeFile(join(SALIDA, 'palabras.json'), JSON.stringify(palabrasJSON));
 
 /* ═════════════ Textos de práctica libre ═════════════ */
 const textos = [];
-const nivelDe = (t, esPar) => (esPar ? (t.length > 260 ? 5 : 4) : /[áéíóúü¿¡0-9]/.test(t) ? 3 : 2);
+const nivelDe = (t, esPar) => (esPar ? (t.length > 260 ? 5 : 4) : (EN ? (/[0-9?!;:@,]/.test(t) || t.length > 50) : /[áéíóúü¿¡0-9]/.test(t)) ? 3 : 2);
 SIN_TILDE.forEach(([tema, t], i) => textos.push({ id: `f${i}`, tema, nivel: 2, texto: t }));
 CON_TILDE.forEach(([tema, t], i) => textos.push({ id: `c${i}`, tema, nivel: nivelDe(t, false), texto: t }));
 PARRAFOS.forEach(([tema, t], i) => textos.push({ id: `p${i}`, tema, nivel: nivelDe(t, true), texto: t }));
-await writeFile(join(RAIZ, 'data', 'texts.json'), JSON.stringify({ version: 1, temas: [...new Set(textos.map((t) => t.tema))], textos }));
+await writeFile(join(SALIDA, 'texts.json'), JSON.stringify({ version: 1, temas: [...new Set(textos.map((t) => t.tema))], textos }));
 
 const porMundo = Object.fromEntries(MUNDOS.map((m) => [m.id, m.lecciones.length]));
-console.log(`Lecciones: ${resumen.length} (${JSON.stringify(porMundo)})`);
+console.log(`[${EN ? 'en' : 'es'}] Lecciones: ${resumen.length} (${JSON.stringify(porMundo)})`);
 console.log(`Ejercicios validados: ${verificacion} · textos de práctica: ${textos.length} · palabras: ${palabrasJSON.sinTilde.length + palabrasJSON.conTilde.length}`);

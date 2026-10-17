@@ -3,10 +3,11 @@
  * Todo se guarda como "data URL" dentro del documento de Firestore (no se usa Storage, que ya
  * requiere plan de pago), por eso se comprime a pocos KB.
  */
+import { t } from '../i18n/index.js';
 
 async function cargar(archivo) {
-  if (!archivo || !archivo.type.startsWith('image/')) throw new Error('El archivo no es una imagen.');
-  if (archivo.size > 12 * 1024 * 1024) throw new Error('La imagen es demasiado grande (máximo 12 MB).');
+  if (!archivo || !archivo.type.startsWith('image/')) throw new Error(t('err.noImagen'));
+  if (archivo.size > 12 * 1024 * 1024) throw new Error(t('err.imagenGrande'));
   return createImageBitmap(archivo);
 }
 

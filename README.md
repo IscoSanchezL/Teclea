@@ -12,6 +12,12 @@ python3 -m http.server 8000
 Luego abre http://localhost:8000 → **Entrar** → botones de "Modo demostración" (Estudiante 2.º–6.º, Docente, Admin).
 Detén el servidor con `Ctrl+C`. Alternativa: `npx serve .`
 
+## Bilingüe (ES | EN)
+La plataforma funciona en español e inglés (selector **ES | EN** en la barra superior y en la pantalla de entrada; se guarda en `localStorage['labs-lang']`).
+- Textos de la interfaz: `js/i18n/es.js` y `js/i18n/en.js` (mismas claves; `node tests/i18n.test.mjs` lo comprueba). Uso: `t('clave', { x })`.
+- Datos: campos paralelos `nombre_en` / `descripcion_en` / `teclas_en` en `data/worlds.json`, `badges.json`, `shop.json`.
+- Lecciones y textos para teclear **no se traducen**: hay variantes en inglés en `data/en/` (lecciones, `texts.json`, `palabras.json`), generadas con `node tools/generar-lecciones.mjs en` a partir de `tools/fuentes/en.mjs`. Las lecciones que enseñan teclas propias del español (ñ, tildes, ¿ ¡) conservan su texto en español.
+
 ## Estado del proyecto
 Todas las fases están construidas y probadas (237 comprobaciones automáticas, 0 errores de accesibilidad automática en las vistas principales):
 

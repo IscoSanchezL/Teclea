@@ -15,20 +15,21 @@ import { obtenerFirebase } from '../db/firebase.js';
 import { actualizar } from '../db/store.js';
 import { leerPerfil, crearPerfil, perfilNuevo, rolSolicitado, actualizarPerfil, demo } from '../db/users.js';
 import { aplicarEstiloUsuario, cambiarPrefs } from '../ui/theme.js';
+import { t } from '../i18n/index.js';
 
 /** Mensajes amables para los errores de Firebase. */
 const ERRORES = {
-  'auth/popup-closed-by-user': 'Cerraste la ventana de Google antes de terminar. ¡Inténtalo otra vez!',
-  'auth/cancelled-popup-request': 'Ya hay una ventana de Google abierta.',
-  'auth/network-request-failed': 'No hay conexión a internet. Revisa tu red e inténtalo de nuevo.',
-  'auth/too-many-requests': 'Demasiados intentos. Espera un momento y vuelve a probar.',
-  'auth/invalid-credential': 'Usuario, PIN o código de clase incorrectos. Pídele ayuda a tu profe.',
-  'auth/user-not-found': 'Usuario, PIN o código de clase incorrectos. Pídele ayuda a tu profe.',
-  'auth/wrong-password': 'Usuario, PIN o código de clase incorrectos. Pídele ayuda a tu profe.',
-  'auth/unauthorized-domain': 'Este sitio aún no está autorizado en Firebase (Authentication → Configuración → Dominios autorizados).',
-  'permission-denied': 'No tienes permiso para esa acción. Avísale a tu docente o al administrador: faltan publicar las reglas nuevas.',
+  'auth/popup-closed-by-user': 'auth.err.popupCerrado',
+  'auth/cancelled-popup-request': 'auth.err.popupAbierto',
+  'auth/network-request-failed': 'auth.err.red',
+  'auth/too-many-requests': 'auth.err.demasiados',
+  'auth/invalid-credential': 'auth.err.credencial',
+  'auth/user-not-found': 'auth.err.credencial',
+  'auth/wrong-password': 'auth.err.credencial',
+  'auth/unauthorized-domain': 'auth.err.dominio',
+  'permission-denied': 'auth.err.permiso',
 };
-export const mensajeError = (e) => ERRORES[e?.code] || 'Algo salió mal. Inténtalo de nuevo en un momento.';
+export const mensajeError = (e) => t(ERRORES[e?.code] || 'auth.err.generico');
 
 /** Aplica el perfil cargado: estado, estilo por grado y preferencias guardadas en la nube. */
 function activarPerfil(perfil) {

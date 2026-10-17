@@ -11,6 +11,7 @@ import * as P from '../js/db/progreso.js';
 import * as C from '../js/db/clases.js';
 import { estadoDe, resumenClase, sesionesDocente } from '../js/db/analitica.js';
 import { MotorEscritura } from '../js/lessons/motor.js';
+import { poner } from '../js/i18n/index.js'; poner('es'); // los mensajes que se comprueban están en español
 
 let ok = 0, mal = 0;
 const t = (n, c, extra = '') => { c ? ok++ : mal++; console.log(`  ${c ? '✓' : '✗'} ${n}${c ? '' : '  ' + extra}`); };

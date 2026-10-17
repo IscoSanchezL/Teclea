@@ -9,6 +9,7 @@ import { sonido } from '../ui/sonido.js';
 import { capturar } from './captura.js';
 import { MotorEscritura } from '../lessons/motor.js';
 import { vistaTexto } from '../lessons/texto-vista.js';
+import { t as tr, idioma } from '../i18n/index.js';
 
 const rnd = (a) => a[Math.floor(Math.random() * a.length)];
 const LARGO_MAX = { 2: 5, 3: 6, 4: 7, 5: 8, 6: 9 };
@@ -18,6 +19,7 @@ export function palabrasDeGrado(vocab, grado) {
   const max = LARGO_MAX[grado] || 7;
   const base = grado >= 5 ? [...vocab.sinTilde, ...vocab.conTilde.filter((w) => !/^[A-Z]/.test(w))] : vocab.sinTilde;
   const pool = base.filter((w) => w.length >= 3 && w.length <= max && /^[a-záéíóúüñ]+$/.test(w));
+  // (en inglés, vocab viene de data/en/palabras.json: palabras sin tildes ni ñ)
   return pool.length > 20 ? pool : vocab.sinTilde.slice(0, 80);
 }
 
@@ -31,7 +33,7 @@ export function lluvia({ zona, grado, vocab, alFin }) {
   const activos = [];
   const campo = h('div', { class: 'jg__campo jg__campo--lluvia' });
   const linea = h('div', { class: 'jg__linea', 'aria-live': 'off' }, h('span', { class: 'jg__buffer' }), h('i', { class: 'jg__cursor' }));
-  const dV = dato('Vidas', '❤️'.repeat(vidas)), dP = dato('Puntos'), dC = dato('Combo', '×1');
+  const dV = dato(tr('juego.vidas'), '❤️'.repeat(vidas)), dP = dato(tr('juego.puntos')), dC = dato(tr('juego.combo'), '×1');
   zona.append(hud(dV.nodo, dP.nodo, dC.nodo), campo, linea);
   const buf = linea.querySelector('.jg__buffer');
 
@@ -97,10 +99,10 @@ export function carrera({ zona, grado, vocab, alFin }) {
   const objetivoChars = Math.min(texto.length - 1, 150 + grado * 20);
   const vel = [0, 0, 5.5, 7.5, 10, 13, 16][grado] || 9; // PPM de los rivales (a su ritmo)
   const rivales = [{ n: 'Nova', v: vel * 0.8, p: 0, c: '#FF6B5B' }, { n: 'Orbi', v: vel, p: 0, c: '#3DDBB0' }, { n: 'Zeta', v: vel * 1.2, p: 0, c: '#FFD04A' }];
-  const pista = h('div', { class: 'carrera' }, [...rivales.map((r) => ({ ...r })), { n: 'Tú', jugador: true, c: '#8A70FA' }].map((c, i) => h('div', { class: 'carrera__carril', dataset: { i } },
+  const pista = h('div', { class: 'carrera' }, [...rivales.map((r) => ({ ...r })), { n: tr('juego.tu'), jugador: true, c: '#8A70FA' }].map((c, i) => h('div', { class: 'carrera__carril', dataset: { i } },
     h('span', { class: 'carrera__nombre' }, c.n), h('span', { class: 'carrera__cohete', style: { '--c': c.c } }, icono('rocket', { tam: 26 })), h('i', { class: 'carrera__meta' }))));
   const cohetes = [...pista.querySelectorAll('.carrera__cohete')];
-  const dT = dato('Tiempo', '0:00'), dPos = dato('Puesto', '—');
+  const dT = dato(tr('juego.tiempo'), '0:00'), dPos = dato(tr('juego.puesto'), '—');
   zona.append(hud(dT.nodo, dPos.nodo), pista, h('div', { class: 'ej__texto card' }, vista.el));
   const cap = capturar(zona, { alChar: (c) => { if (!terminado) motor.escribir(c); }, alBorrar: () => motor.borrar() });
   function cuadro(t) {
@@ -111,7 +113,7 @@ export function carrera({ zona, grado, vocab, alFin }) {
     rivales.forEach((r, i) => { prog[i] = Math.min(1, (r.v * 5 * (seg / 60)) / objetivoChars); });
     cohetes.forEach((c, i) => { c.style.setProperty('--x', `${prog[i] * 100}%`); });
     const orden = prog.map((p, i) => ({ p, i })).sort((a, b) => b.p - a.p); const puesto = orden.findIndex((o) => o.i === 3) + 1;
-    dPos.b.textContent = `${puesto}º`; dT.b.textContent = `${Math.floor(seg / 60)}:${String(Math.floor(seg % 60)).padStart(2, '0')}`;
+    dPos.b.textContent = tr('juego.puestoN', { n: puesto }); dT.b.textContent = `${Math.floor(seg / 60)}:${String(Math.floor(seg % 60)).padStart(2, '0')}`;
     if (prog[3] >= 1 || prog.slice(0, 3).some((p) => p >= 1) || seg > 180) {
       terminado = true; motor.terminar();
       const r = motor.resultado(); const pos = prog[3] >= 1 ? orden.filter((o) => o.p >= 1).findIndex((o) => o.i === 3) + 1 || 1 : puesto;
@@ -131,7 +133,7 @@ export function rescate({ zona, grado, vocab, alFin }) {
   const objetivo = 8 + grado; let hechas = 0, chars = 0, errores = 0, buffer = '', agua = 0, fin = false, raf = 0, palabra = rnd(pal);
   const t0 = performance.now(); const subida = grado <= 3 ? 1.6 : 2.4;  // % de agua por segundo
   const escena = h('div', { class: 'rescate' }, h('div', { class: 'rescate__cielo' }), h('div', { class: 'rescate__tecli' }, '🦊'), h('div', { class: 'rescate__agua' }), h('div', { class: 'rescate__cuerda' }));
-  const pal$ = h('div', { class: 'rescate__palabra' }), dP = dato('Rescate', `0/${objetivo}`);
+  const pal$ = h('div', { class: 'rescate__palabra' }), dP = dato(tr('juego.rescate'), `0/${objetivo}`);
   zona.append(hud(dP.nodo), escena, pal$);
   const pintar = () => { pal$.replaceChildren(...[...palabra].map((c, i) => h('span', { class: i < buffer.length ? 't--ok' : i === buffer.length ? 't--act' : 't--pend' }, c))); };
   const cap = capturar(zona, {
@@ -155,10 +157,11 @@ export function rescate({ zona, grado, vocab, alFin }) {
 
 /* ═════════════ 4. Tiro al blanco de letras ═════════════ */
 export function blanco({ zona, grado, alFin }) {
-  const letras = (grado <= 3 ? 'asdfjklñgh' : 'abcdefghijklmnñopqrstuvwxyz').split('');
+  const en = idioma() === 'en';
+  const letras = (grado <= 3 ? (en ? 'asdfjklgh' : 'asdfjklñgh') : (en ? 'abcdefghijklmnopqrstuvwxyz' : 'abcdefghijklmnñopqrstuvwxyz')).split('');
   const DUR = 45; let puntos = 0, aciertos = 0, fallos = 0, combo = 0, fin = false, raf = 0, ultimo = 0; const t0 = performance.now(); const dianas = [];
   const campo = h('div', { class: 'jg__campo jg__campo--blanco' });
-  const dP = dato('Puntos'), dT = dato('Tiempo', `${DUR}`), dC = dato('Combo', '×1');
+  const dP = dato(tr('juego.puntos')), dT = dato(tr('juego.tiempo'), `${DUR}`), dC = dato(tr('juego.combo'), '×1');
   zona.append(hud(dT.nodo, dP.nodo, dC.nodo), campo);
   const cap = capturar(zona, {
     alChar: (ch) => {
@@ -191,10 +194,10 @@ export function duelo({ zona, grado, vocab, alFin, mejorPrevio = 0 }) {
   const pal = palabrasDeGrado(vocab, grado);
   const DUR = 60; let palabra = rnd(pal), buffer = '', puntos = 0, chars = 0, errores = 0, hechas = 0, fin = false, raf = 0, t0 = null;
   const objetivo = Math.max(mejorPrevio, 120);
-  const dT = dato('Tiempo', `${DUR}`), dP = dato('Puntos'), dM = dato('A superar', String(objetivo));
+  const dT = dato(tr('juego.tiempo'), `${DUR}`), dP = dato(tr('juego.puntos')), dM = dato(tr('juego.aSuperar'), String(objetivo));
   const barraTu = h('i', { class: 'duelo__barra duelo__barra--tu' }), barraFan = h('i', { class: 'duelo__barra duelo__barra--fan' });
   const grande = h('div', { class: 'duelo__palabra' });
-  zona.append(hud(dT.nodo, dP.nodo, dM.nodo), h('div', { class: 'duelo__barras' }, h('div', {}, h('small', {}, 'Tú'), h('span', {}, barraTu)), h('div', {}, h('small', {}, 'Tu marca'), h('span', {}, barraFan))), grande);
+  zona.append(hud(dT.nodo, dP.nodo, dM.nodo), h('div', { class: 'duelo__barras' }, h('div', {}, h('small', {}, tr('juego.tu')), h('span', {}, barraTu)), h('div', {}, h('small', {}, tr('juego.tuMarca')), h('span', {}, barraFan))), grande);
   const pintar = () => grande.replaceChildren(...[...palabra].map((c, i) => h('span', { class: i < buffer.length ? 't--ok' : i === buffer.length ? 't--act' : 't--pend' }, c)));
   const cap = capturar(zona, {
     alChar: (ch) => {
@@ -218,9 +221,9 @@ export function duelo({ zona, grado, vocab, alFin, mejorPrevio = 0 }) {
 }
 
 export const JUEGOS = [
-  { id: 'carrera', nombre: 'Carrera de cohetes', icono: 'rocket', color: ['#8A70FA', '#4F6BFF'], texto: 'Escribe rápido y sin errores para ganarle a Nova, Orbi y Zeta.', crear: carrera },
-  { id: 'lluvia', nombre: 'Lluvia de palabras', icono: 'sparkle', color: ['#4FB6FF', '#1E78C8'], texto: 'Las palabras caen: escríbelas antes de que toquen el suelo.', crear: lluvia },
-  { id: 'rescate', nombre: 'Rescata a Tecli', icono: 'heart', color: ['#FF8A7A', '#E84F3F'], texto: 'El agua sube. Cada palabra correcta la hace bajar y acerca a Tecli a la cima.', crear: rescate },
-  { id: 'blanco', nombre: 'Tiro al blanco', icono: 'target', color: ['#3DDBB0', '#0B8F6D'], texto: 'Aparecen letras: pulsa la tecla justa antes de que desaparezcan.', crear: blanco },
-  { id: 'duelo', nombre: 'Duelo contra el tiempo', icono: 'clock', color: ['#FFD04A', '#E39A00'], texto: '60 segundos para escribir todas las palabras que puedas. ¡Supera tu marca!', crear: duelo },
+  { id: 'carrera', get nombre() { return tr('juego.carrera.nombre'); }, icono: 'rocket', color: ['#8A70FA', '#4F6BFF'], get texto() { return tr('juego.carrera.texto'); }, crear: carrera },
+  { id: 'lluvia', get nombre() { return tr('juego.lluvia.nombre'); }, icono: 'sparkle', color: ['#4FB6FF', '#1E78C8'], get texto() { return tr('juego.lluvia.texto'); }, crear: lluvia },
+  { id: 'rescate', get nombre() { return tr('juego.rescate.nombre'); }, icono: 'heart', color: ['#FF8A7A', '#E84F3F'], get texto() { return tr('juego.rescate.texto'); }, crear: rescate },
+  { id: 'blanco', get nombre() { return tr('juego.blanco.nombre'); }, icono: 'target', color: ['#3DDBB0', '#0B8F6D'], get texto() { return tr('juego.blanco.texto'); }, crear: blanco },
+  { id: 'duelo', get nombre() { return tr('juego.duelo.nombre'); }, icono: 'clock', color: ['#FFD04A', '#E39A00'], get texto() { return tr('juego.duelo.texto'); }, crear: duelo },
 ];

@@ -5,11 +5,12 @@
 import { h } from '../core/utils.js';
 import { LAYOUTS, DEDOS, pasosPara, dedoDeCodigo, shiftPara } from './teclado-datos.js';
 import { crearManos } from './manos.js';
+import { t } from '../i18n/index.js';
 
 const ESPECIALES = {
   fila0: [['Backspace', '⌫', 2]],
   fila1: { ini: [['Tab', 'Tab', 1.5]], fin: [['EnterAlto', '', 1.5, true]] },
-  fila2: { ini: [['CapsLock', 'Bloq', 1.75]], fin: [['Enter', 'Enter', 1.25]] },
+  fila2: { ini: [['CapsLock', 'Caps', 1.75]], fin: [['Enter', 'Enter', 1.25]] },
   fila3: { ini: [['ShiftLeft', '⇧', 1.25]], fin: [['ShiftRight', '⇧', 2.75]] },
   fila4: [['ControlLeft', 'Ctrl', 1.5], ['MetaLeft', '', 1.25], ['AltLeft', 'Alt', 1.25], ['Space', '', 6.5], ['AltRight', 'AltGr', 1.25], ['MetaRight', '', 1.25], ['ControlRight', 'Ctrl', 1.5]],
 };
@@ -71,7 +72,7 @@ export function crearTeclado({ idioma = 'es-LA', manos = true } = {}) {
       m?.resaltar(p.dedo, secundario);
       const dedo = DEDOS[p.dedo]?.nombre || '';
       const mod = p.modificador ? (p.modificador === 'AltRight' ? ' + AltGr' : ' + Shift') : '';
-      ayuda.textContent = pasos.length === 2 ? `Paso ${paso + 1} de 2 · ${dedo}${mod}` : `${dedo}${mod}`;
+      ayuda.textContent = pasos.length === 2 ? t('teclado.paso', { n: paso + 1, dedo, mod }) : `${dedo}${mod}`;
     },
     /** Tras pulsar una tecla muerta (´ ¨) se pasa al segundo paso (la vocal). */
     avanzarPaso() { if (paso < pasos.length - 1) { paso++; this._pintarPaso(); } },

@@ -4,20 +4,21 @@
  * superficies (modo claro y oscuro). Se aplica con una hoja de estilo propia que sobrescribe los tokens de tokens.css.
  * Sin paleta guardada (null) la plataforma se ve con los colores originales.
  */
+import { t } from '../i18n/index.js';
 
 export const PALETA_ORIGINAL = { primario: '#6C4CF5', acento: '#FF6B5B' };
 
 export const PRESETS = [
-  { id: 'violeta', nombre: 'Violeta (original)', primario: '#6C4CF5', acento: '#FF6B5B' },
-  { id: 'oceano', nombre: 'Océano', primario: '#1E78C8', acento: '#FFB84D' },
-  { id: 'turquesa', nombre: 'Turquesa', primario: '#0E9F9A', acento: '#FF7A59' },
-  { id: 'bosque', nombre: 'Bosque', primario: '#2E9E6B', acento: '#F2A93B' },
-  { id: 'mandarina', nombre: 'Mandarina', primario: '#F2701A', acento: '#4C6FFF' },
-  { id: 'frambuesa', nombre: 'Frambuesa', primario: '#D6336C', acento: '#2FBF9B' },
-  { id: 'indigo', nombre: 'Índigo', primario: '#4C5BD4', acento: '#FF8A5C' },
-  { id: 'rojo', nombre: 'Rojo escuela', primario: '#C62828', acento: '#F2B632' },
-  { id: 'grafito', nombre: 'Grafito', primario: '#4B5563', acento: '#F59E0B' },
-  { id: 'lavanda', nombre: 'Lavanda suave', primario: '#8E7CC3', acento: '#F4A7B9' },
+  { id: 'violeta', get nombre() { return t('preset.violeta'); }, primario: '#6C4CF5', acento: '#FF6B5B' },
+  { id: 'oceano', get nombre() { return t('preset.oceano'); }, primario: '#1E78C8', acento: '#FFB84D' },
+  { id: 'turquesa', get nombre() { return t('preset.turquesa'); }, primario: '#0E9F9A', acento: '#FF7A59' },
+  { id: 'bosque', get nombre() { return t('preset.bosque'); }, primario: '#2E9E6B', acento: '#F2A93B' },
+  { id: 'mandarina', get nombre() { return t('preset.mandarina'); }, primario: '#F2701A', acento: '#4C6FFF' },
+  { id: 'frambuesa', get nombre() { return t('preset.frambuesa'); }, primario: '#D6336C', acento: '#2FBF9B' },
+  { id: 'indigo', get nombre() { return t('preset.indigo'); }, primario: '#4C5BD4', acento: '#FF8A5C' },
+  { id: 'rojo', get nombre() { return t('preset.rojo'); }, primario: '#C62828', acento: '#F2B632' },
+  { id: 'grafito', get nombre() { return t('preset.grafito'); }, primario: '#4B5563', acento: '#F59E0B' },
+  { id: 'lavanda', get nombre() { return t('preset.lavanda'); }, primario: '#8E7CC3', acento: '#F4A7B9' },
 ];
 
 /* ── Utilidades de color ── */
@@ -40,7 +41,7 @@ export function deHSL(h, s, l) {
 /** Armonías sugeridas a partir de un color. */
 export function armonias(hex) {
   const { h, s, l } = aHSL(hex);
-  return { Complementario: [deHSL(h + 180, s, l)], Análogos: [deHSL(h - 30, s, l), deHSL(h + 30, s, l)], Triádicos: [deHSL(h + 120, s, l), deHSL(h + 240, s, l)] };
+  return { [t('paleta.arm.comp')]: [deHSL(h + 180, s, l)], [t('paleta.arm.analogos')]: [deHSL(h - 30, s, l), deHSL(h + 30, s, l)], [t('paleta.arm.triadicos')]: [deHSL(h + 120, s, l), deHSL(h + 240, s, l)] };
 }
 
 /** Texto sobre el color principal: blanco si contrasta (≥ 4.5), si no un azul muy oscuro. */

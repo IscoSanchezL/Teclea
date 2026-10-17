@@ -4,6 +4,7 @@
  */
 import { state, setState } from '../core/state.js';
 import * as store from './store.js';
+import { t } from '../i18n/index.js';
 
 let cargador = async (r) => { const x = await fetch(r); if (!x.ok) throw new Error(`HTTP ${x.status}`); return x.json(); };
 export const _inyectarCargador = (f) => { cargador = f; };
@@ -23,16 +24,16 @@ export const PROTECTORES_MAX = 3;
 /** Compra un artículo. Lanza Error con mensaje amable si no se puede. */
 export async function comprar(user, item) {
   const lista = await cargarInventario(user.uid);
-  if ((user.monedas || 0) < item.precio) throw new Error('Te faltan monedas para este artículo.');
+  if ((user.monedas || 0) < item.precio) throw new Error(t('tienda.err.monedas'));
 
   if (item.categoria === 'consumible') {
-    if ((user.protectores || 0) >= PROTECTORES_MAX) throw new Error(`Ya tienes el máximo de ${PROTECTORES_MAX} protectores.`);
+    if ((user.protectores || 0) >= PROTECTORES_MAX) throw new Error(t('tienda.err.maxProtectores', { n: PROTECTORES_MAX }));
     await store.esperarMax(store.actualizar(`users/${user.uid}`, { monedas: store.sumar(-item.precio), protectores: store.sumar(1) }));
     const u = { ...user, monedas: user.monedas - item.precio, protectores: (user.protectores || 0) + 1 };
     if (state.user?.uid === user.uid) setState({ user: u });
     return u;
   }
-  if (lista.some((x) => x.itemId === item.id)) throw new Error('Ya tienes este artículo.');
+  if (lista.some((x) => x.itemId === item.id)) throw new Error(t('tienda.err.yaTienes'));
   await store.esperarMax(store.lote([
     { tipo: 'set', ruta: `inventory/${user.uid}_${item.id}`, datos: { uid: user.uid, itemId: item.id, compradoEn: store.ahora(), equipado: false } },
     { tipo: 'update', ruta: `users/${user.uid}`, datos: { monedas: store.sumar(-item.precio) } },
@@ -50,7 +51,7 @@ const grupoDe = (it) => (['accesorio', 'deco'].includes(it.categoria) ? `${it.ca
 export async function equipar(user, item, activar = true) {
   const lista = await cargarInventario(user.uid);
   const registro = lista.find((x) => x.itemId === item.id);
-  if (!registro) throw new Error('Primero compra este artículo.');
+  if (!registro) throw new Error(t('tienda.err.primeroCompra'));
   const catalogoItems = await cargarTienda();
   const avatar = { ...(user.avatar || {}) };
   const cuarto = { ...(avatar.cuarto || {}), deco: { ...(avatar.cuarto?.deco || {}) } };

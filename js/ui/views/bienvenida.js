@@ -12,6 +12,7 @@ import { mascota } from '../art.js';
 import { icono } from '../icons.js';
 import { toast } from '../overlay.js';
 import { personajeSVG, ESPECIES, EMOJI_ESPECIE, especieDe } from '../personaje.js';
+import { t } from '../../i18n/index.js';
 
 const INICIALES = Object.keys(ESPECIES).filter((k) => ESPECIES[k].gratis);
 const EMOJI_DE = EMOJI_ESPECIE;
@@ -21,30 +22,30 @@ export async function render() {
   let grado = u.grado || null;
   let especie = INICIALES.includes(especieDe(u.avatar)) ? especieDe(u.avatar) : 'zorro';
 
-  const apodo = campo({ etiqueta: '¿Cómo quieres que te llamemos?', value: u.apodo || '', maxlength: 30, autocomplete: 'off',
-    ayuda: 'Usa solo tu nombre o un apodo. No escribas apellidos ni datos personales.' });
+  const apodo = campo({ etiqueta: t('bienv.apodo'), value: u.apodo || '', maxlength: 30, autocomplete: 'off',
+    ayuda: t('bienv.apodoAyuda') });
 
   const info = h('p', { class: 'suave info-grado', 'aria-live': 'polite' });
   const botonesGrado = GRADOS.map((g) => h('button', {
     type: 'button', class: 'opcion-grado', 'aria-pressed': String(g === grado), disabled: Boolean(u.grado) || null,
     onclick: () => elegirGrado(g),
-  }, h('strong', {}, `${g}.º`), h('span', {}, 'grado')));
+  }, h('strong', {}, t(`grado.ord.${g}`)), h('span', {}, t('bienv.grado'))));
 
   function elegirGrado(g) {
     grado = g;
     botonesGrado.forEach((b, i) => b.setAttribute('aria-pressed', String(GRADOS[i] === g)));
     const p = perfilDeGrado(g);
-    info.textContent = `Tu meta: ${p.ppmMin}–${p.ppmMax} palabras por minuto con ${p.precision}% de precisión.`;
+    info.textContent = t('bienv.meta', { a: p.ppmMin, b: p.ppmMax, c: p.precision });
     aplicarEstiloGrado(g); // vista previa del estilo
     actualizar();
   }
 
   const botonesAvatar = INICIALES.map((k) => h('button', {
-    type: 'button', class: 'opcion-avatar opcion-mascota', 'aria-pressed': String(k === especie), 'aria-label': `Mascota ${ESPECIES[k].nombre}`,
+    type: 'button', class: 'opcion-avatar opcion-mascota', 'aria-pressed': String(k === especie), 'aria-label': t('bienv.mascotaAria', { nombre: ESPECIES[k].nombre }),
     onclick: () => { especie = k; botonesAvatar.forEach((b, i) => b.setAttribute('aria-pressed', String(INICIALES[i] === k))); },
   }, personajeSVG(k, { cabeza: true, tam: 76 }), h('span', {}, ESPECIES[k].nombre)));
 
-  const btn = h('button', { class: 'btn btn--primary btn--lg btn--bloque', type: 'button', onclick: guardar }, '¡Listo, vamos!', icono('arrow', { tam: 22 }));
+  const btn = h('button', { class: 'btn btn--primary btn--lg btn--bloque', type: 'button', onclick: guardar }, t('bienv.listo'), icono('arrow', { tam: 22 }));
   function actualizar() { btn.disabled = !grado || !apodo.input.value.trim(); }
   apodo.input.addEventListener('input', actualizar);
 
@@ -52,7 +53,7 @@ export async function render() {
     btn.classList.add('btn--cargando'); btn.disabled = true;
     try {
       await guardarPerfil({ grado, apodo: apodo.input.value.trim().slice(0, 30), avatar: { ...(u.avatar || {}), emoji: EMOJI_DE[especie] || '🦊', mascota: especie } });
-      toast('¡Perfil listo! Vamos a tu aventura.', { tipo: 'ok' });
+      toast(t('bienv.perfilListo'), { tipo: 'ok' });
       navegar('/', { reemplazar: true });
     } catch (e) {
       console.error(e);
@@ -66,13 +67,13 @@ export async function render() {
   return h('section', { class: 'bienvenida card card--vidrio' },
     h('div', { class: 'bienvenida__cab' },
       mascota('anima', { tam: 'lg' }),
-      h('div', {}, h('h1', {}, '¡Cuéntame de ti!'), h('p', { class: 'suave' }, 'Así preparo los ejercicios justo para tu nivel.'))),
+      h('div', {}, h('h1', {}, t('bienv.cuentame')), h('p', { class: 'suave' }, t('bienv.preparo')))),
     h('fieldset', { class: 'pila' },
-      h('legend', { class: 'campo__etiqueta' }, '¿En qué grado estás?'),
+      h('legend', { class: 'campo__etiqueta' }, t('bienv.enQueGrado')),
       h('div', { class: 'rejilla-grados' }, botonesGrado), info),
     apodo.nodo,
     h('fieldset', { class: 'pila' },
-      h('legend', { class: 'campo__etiqueta' }, 'Elige tu mascota (en la tienda podrás vestirla y conseguir más)'),
+      h('legend', { class: 'campo__etiqueta' }, t('bienv.eligeMascota')),
       h('div', { class: 'rejilla-avatares' }, botonesAvatar)),
     btn);
 }

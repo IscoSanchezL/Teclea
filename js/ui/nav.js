@@ -2,7 +2,7 @@
  * Navegación: barra lateral flotante (estudiantes, escritorio), barra lateral fija con etiquetas
  * (docentes/administración), barra inferior (móvil) y barra superior.
  */
-import { marca } from '../core/marca.js';
+import { colegioMarca } from '../core/marca.js';
 import { state, subscribe } from '../core/state.js';
 import { rutasVisibles, buscarRuta } from '../core/routes.js';
 import { h, contar } from '../core/utils.js';
@@ -15,10 +15,12 @@ import { alternarTema } from './theme.js';
 import { sincronizarPrefs } from './sync-prefs.js';
 import { abrirCapa } from './overlay.js';
 import { CONFIG } from '../core/config.js';
+import { selectorIdioma } from './idioma.js';
+import { t } from '../i18n/index.js';
 
 const $ = (id) => document.getElementById(id);
 const esStaff = () => state.user?.rol === 'docente' || state.user?.rol === 'admin';
-const ROL = { docente: 'Docente', admin: 'Administración', estudiante: 'Estudiante' };
+const rolTxt = (r) => t(`rol.${r}`);
 
 /** Título para la miga de pan: usa la etiqueta del menú (p. ej. "Resumen") si la hay. */
 const tituloDe = (path) => rutasVisibles().find((x) => x.ruta.path === path)?.item.etiqueta || buscarRuta(path).titulo;
@@ -33,7 +35,7 @@ function botonTema() {
   const oscuro = document.documentElement.dataset.theme === 'dark';
   return h('button', {
     class: 'btn btn--icono btn--suave', type: 'button',
-    'aria-label': oscuro ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro',
+    'aria-label': oscuro ? t('nav.cambiarClaro') : t('nav.cambiarOscuro'),
     onclick: () => alternarTema(sincronizarPrefs),
   }, icono(oscuro ? 'sun' : 'moon', { tam: 22 }));
 }
@@ -41,15 +43,15 @@ function botonTema() {
 /** Botón de cerrar sesión siempre visible (equipos compartidos: cada persona debe salir de su perfil). */
 function botonSalir() {
   return h('button', {
-    class: 'btn btn--salir btn--sm', type: 'button', title: 'Cerrar sesión', 'aria-label': 'Cerrar sesión',
+    class: 'btn btn--salir btn--sm', type: 'button', title: t('nav.cerrarSesion'), 'aria-label': t('nav.cerrarSesion'),
     onclick: async () => { const { cerrarSesion } = await import('../auth/auth.js'); await cerrarSesion(); location.hash = '#/'; },
-  }, icono('logout', { tam: 18 }), h('span', { class: 'btn--salir__txt' }, 'Salir'));
+  }, icono('logout', { tam: 18 }), h('span', { class: 'btn--salir__txt' }, t('nav.salir')));
 }
 
 function botonBuscar() {
   const mac = /Mac|iPhone|iPad/.test(navigator.platform);
-  return h('button', { class: 'buscar', type: 'button', 'aria-label': 'Abrir búsqueda rápida', onclick: () => document.dispatchEvent(new CustomEvent('teclea:paleta')) },
-    icono('search', { tam: 18 }), h('span', {}, 'Buscar o ir a…'), h('kbd', {}, mac ? '⌘ K' : 'Ctrl K'));
+  return h('button', { class: 'buscar', type: 'button', 'aria-label': t('nav.abrirBusqueda'), onclick: () => document.dispatchEvent(new CustomEvent('teclea:paleta')) },
+    icono('search', { tam: 18 }), h('span', {}, t('nav.buscar')), h('kbd', {}, mac ? '⌘ K' : 'Ctrl K'));
 }
 
 function chip(clase, nombreIcono, valor, etiqueta) {
@@ -66,19 +68,19 @@ function renderSidebar() {
   if (esStaff()) {
     const grupos = [...new Set(visibles.map((x) => x.item.grupo || 'General'))];
     raiz.replaceChildren(
-      h('a', { class: 'sidebar__logo', href: '#/', 'aria-label': 'Ir al inicio' }, logo()),
-      h('nav', { class: 'sidebar__lista', 'aria-label': 'Secciones' },
+      h('a', { class: 'sidebar__logo', href: '#/', 'aria-label': t('nav.irInicio') }, logo()),
+      h('nav', { class: 'sidebar__lista', 'aria-label': t('nav.secciones') },
         grupos.map((g) => h('div', { class: 'sidebar__grupo' },
           h('p', { class: 'sidebar__rotulo' }, g),
           visibles.filter((x) => (x.item.grupo || 'General') === g).map((x) => enlace(x, 'nav-item'))))),
       h('a', { class: 'sidebar__usuario', href: '#/perfil' },
         avatar(state.user, { tam: 'sm', clase: 'sidebar__avatar' }),
-        h('span', { class: 'sidebar__quien' }, h('strong', {}, state.user.nombre), h('small', {}, `${ROL[state.user.rol]} · ${marca.colegio}`))));
+        h('span', { class: 'sidebar__quien' }, h('strong', {}, state.user.nombre), h('small', {}, `${rolTxt(state.user.rol)} · ${colegioMarca()}`))));
     return;
   }
   raiz.replaceChildren(
-    h('a', { class: 'sidebar__logo', href: '#/', 'aria-label': 'Ir al inicio' }, logo({ solo: true })),
-    h('nav', { class: 'sidebar__lista', 'aria-label': 'Secciones' }, visibles.map((x) => enlace(x, 'nav-item'))));
+    h('a', { class: 'sidebar__logo', href: '#/', 'aria-label': t('nav.irInicio') }, logo({ solo: true })),
+    h('nav', { class: 'sidebar__lista', 'aria-label': t('nav.secciones') }, visibles.map((x) => enlace(x, 'nav-item'))));
 }
 
 function renderBottomNav() {
@@ -98,9 +100,9 @@ function renderBottomNav() {
           a.addEventListener('click', () => capa.cerrar());
           return a;
         });
-        capa = abrirCapa({ titulo: 'Más secciones', contenido: h('div', { class: 'rejilla-mas' }, enlaces) });
+        capa = abrirCapa({ titulo: t('nav.masSecciones'), contenido: h('div', { class: 'rejilla-mas' }, enlaces) });
       },
-    }, icono('more', { tam: 24 }), h('span', { class: 'nav-item__texto' }, 'Más')));
+    }, icono('more', { tam: 24 }), h('span', { class: 'nav-item__texto' }, t('nav.mas'))));
   }
   raiz.replaceChildren(...hijos);
 }
@@ -110,36 +112,36 @@ function renderTopbar() {
   const u = state.user;
   if (!u) {
     raiz.replaceChildren(
-      h('a', { class: 'topbar__marca', href: '#/', 'aria-label': 'Ir al inicio' }, logo()),
-      h('div', { class: 'topbar__acciones' }, botonTema(), h('a', { class: 'btn btn--primary btn--sm', href: '#/entrar' }, 'Entrar')));
+      h('a', { class: 'topbar__marca', href: '#/', 'aria-label': t('nav.irInicio') }, logo()),
+      h('div', { class: 'topbar__acciones' }, selectorIdioma(), botonTema(), h('a', { class: 'btn btn--primary btn--sm', href: '#/entrar' }, t('nav.entrar'))));
     return;
   }
   if (u.rol === 'pendiente' || u.rol === 'rechazado') {
     raiz.replaceChildren(
-      h('a', { class: 'topbar__marca', href: '#/', 'aria-label': 'Inicio' }, logo()),
-      h('div', { class: 'topbar__acciones' }, botonTema(), botonSalir()));
+      h('a', { class: 'topbar__marca', href: '#/', 'aria-label': t('nav.inicio') }, logo()),
+      h('div', { class: 'topbar__acciones' }, selectorIdioma(), botonTema(), botonSalir()));
     return;
   }
   if (esStaff()) {
     raiz.replaceChildren(
       h('div', { class: 'topbar__migas' },
-        h('span', { class: 'suave' }, marca.colegio), icono('arrow', { tam: 14 }),
+        h('span', { class: 'suave' }, colegioMarca()), icono('arrow', { tam: 14 }),
         h('strong', { id: 'topbar-titulo' }, tituloDe(state.ruta))),
-      h('div', { class: 'topbar__acciones' }, botonBuscar(), botonTema(),
-        h('span', { class: 'rol-pill' }, ROL[u.rol]), botonSalir()));
+      h('div', { class: 'topbar__acciones' }, botonBuscar(), selectorIdioma(), botonTema(),
+        h('span', { class: 'rol-pill' }, rolTxt(u.rol)), botonSalir()));
     return;
   }
   const nivel = nivelPorXP(u.xp);
   raiz.replaceChildren(
     h('div', { class: 'topbar__saludo' },
       mascota('saludo', { tam: 'xs', animada: false }),
-      h('div', {}, h('span', { class: 'topbar__hola' }, `¡Hola, ${u.apodo}!`), h('span', { class: 'topbar__nivel suave' }, `Nivel ${nivel.nivel} · ${nivel.nombre}`))),
+      h('div', {}, h('span', { class: 'topbar__hola' }, t('nav.hola', { n: u.apodo })), h('span', { class: 'topbar__nivel suave' }, t('nav.nivel', { n: nivel.nivel, nombre: nivel.nombre })))),
     h('div', { class: 'topbar__acciones' },
-      chip('chip--racha', 'flame', u.racha || 0, 'Racha de días'),
-      chip('chip--moneda', 'coin', u.monedas || 0, 'Monedas'),
-      chip('chip--xp', 'star', u.xp || 0, 'Puntos de experiencia'),
-      botonTema(), botonSalir(),
-      h('a', { class: 'avatar-mini', href: '#/perfil', 'aria-label': 'Mi perfil' }, avatar(u, { tam: 'md' }))));
+      chip('chip--racha', 'flame', u.racha || 0, t('nav.racha')),
+      chip('chip--moneda', 'coin', u.monedas || 0, t('nav.monedas')),
+      chip('chip--xp', 'star', u.xp || 0, t('nav.xp')),
+      selectorIdioma(), botonTema(), botonSalir(),
+      h('a', { class: 'avatar-mini', href: '#/perfil', 'aria-label': t('nav.miPerfil') }, avatar(u, { tam: 'md' }))));
 }
 
 /** Marca el ítem activo (aria-current) y actualiza el título de la barra superior. */

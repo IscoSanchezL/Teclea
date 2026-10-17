@@ -7,6 +7,7 @@ import { icono } from './icons.js';
 import { sparkline } from './graficas.js';
 import { anillo } from './componentes.js';
 import { medallaSVG } from './medallas.js';
+import { t } from '../i18n/index.js';
 
 const FILAS = [
   ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
@@ -29,11 +30,11 @@ export function hero3d({ compacto = false } = {}) {
     h('div', { class: 'h3d__halo' }),
     h('div', { class: 'h3d__plano' }, kb),
     h('div', { class: 'h3d__card h3d__card--ppm' },
-      h('small', {}, 'Velocidad'), h('strong', {}, '32', h('em', {}, ' PPM')),
+      h('small', {}, t('hero.velocidad')), h('strong', {}, '32', h('em', {}, ` ${t('hero.ppm')}`)),
       sparkline([12, 15, 14, 19, 22, 25, 29, 32], { ancho: 110, alto: 30, color: '#3DDBB0' })),
     h('div', { class: 'h3d__card h3d__card--pre' },
-      anillo({ valor: 0.96, tam: 70, grosor: 8, color: '#FFD04A' }, h('b', {}, '96%')), h('small', {}, 'Precisión')),
-    h('div', { class: 'h3d__card h3d__card--racha' }, icono('flame', { tam: 22 }), h('strong', {}, '12'), h('small', {}, 'días de racha')),
+      anillo({ valor: 0.96, tam: 70, grosor: 8, color: '#FFD04A' }, h('b', {}, '96%')), h('small', {}, t('hero.precision'))),
+    h('div', { class: 'h3d__card h3d__card--racha' }, icono('flame', { tam: 22 }), h('strong', {}, '12'), h('small', {}, t('hero.racha'))),
     h('div', { class: 'h3d__medalla' }, medallaSVG({ nivel: 'oro', icono: 'bolt', tam: compacto ? 56 : 78 })));
 
   // Teclas que "se escriben solas" (se detiene si cambias de pantalla o prefieres menos movimiento)

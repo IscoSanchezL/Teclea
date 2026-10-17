@@ -16,6 +16,7 @@ import * as R from '../js/game/retos.js';
 import * as C from '../js/lessons/curriculo.js';
 import { actualizarRacha } from '../js/game/xp.js';
 import { MotorEscritura } from '../js/lessons/motor.js';
+import { poner } from '../js/i18n/index.js'; poner('es'); // los mensajes que se comprueban están en español
 
 const RAIZ = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const leerJSON = async (r) => JSON.parse(await readFile(join(RAIZ, r), 'utf8'));

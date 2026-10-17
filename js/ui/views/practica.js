@@ -13,16 +13,17 @@ import { mascota } from '../art.js';
 import { segmentado } from '../componentes.js';
 import { panelResultado } from '../resultado.js';
 import { confirmar, toast } from '../overlay.js';
+import { t, idioma } from '../../i18n/index.js';
 
 let actual = null;
-let cacheTextos = null, cachePalabras = null;
-const cargarTextos = async () => (cacheTextos ||= (await fetch('data/texts.json')).json());
-const cargarPalabras = async () => (cachePalabras ||= (await fetch('data/palabras.json')).json());
+// Los textos que se teclean NO se traducen: hay un banco en español (data/) y otro en inglés (data/en/).
+const cacheDatos = {};
+const cargarDatos = (archivo, lang) => (cacheDatos[`${lang}:${archivo}`] ||= fetch(lang === 'en' ? `data/en/${archivo}` : `data/${archivo}`).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }));
+const cargarTextos = (lang) => cargarDatos('texts.json', lang);
+const cargarPalabras = (lang) => cargarDatos('palabras.json', lang);
 
 const NIVELES_POR_GRADO = { 2: [2], 3: [2], 4: [2, 3], 5: [3, 4], 6: [3, 4, 5] };
-const NOMBRE_TEMA = { animales: 'Animales', escuela: 'Escuela', familia: 'Familia', naturaleza: 'Naturaleza', deportes: 'Deportes', tecnologia: 'Tecnología', ciencia: 'Ciencia',
-  colombia: 'Colombia', comida: 'Comida', valores: 'Valores', refranes: 'Refranes', trabalenguas: 'Trabalenguas', pangramas: 'Pangramas', numeros: 'Números', signos: 'Signos',
-  cuento: 'Cuentos', historia: 'Historia', espacio: 'Espacio', dialogo: 'Diálogos' };
+const nombreTema = (tema) => t(`tema.${tema}`);
 
 function mezclar(a) { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
 
@@ -51,17 +52,17 @@ export async function render({ query }) {
       if (tarea) import('../../db/clases.js').then((m) => m.entregarTareas(r.usuario, { tipo: 'ejercicio', refId: tarea, resultado, sesionId: r.sesionId })).catch(() => {});
       return r;
     })();
-    montar(panelResultado({ titulo, subtitulo: 'Práctica', estrellas: null, resultado, resumen,
-      acciones: [{ texto: 'Otra práctica', clase: 'btn--primary btn--lg', principal: true, icono: 'refresh', onclick: volver }, { texto: 'Volver al curso', onclick: () => navegar('/aprende') }] }));
+    montar(panelResultado({ titulo, subtitulo: t('practica.sub'), estrellas: null, resultado, resumen,
+      acciones: [{ texto: t('practica.otra'), clase: 'btn--primary btn--lg', principal: true, icono: 'refresh', onclick: volver }, { texto: t('practica.volverCurso'), onclick: () => navegar('/aprende') }] }));
   }
 
   /* ── Refuerzo ── */
   async function refuerzo() {
-    const [debiles, vocab] = await Promise.all([teclasDebiles(u.uid, 5), cargarPalabras()]);
+    const [debiles, vocab] = await Promise.all([teclasDebiles(u.uid, 5), cargarPalabras(idioma()).catch(() => cargarPalabras('es'))]);
     if (!debiles.length) {
       montar(h('section', { class: 'proximamente card card--vidrio' }, mascota('piensa', { tam: 'lg' }), h('div', { class: 'proximamente__texto' },
-        h('h1', {}, 'Aún no tengo suficientes datos'), h('p', {}, 'Completa algunas lecciones y volveré con ejercicios para las teclas que más te cuestan.'),
-        h('a', { class: 'btn btn--primary', href: '#/aprende' }, 'Ir al curso'))));
+        h('h1', {}, t('practica.refuerzo.sinDatos')), h('p', {}, t('practica.refuerzo.sinDatosTexto')),
+        h('a', { class: 'btn btn--primary', href: '#/aprende' }, t('practica.refuerzo.irCurso')))));
       return;
     }
     const chars = debiles.map((d) => d.c);
@@ -71,17 +72,17 @@ export async function render({ query }) {
     const etapa = (i) => {
       const guiado = i === 0;
       const ej = crearEjercicio({
-        texto: guiado ? calent : texto, modo: guiado ? 'guiado' : 'libre', grande: grado <= 3, titulo: 'Refuerzo',
-        alSalir: async () => { if (await confirmar({ titulo: '¿Salir del refuerzo?', mensaje: 'No se guardará este ejercicio.', si: 'Salir', no: 'Seguir' })) navegar('/aprende'); },
+        texto: guiado ? calent : texto, modo: guiado ? 'guiado' : 'libre', grande: grado <= 3, titulo: t('practica.refuerzo.titulo'),
+        alSalir: async () => { if (await confirmar({ titulo: t('practica.refuerzo.salir'), mensaje: t('practica.noGuarda'), si: t('practica.salir'), no: t('practica.seguir') })) navegar('/aprende'); },
         alFin: ({ resultado, motor }) => {
           if (guiado) { motorA = motor; etapa(1); return; }
           // se combinan las estadísticas por tecla de los dos ejercicios
           for (const [c, v] of Object.entries(motorA.porTecla)) { const a = (motor.porTecla[c] ||= { ok: 0, err: 0 }); a.ok += v.ok; a.err += v.err; }
-          guardarYMostrar({ resultado, motor, refId: 'refuerzo', titulo: '¡Refuerzo completado!', volver: () => navegar('/practica?modo=refuerzo') });
+          guardarYMostrar({ resultado, motor, refId: 'refuerzo', titulo: t('practica.refuerzo.fin'), volver: () => navegar('/practica?modo=refuerzo') });
         },
       });
-      montar(h('div', { class: 'ej-cab' }, h('h1', {}, guiado ? 'Calentamiento' : 'Refuerzo de tus teclas débiles'),
-        h('p', { class: 'suave' }, `Practicamos: ${chars.map((c) => c.toUpperCase()).join('  ')}`)), ej.el);
+      montar(h('div', { class: 'ej-cab' }, h('h1', {}, guiado ? t('practica.calentamiento') : t('practica.refuerzo.cab')),
+        h('p', { class: 'suave' }, t('practica.practicamos', { teclas: chars.map((c) => c.toUpperCase()).join('  ') }))), ej.el);
       actual = ej;
       ej.enfocar();
     };
@@ -89,31 +90,35 @@ export async function render({ query }) {
   }
 
   /* ── Configuración de práctica libre ── */
-  async function configurar() {
-    const data = await cargarTextos();
-    const temas = ['todos', ...data.temas.filter((t) => t !== 'signos')];
-    let cfg = { tema: 'todos', nivel: 'grado', seg: 120, oculto: false };
-    const chips = temas.map((t) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(t === cfg.tema), onclick: (e) => { cfg.tema = t; chips.forEach((b) => b.setAttribute('aria-pressed', 'false')); e.currentTarget.setAttribute('aria-pressed', 'true'); } }, t === 'todos' ? 'Todos los temas' : (NOMBRE_TEMA[t] || t)));
+  async function configurar(previa = null) {
+    // Idioma de los textos a teclear: por defecto el de la plataforma, pero se puede cambiar (ES | EN) solo para la práctica.
+    const cfg = previa || { tema: 'todos', nivel: 'grado', seg: 120, oculto: false, lang: idioma() };
+    const data = await cargarTextos(cfg.lang).catch(() => { cfg.lang = 'es'; return cargarTextos('es'); });
+    const temas = ['todos', ...data.temas.filter((tm) => tm !== 'signos')];
+    if (!temas.includes(cfg.tema)) cfg.tema = 'todos';
+    const chips = temas.map((tm) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(tm === cfg.tema), onclick: (e) => { cfg.tema = tm; chips.forEach((b) => b.setAttribute('aria-pressed', 'false')); e.currentTarget.setAttribute('aria-pressed', 'true'); } }, tm === 'todos' ? t('tema.todos') : nombreTema(tm)));
     const p = perfilDeGrado(grado);
     montar(h('section', { class: 'card practica__cfg' },
-      h('div', { class: 'fila' }, mascota('anima', { tam: 'sm' }), h('div', {}, h('h1', {}, 'Práctica libre'), h('p', { class: 'suave' }, `Elige qué quieres practicar. Meta de ${grado}.º: ${p.ppmMin}–${p.ppmMax} PPM con ${p.precision} % de precisión.`))),
-      h('div', { class: 'pila' }, h('strong', {}, 'Tema'), h('div', { class: 'filtros' }, chips)),
-      h('div', { class: 'pila' }, h('strong', {}, 'Dificultad'), segmentado({ nombre: 'dif', etiqueta: 'Dificultad', valor: cfg.nivel, alCambiar: (v) => { cfg.nivel = v; },
-        opciones: [{ valor: 'grado', etiqueta: `Para ${grado}.º` }, { valor: 'facil', etiqueta: 'Fácil' }, { valor: 'medio', etiqueta: 'Medio' }, { valor: 'dificil', etiqueta: 'Difícil' }] })),
-      h('div', { class: 'pila' }, h('strong', {}, 'Duración'), segmentado({ nombre: 'dur', etiqueta: 'Duración', valor: String(cfg.seg), alCambiar: (v) => { cfg.seg = Number(v); },
-        opciones: [{ valor: '60', etiqueta: '1 min' }, { valor: '120', etiqueta: '2 min' }, { valor: '180', etiqueta: '3 min' }, { valor: '300', etiqueta: '5 min' }] })),
-      h('label', { class: 'consentimiento' }, h('input', { type: 'checkbox', onchange: (e) => { cfg.oculto = e.target.checked; } }), h('span', {}, 'Ocultar el teclado (reto: ¡a ciegas!)')),
-      h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary btn--lg', type: 'button', onclick: () => correr(data.textos, cfg) }, icono('play', { tam: 20 }), 'Empezar'))));
+      h('div', { class: 'fila' }, mascota('anima', { tam: 'sm' }), h('div', {}, h('h1', {}, t('practica.titulo')), h('p', { class: 'suave' }, t('practica.eligeTexto', { g: grado, a: p.ppmMin, b: p.ppmMax, c: p.precision })))),
+      h('div', { class: 'pila' }, h('strong', {}, t('practica.idioma.titulo')), segmentado({ nombre: 'lang', etiqueta: t('practica.idioma.titulo'), valor: cfg.lang, alCambiar: (v) => { cfg.lang = v; configurar(cfg); },
+        opciones: [{ valor: 'es', etiqueta: t('practica.idioma.es') }, { valor: 'en', etiqueta: t('practica.idioma.en') }] }), h('small', { class: 'suave' }, t('practica.idioma.ayuda'))),
+      h('div', { class: 'pila' }, h('strong', {}, t('practica.tema')), h('div', { class: 'filtros' }, chips)),
+      h('div', { class: 'pila' }, h('strong', {}, t('practica.dificultad')), segmentado({ nombre: 'dif', etiqueta: t('practica.dificultad'), valor: cfg.nivel, alCambiar: (v) => { cfg.nivel = v; },
+        opciones: [{ valor: 'grado', etiqueta: t('practica.dif.grado', { g: grado }) }, { valor: 'facil', etiqueta: t('practica.dif.facil') }, { valor: 'medio', etiqueta: t('practica.dif.medio') }, { valor: 'dificil', etiqueta: t('practica.dif.dificil') }] })),
+      h('div', { class: 'pila' }, h('strong', {}, t('practica.duracion')), segmentado({ nombre: 'dur', etiqueta: t('practica.duracion'), valor: String(cfg.seg), alCambiar: (v) => { cfg.seg = Number(v); },
+        opciones: [60, 120, 180, 300].map((s) => ({ valor: String(s), etiqueta: t('practica.min', { n: s / 60 }) })) })),
+      h('label', { class: 'consentimiento' }, h('input', { type: 'checkbox', checked: cfg.oculto, onchange: (e) => { cfg.oculto = e.target.checked; } }), h('span', {}, t('practica.ocultar'))),
+      h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary btn--lg', type: 'button', onclick: () => correr(data.textos, cfg) }, icono('play', { tam: 20 }), t('practica.empezar')))));
   }
 
   function correr(textos, cfg) {
     const texto = armarTexto(textos, { ...cfg, grado });
     const ej = crearEjercicio({
-      texto, modo: cfg.oculto ? 'oculto' : 'libre', seg: cfg.seg, grande: grado <= 3, titulo: 'Práctica libre',
-      alSalir: async () => { if (await confirmar({ titulo: '¿Salir de la práctica?', mensaje: 'No se guardará este ejercicio.', si: 'Salir', no: 'Seguir' })) configurar(); },
-      alFin: ({ resultado, motor }) => guardarYMostrar({ resultado, motor, refId: `tema:${cfg.tema}:${cfg.seg}s`, titulo: '¡Práctica terminada!', volver: configurar }),
+      texto, modo: cfg.oculto ? 'oculto' : 'libre', seg: cfg.seg, grande: grado <= 3, titulo: t('practica.titulo'),
+      alSalir: async () => { if (await confirmar({ titulo: t('practica.salirPractica'), mensaje: t('practica.noGuarda'), si: t('practica.salir'), no: t('practica.seguir') })) configurar(cfg); },
+      alFin: ({ resultado, motor }) => guardarYMostrar({ resultado, motor, refId: `tema:${cfg.tema}:${cfg.seg}s`, titulo: t('practica.terminada'), volver: () => configurar(cfg) }),
     });
-    montar(h('div', { class: 'ej-cab' }, h('h1', {}, 'Práctica libre'), h('p', { class: 'suave' }, `${Math.round(cfg.seg / 60)} min · escribe sin parar hasta que se acabe el tiempo.`)), ej.el);
+    montar(h('div', { class: 'ej-cab' }, h('h1', {}, t('practica.titulo')), h('p', { class: 'suave' }, t('practica.cabCorrer', { n: Math.round(cfg.seg / 60) }))), ej.el);
     actual = ej;
     ej.enfocar();
   }
@@ -121,13 +126,13 @@ export async function render({ query }) {
   async function ejercicioDocente(id) {
     const { leerEjercicio } = await import('../../db/clases.js');
     const ej = await leerEjercicio(id).catch(() => null);
-    if (!ej) { toast('No encontré ese ejercicio.', { tipo: 'error' }); return configurar(); }
+    if (!ej) { toast(t('practica.noEjercicio'), { tipo: 'error' }); return configurar(); }
     const motorUI = crearEjercicio({
       texto: ej.texto, modo: 'libre', grande: grado <= 3, titulo: ej.titulo,
-      alSalir: async () => { if (await confirmar({ titulo: '¿Salir del ejercicio?', mensaje: 'No se guardará este ejercicio.', si: 'Salir', no: 'Seguir' })) navegar('/clases'); },
-      alFin: ({ resultado, motor }) => guardarYMostrar({ resultado, motor, refId: `ej:${id}`, tarea: id, titulo: '¡Ejercicio terminado!', volver: () => navegar('/clases') }),
+      alSalir: async () => { if (await confirmar({ titulo: t('practica.salirEjercicio'), mensaje: t('practica.noGuarda'), si: t('practica.salir'), no: t('practica.seguir') })) navegar('/clases'); },
+      alFin: ({ resultado, motor }) => guardarYMostrar({ resultado, motor, refId: `ej:${id}`, tarea: id, titulo: t('practica.ejTerminado'), volver: () => navegar('/clases') }),
     });
-    montar(h('div', { class: 'ej-cab' }, h('h1', {}, ej.titulo), h('p', { class: 'suave' }, 'Ejercicio de tu profe')), motorUI.el);
+    montar(h('div', { class: 'ej-cab' }, h('h1', {}, ej.titulo), h('p', { class: 'suave' }, t('practica.ejProfe'))), motorUI.el);
     actual = motorUI; motorUI.enfocar();
   }
 
@@ -136,3 +141,6 @@ export async function render({ query }) {
 }
 
 export function destroy() { actual?.destruir(); actual = null; }
+
+/** Hay un ejercicio en curso: el cambio de idioma no reinicia la vista (se actualiza al navegar). */
+export const conservarAlCambiarIdioma = true;
