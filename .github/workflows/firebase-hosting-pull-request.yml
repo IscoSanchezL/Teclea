@@ -1,0 +1,32 @@
+# Vista previa en Firebase Hosting para cada pull request (no toca el sitio en línea).
+name: Deploy to Firebase Hosting on PR
+on: pull_request
+permissions:
+  checks: write
+  contents: read
+  pull-requests: write
+jobs:
+  build_and_preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # Mismos pasos que el flujo de GitHub Pages: registra ilustraciones y genera el precaché (modo sin conexión)
+      - name: Generar manifiesto de ilustraciones
+        run: node tools/generar-manifest-assets.mjs
+      - name: Generar precaché (modo sin conexión)
+        run: node tools/generar-precache.mjs
+      # Solo se publica lo que la web necesita (sin pruebas, herramientas ni documentos internos)
+      - name: Preparar carpeta de publicación
+        run: |
+          mkdir _site
+          cp -r index.html configurar.html manifest.webmanifest sw.js precache.json css js data assets _site/
+          cp -r docs _site/docs
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_TECLEA_COLEGIO }}
+          projectId: teclea-colegio
