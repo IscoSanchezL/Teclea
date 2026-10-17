@@ -5,6 +5,7 @@ import { perfilDeGrado } from '../core/grados.js';
 import { hoyISO } from '../game/xp.js';
 import * as store from './store.js';
 import { nuevoId } from './progreso.js';
+import { t } from '../i18n/index.js';
 
 const DIA = 86400000;
 const inicioDia = (ms = Date.now()) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -13,7 +14,7 @@ export const diasDesde = (ms) => (ms ? Math.floor((inicioDia() - inicioDia(ms)) 
 export function textoUltima(ms) {
   const d = diasDesde(ms);
   if (d == null) return '—';
-  return d <= 0 ? 'Hoy' : d === 1 ? 'Ayer' : `Hace ${d} días`;
+  return d <= 0 ? t('analitica.hoy') : d === 1 ? t('analitica.ayer') : t('analitica.hace', { n: d });
 }
 
 /** nuevo | inactivo | atrasado | destacado | ok */
@@ -38,7 +39,7 @@ export function resumenClase(inscs, sesiones = []) {
   const semana = Array.from({ length: 7 }, (_, k) => {
     const dia = inicioDia(Date.now() - (6 - k) * DIA);
     const mins = sesiones.filter((s) => inicioDia(s.creadoEn || 0) === dia).reduce((a, s) => a + (s.duracionSeg || 0), 0) / 60;
-    return { etiqueta: ['D', 'L', 'M', 'X', 'J', 'V', 'S'][new Date(dia).getDay()], valor: Math.round(mins) };
+    return { etiqueta: t(`analitica.dias.${new Date(dia).getDay()}`), valor: Math.round(mins) };
   });
   const errores = {};
   for (const s of sesiones) for (const [c, v] of Object.entries(s.erroresPorTecla || {})) errores[c] = (errores[c] || 0) + v;
@@ -50,7 +51,7 @@ export function resumenClase(inscs, sesiones = []) {
   };
 }
 
-export const ETIQUETAS = { ok: 'Al día', destacado: 'Destacado', atrasado: 'Atrasado', inactivo: 'Inactivo', nuevo: 'Sin empezar' };
+export const ETIQUETAS = { get ok() { return t('estado.ok'); }, get destacado() { return t('estado.destacado'); }, get atrasado() { return t('estado.atrasado'); }, get inactivo() { return t('estado.inactivo'); }, get nuevo() { return t('estado.nuevo'); } };
 
 export function aCSV(encabezado, filas) {
   const enc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;

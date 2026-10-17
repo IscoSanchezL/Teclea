@@ -322,3 +322,13 @@
 .lang button[aria-pressed="true"] { background: var(--primario); color: #fff; }
 .lang button:focus-visible { outline: 3px solid var(--primario); outline-offset: -3px; }
 .lang--flotante { position: absolute; top: 1rem; right: 1rem; z-index: 5; background: color-mix(in srgb, var(--superficie, #fff) 88%, transparent); }
+@media (max-width: 520px) {
+  .lang button { padding: .3rem .5rem; min-width: 2.1rem; min-height: 2rem; font-size: .72rem; }
+  .topbar__acciones { gap: .3rem; }
+  .topbar__acciones .chip--xp { display: none; }
+}
+@media (max-width: 520px) {
+  .topbar__acciones .btn--icono { width: 2.4rem; height: 2.4rem; min-width: 0; padding: 0; }
+  .topbar__acciones .chip { padding-inline: .5rem; gap: .25rem; }
+  .topbar__acciones .avatar-mini .avatar { --tam: 2.4rem; width: 2.4rem; height: 2.4rem; }
+}

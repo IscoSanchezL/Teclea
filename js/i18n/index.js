@@ -54,6 +54,7 @@ export function alCambiar(f) { cbs.add(f); return () => cbs.delete(f); }
 
 /** Aplica el idioma al HTML estático. */
 function aplicar() {
+  if (typeof document === 'undefined') return; // Node (pruebas y generadores)
   const r = document.documentElement;
   r.lang = L;
   document.querySelectorAll('[data-i18n]').forEach((e) => { e.innerHTML = t(e.getAttribute('data-i18n')); });

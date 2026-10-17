@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import * as fs from 'firebase/firestore';
+import { poner } from '../js/i18n/index.js'; poner('es'); // los mensajes que se comprueban están en español
 
 const RAIZ = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 let ok = 0, mal = 0;

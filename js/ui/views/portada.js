@@ -75,7 +75,7 @@ export async function render() {
     h('div', { class: 'l-sec__cab' }, h('h2', { id: 'titulo-mundos' }, t('portada.mundos.titulo')), h('p', {}, t('portada.mundos.texto'))),
     h('ol', { class: 'linea' }, mundos.map((m) => h('li', { class: 'm-tile', style: { '--g1': m.color[0], '--g2': m.color[1] } },
       h('span', { class: 'm-tile__n' }, String(m.id).padStart(2, '0')), h('strong', {}, loc(m, 'nombre')), h('span', {}, loc(m, 'descripcion')),
-      h('div', { class: 'm-tile__teclas' }, m.teclas.split(' ').slice(0, 11).map((t) => h('kbd', {}, t)))))));
+      h('div', { class: 'm-tile__teclas' }, loc(m, 'teclas').split(' ').slice(0, 11).map((t) => h('kbd', {}, t)))))));
 
   const grados = h('section', { class: 'grados', 'aria-labelledby': 'titulo-grados' },
     h('div', { class: 'l-sec__cab' }, h('h2', { id: 'titulo-grados' }, t('portada.grados.titulo')), h('p', {}, t('portada.grados.texto'))),

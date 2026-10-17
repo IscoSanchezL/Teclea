@@ -7,6 +7,7 @@ import * as fs from 'firebase/firestore';
 import { state } from '../js/core/state.js';
 import * as store from '../js/db/store.js';
 import * as A from '../js/db/admin.js';
+import { poner } from '../js/i18n/index.js'; poner('es'); // los mensajes que se comprueban están en español
 
 const fetchReal = globalThis.fetch;
 globalThis.fetch = async (ruta, o) => String(ruta).startsWith('http') ? fetchReal(ruta, o) : ({ ok: true, json: async () => JSON.parse(readFileSync(new URL(`../${ruta}`, import.meta.url), 'utf8')) });
