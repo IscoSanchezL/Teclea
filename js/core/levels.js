@@ -1,6 +1,7 @@
 /**
  * Niveles temáticos según XP. (La lógica de ganar XP llega en la Fase 4.)
  */
+import { t } from '../i18n/index.js';
 export const NIVELES = [
   { nivel: 1, nombre: 'Aprendiz del Teclado', xp: 0 },
   { nivel: 2, nombre: 'Explorador de Teclas', xp: 100 },
@@ -20,5 +21,6 @@ export function nivelPorXP(xp = 0) {
   for (const n of NIVELES) if (xp >= n.xp) actual = n;
   const siguiente = NIVELES[actual.nivel] || null;
   const progreso = siguiente ? (xp - actual.xp) / (siguiente.xp - actual.xp) : 1;
-  return { ...actual, siguiente, progreso: Math.min(1, Math.max(0, progreso)) };
+  // `nombre` se devuelve ya traducido al idioma activo (la tabla NIVELES conserva el nombre en español).
+  return { ...actual, nombre: t(`nivel.${actual.nivel}`), siguiente: siguiente ? { ...siguiente, nombre: t(`nivel.${siguiente.nivel}`) } : null, progreso: Math.min(1, Math.max(0, progreso)) };
 }

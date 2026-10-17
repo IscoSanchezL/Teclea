@@ -10,10 +10,16 @@ import { registrarActividad } from '../../db/progreso.js';
 import { icono } from '../icons.js';
 import { panelResultado } from '../resultado.js';
 import { confirmar } from '../overlay.js';
+import { t, idioma } from '../../i18n/index.js';
 
 let actual = null;
-let vocabCache = null;
-const cargarVocab = async () => (vocabCache ||= (await fetch('data/palabras.json')).json());
+const vocabCache = {};
+// Las palabras que se teclean en los juegos NO se traducen: hay un vocabulario en español y otro en inglés.
+const cargarVocab = async () => {
+  const lang = idioma();
+  const pedir = (l) => (vocabCache[l] ||= fetch(l === 'en' ? 'data/en/palabras.json' : 'data/palabras.json').then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }));
+  return pedir(lang).catch(() => pedir('es'));
+};
 const claveMejor = (uid, id) => `teclea:mejor:${uid}:${id}`;
 const leerMejor = (uid, id) => { try { return Number(localStorage.getItem(claveMejor(uid, id))) || 0; } catch { return 0; } };
 const guardarMejor = (uid, id, v) => { try { localStorage.setItem(claveMejor(uid, id), String(v)); } catch { /* sin almacenamiento */ } };
@@ -25,12 +31,12 @@ export async function render({ query }) {
   const montar = (...n) => { limpiar(); cont.replaceChildren(...n.filter(Boolean)); window.scrollTo({ top: 0 }); };
 
   function menu() {
-    montar(h('header', { class: 'juegos__cab' }, h('h1', {}, 'Juegos'), h('p', { class: 'suave' }, 'Practicar jugando también cuenta: ganas XP, monedas y medallas.')),
+    montar(h('header', { class: 'juegos__cab' }, h('h1', {}, t('juegos.titulo')), h('p', { class: 'suave' }, t('juegos.sub'))),
       h('div', { class: 'juegos__rejilla' }, JUEGOS.map((j, i) => h('button', { class: 'juego-tarjeta reveal', style: { '--g1': j.color[0], '--g2': j.color[1], '--i': i }, type: 'button', onclick: () => jugar(j) },
         h('span', { class: 'juego-tarjeta__ic' }, icono(j.icono, { tam: 34 })),
         h('strong', {}, j.nombre), h('span', {}, j.texto),
-        leerMejor(u.uid, j.id) ? h('small', { class: 'juego-tarjeta__mejor' }, `Tu mejor: ${leerMejor(u.uid, j.id)} pts`) : h('small', { class: 'juego-tarjeta__mejor' }, '¡Sé el primero en tu marca!'),
-        h('span', { class: 'juego-tarjeta__jugar' }, icono('play', { tam: 18 }), 'Jugar')))));
+        leerMejor(u.uid, j.id) ? h('small', { class: 'juego-tarjeta__mejor' }, t('juegos.mejor', { n: leerMejor(u.uid, j.id) })) : h('small', { class: 'juego-tarjeta__mejor' }, t('juegos.primero')),
+        h('span', { class: 'juego-tarjeta__jugar' }, icono('play', { tam: 18 }), t('juegos.jugar'))))));
   }
 
   async function jugar(j) {
@@ -38,7 +44,7 @@ export async function render({ query }) {
     const zona = h('div', { class: `jg jg--${j.id}` });
     const mejorPrevio = leerMejor(u.uid, j.id);
     montar(h('div', { class: 'jg__barra' },
-      h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => { if (await confirmar({ titulo: '¿Salir del juego?', mensaje: 'No se guardará esta partida.', si: 'Salir', no: 'Seguir' })) menu(); } }, icono('arrow', { tam: 18 }), 'Salir'),
+      h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => { if (await confirmar({ titulo: t('juegos.salirJuego'), mensaje: t('juegos.noPartida'), si: t('practica.salir'), no: t('practica.seguir') })) menu(); } }, icono('arrow', { tam: 18 }), t('leccion.salir')),
       h('h1', {}, j.nombre)), zona);
     actual = j.crear({ zona, grado, vocab, mejorPrevio, alFin: (r) => terminar(j, r, mejorPrevio) });
     // el router devuelve el foco al título tras cargar la vista: se recupera el campo de escritura
@@ -60,9 +66,9 @@ export async function render({ query }) {
       import('../../db/clases.js').then((m) => m.entregarTareas(g.usuario, { tipo: 'juego', refId: j.id, resultado, sesionId: g.sesionId })).catch(() => {});
       return g;
     })();
-    montar(panelResultado({ titulo: `${r.puntos} puntos`, subtitulo: j.nombre, estrellas: null, resultado, resumen,
-      acciones: [{ texto: 'Jugar otra vez', clase: 'btn--primary btn--lg', principal: true, icono: 'refresh', onclick: () => jugar(j) }, { texto: 'Más juegos', onclick: menu }] }),
-      nuevoRecord && mejorPrevio ? h('p', { class: 'chip chip--racha juegos__record' }, icono('bolt', { tam: 18 }), `¡Nuevo récord! Antes: ${mejorPrevio} pts`) : null);
+    montar(panelResultado({ titulo: t('juegos.puntos', { n: r.puntos }), subtitulo: j.nombre, estrellas: null, resultado, resumen,
+      acciones: [{ texto: t('juegos.otraVez'), clase: 'btn--primary btn--lg', principal: true, icono: 'refresh', onclick: () => jugar(j) }, { texto: t('juegos.mas'), onclick: menu }] }),
+      nuevoRecord && mejorPrevio ? h('p', { class: 'chip chip--racha juegos__record' }, icono('bolt', { tam: 18 }), t('juegos.record', { n: mejorPrevio })) : null);
   }
 
   const j = JUEGOS.find((x) => x.id === query.id);
@@ -70,3 +76,6 @@ export async function render({ query }) {
   return cont;
 }
 export function destroy() { actual?.destruir(); actual = null; }
+
+/** Puede haber una partida en curso: el cambio de idioma no reinicia la vista (se actualiza al navegar). */
+export const conservarAlCambiarIdioma = true;

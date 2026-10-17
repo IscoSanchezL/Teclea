@@ -3,6 +3,7 @@
  * El docente podrá editarlos por clase (Fase 5): se guardan en Firestore config/grade_profiles
  * y, si existen allí, reemplazan a estos.
  */
+import { t } from '../i18n/index.js';
 export const PERFILES_GRADO = {
   2: { grado: 2, ppmMin: 8,  ppmMax: 12, precision: 85, contenido: 'Letras y palabras cortas', signos: false, textoGrande: true },
   3: { grado: 3, ppmMin: 12, ppmMax: 18, precision: 88, contenido: 'Palabras y frases simples', signos: false, textoGrande: false },
@@ -12,5 +13,5 @@ export const PERFILES_GRADO = {
 };
 
 export const GRADOS = [2, 3, 4, 5, 6];
-export const nombreGrado = (g) => `${g}.º`;
+export const nombreGrado = (g) => t(`grado.etq`, { g });
 export const perfilDeGrado = (g) => PERFILES_GRADO[g] || PERFILES_GRADO[3];

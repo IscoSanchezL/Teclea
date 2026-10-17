@@ -8,17 +8,18 @@ import { hoyISO } from './xp.js';
 import * as store from '../db/store.js';
 import { nivelPorXP } from '../core/levels.js';
 import { state, setState } from '../core/state.js';
+import { t } from '../i18n/index.js';
 
 function mulberry(a) { return () => { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
 const semilla = (s) => { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; };
 
 const PLANTILLAS = [
-  { tipo: 'minutos', titulo: (m) => `Practica ${m} minutos`, metas: [3, 5, 8], campo: 'minutos', icono: 'clock', xp: 25, monedas: 12 },
-  { tipo: 'lecciones', titulo: (m) => (m === 1 ? 'Completa una lección' : `Completa ${m} lecciones`), metas: [1, 2], campo: 'lecciones', icono: 'keyboard', xp: 30, monedas: 15 },
-  { tipo: 'precision', titulo: (m) => `Logra ${m} % de precisión`, metas: [90, 95], campo: 'precision', icono: 'target', xp: 25, monedas: 12 },
-  { tipo: 'juegos', titulo: (m) => (m === 1 ? 'Juega una partida' : `Juega ${m} partidas`), metas: [1, 2, 3], campo: 'juegos', icono: 'gamepad', xp: 20, monedas: 10 },
-  { tipo: 'practica', titulo: () => 'Haz una práctica libre', metas: [1], campo: 'practicas', icono: 'book', xp: 20, monedas: 10 },
-  { tipo: 'velocidad', titulo: (m) => `Alcanza ${m} PPM`, metas: [null], campo: 'mejorPpm', icono: 'bolt', xp: 30, monedas: 15 },
+  { tipo: 'minutos', titulo: (m) => t('reto.minutos', { n: m }), metas: [3, 5, 8], campo: 'minutos', icono: 'clock', xp: 25, monedas: 12 },
+  { tipo: 'lecciones', titulo: (m) => (m === 1 ? t('reto.leccion1') : t('reto.lecciones', { n: m })), metas: [1, 2], campo: 'lecciones', icono: 'keyboard', xp: 30, monedas: 15 },
+  { tipo: 'precision', titulo: (m) => t('reto.precision', { n: m }), metas: [90, 95], campo: 'precision', icono: 'target', xp: 25, monedas: 12 },
+  { tipo: 'juegos', titulo: (m) => (m === 1 ? t('reto.juego1') : t('reto.juegos', { n: m })), metas: [1, 2, 3], campo: 'juegos', icono: 'gamepad', xp: 20, monedas: 10 },
+  { tipo: 'practica', titulo: () => t('reto.practica'), metas: [1], campo: 'practicas', icono: 'book', xp: 20, monedas: 10 },
+  { tipo: 'velocidad', titulo: (m) => t('reto.velocidad', { n: m }), metas: [null], campo: 'mejorPpm', icono: 'bolt', xp: 30, monedas: 15 },
 ];
 
 /** 3 retos del día. */
@@ -27,11 +28,11 @@ export function retosDelDia(fecha = hoyISO(), grado = 4, uid = '') {
   const p = perfilDeGrado(grado);
   const orden = [...PLANTILLAS.slice(1)].sort(() => rng() - 0.5);
   const elegidas = [PLANTILLAS[0], orden[0], orden[1]];
-  return elegidas.map((t, i) => {
-    let meta = t.metas[Math.floor(rng() * t.metas.length)];
-    if (t.tipo === 'velocidad') meta = Math.max(3, Math.round(p.ppmMin * 0.8));
-    if (grado <= 3 && t.tipo === 'minutos') meta = Math.min(meta, 5);
-    return { id: `${fecha}-${i + 1}`, tipo: t.tipo, titulo: t.titulo(meta), meta, icono: t.icono, campo: t.campo, xp: t.xp, monedas: t.monedas };
+  return elegidas.map((pl, i) => {
+    let meta = pl.metas[Math.floor(rng() * pl.metas.length)];
+    if (pl.tipo === 'velocidad') meta = Math.max(3, Math.round(p.ppmMin * 0.8));
+    if (grado <= 3 && pl.tipo === 'minutos') meta = Math.min(meta, 5);
+    return { id: `${fecha}-${i + 1}`, tipo: pl.tipo, titulo: pl.titulo(meta), meta, icono: pl.icono, campo: pl.campo, xp: pl.xp, monedas: pl.monedas };
   });
 }
 

@@ -1,5 +1,5 @@
 {
-  "version": "1bebeebcca30",
+  "version": "4f5a034655d5",
   "archivos": [
     "assets/assets.json",
     "assets/img/apple-touch-icon.png",
@@ -68,6 +68,9 @@
     "js/game/juegos.js",
     "js/game/retos.js",
     "js/game/xp.js",
+    "js/i18n/en.js",
+    "js/i18n/es.js",
+    "js/i18n/index.js",
     "js/lessons/curriculo.js",
     "js/lessons/ejercicio-ui.js",
     "js/lessons/entrada.js",
@@ -91,6 +94,7 @@
     "js/ui/graficas.js",
     "js/ui/hero3d.js",
     "js/ui/icons.js",
+    "js/ui/idioma.js",
     "js/ui/imagen.js",
     "js/ui/logo.js",
     "js/ui/medallas.js",

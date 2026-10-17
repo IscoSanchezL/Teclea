@@ -15,7 +15,9 @@ import { toast, confirmar } from '../overlay.js';
 import { sonido } from '../sonido.js';
 import { aplicarPrefs } from '../theme.js';
 
-const CATS = { todo: 'Todo', accesorio: 'Accesorios', mascota: 'Mascotas', deco: 'Decoración', escena: 'Escenas', fondo: 'Fondos', marco: 'Marcos', tema: 'Temas de color', consumible: 'Protectores' };
+import { t, loc } from '../../i18n/index.js';
+
+const CATS = ['todo', 'accesorio', 'mascota', 'deco', 'escena', 'fondo', 'marco', 'tema', 'consumible'];
 const PROBABLES = ['accesorio', 'mascota', 'deco', 'escena', 'fondo', 'marco'];
 const MUESTRA_TEMA = { bosque: ['#2E9E6B', '#0F5C3C'], oceano: ['#2D9CDB', '#0B4F8A'], atardecer: ['#FF8A5B', '#B8336A'], neon: ['#C13CFF', '#00E5FF'] };
 
@@ -44,36 +46,36 @@ export async function render() {
     const reg = tengo(it);
     try {
       if (it.categoria === 'consumible' || !reg) {
-        if (!(await confirmar({ titulo: `¿Comprar ${it.nombre}?`, mensaje: `Cuesta ${it.precio} monedas.`, si: 'Comprar', no: 'Cancelar' }))) return;
+        if (!(await confirmar({ titulo: t('tienda.comprarQ', { nombre: loc(it, 'nombre') }), mensaje: t('tienda.cuesta', { n: it.precio }), si: t('tienda.comprar'), no: t('tienda.cancelar') }))) return;
         u = await comprar(u, it); sonido.acierto();
-        if (it.categoria !== 'consumible' && it.categoria !== 'tema') { u = await equipar(u, it, true); probando = null; toast(`¡Listo! Compraste ${it.nombre} y ya está en tu cuarto.`); } else toast(`¡Listo! Compraste ${it.nombre}.`);
+        if (it.categoria !== 'consumible' && it.categoria !== 'tema') { u = await equipar(u, it, true); probando = null; toast(t('tienda.compraste', { nombre: loc(it, 'nombre') })); } else toast(t('tienda.compraste2', { nombre: loc(it, 'nombre') }));
       } else { u = await equipar(u, it, !reg.equipado); aplicarPrefs(); sonido.clic(); }
-    } catch (e) { toast(e.message || 'No se pudo completar.', { tipo: 'error' }); }
+    } catch (e) { toast(e.message || t('tienda.noCompleto'), { tipo: 'error' }); }
     pintar();
   }
 
   function pintar() {
     document.dispatchEvent(new Event('teclea:marca')); // redibuja la barra con el avatar nuevo
     cab.replaceChildren(cuarto(u, items, { probando }),
-      h('div', { class: 'tienda__txt' }, h('h1', {}, 'Tienda · Mi cuarto'), h('p', {}, 'Elige tu mascota y vístela con lo que compres: todo se acomoda a su figura. Toca “Probar” en un artículo para verlo antes de comprarlo.'),
-        h('p', { class: 'mascotas__tit' }, 'Elige tu mascota'),
-        h('div', { class: 'mascotas', role: 'group', 'aria-label': 'Elegir mascota' }, Object.entries(ESPECIES).filter(([k, e]) => e.gratis || items.some((it) => it.especie === k && tengo(it))).map(([k, e]) =>
-          h('button', { class: 'mascotas__op', type: 'button', 'aria-pressed': String(especieDe(u.avatar) === k), onclick: async () => { try { u = await elegirEspecie(u, k); sonido.clic(); probando = null; } catch { toast('No se pudo cambiar la mascota.', { tipo: 'error' }); } pintar(); } }, personajeSVG(k, { cabeza: true, tam: 54 }), e.nombre))),
-        probando ? h('div', { class: 'tienda__prueba' }, `Probando: ${probando.nombre}`, h('button', { class: 'btn btn--sm btn--suave', type: 'button', onclick: () => { probando = null; pintar(); } }, 'Quitar prueba')) : null,
-        h('span', { class: 'tienda__monedas', 'aria-label': `${u.monedas || 0} monedas` }, icono('coin', { tam: 24 }), h('b', {}, u.monedas || 0))));
-    filtros.replaceChildren(...Object.entries(CATS).map(([c, n]) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(c === sel), onclick: () => { sel = c; pintar(); } }, n)));
+      h('div', { class: 'tienda__txt' }, h('h1', {}, t('tienda.titulo')), h('p', {}, t('tienda.intro')),
+        h('p', { class: 'mascotas__tit' }, t('tienda.eligeMascota')),
+        h('div', { class: 'mascotas', role: 'group', 'aria-label': t('tienda.elegirMascota') }, Object.entries(ESPECIES).filter(([k, e]) => e.gratis || items.some((it) => it.especie === k && tengo(it))).map(([k, e]) =>
+          h('button', { class: 'mascotas__op', type: 'button', 'aria-pressed': String(especieDe(u.avatar) === k), onclick: async () => { try { u = await elegirEspecie(u, k); sonido.clic(); probando = null; } catch { toast(t('tienda.noMascota'), { tipo: 'error' }); } pintar(); } }, personajeSVG(k, { cabeza: true, tam: 54 }), e.nombre))),
+        probando ? h('div', { class: 'tienda__prueba' }, t('tienda.probando', { nombre: loc(probando, 'nombre') }), h('button', { class: 'btn btn--sm btn--suave', type: 'button', onclick: () => { probando = null; pintar(); } }, t('tienda.quitarPrueba'))) : null,
+        h('span', { class: 'tienda__monedas', 'aria-label': t('tienda.monedasAria', { n: u.monedas || 0 }) }, icono('coin', { tam: 24 }), h('b', {}, u.monedas || 0))));
+    filtros.replaceChildren(...CATS.map((c) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(c === sel), onclick: () => { sel = c; pintar(); } }, t(`tienda.cat.${c}`))));
     rejilla.replaceChildren(...items.filter((it) => sel === 'todo' || it.categoria === sel).map((it) => {
       const reg = tengo(it), consumible = it.categoria === 'consumible';
       const sinMax = consumible && (u.protectores || 0) >= 3, faltan = !reg && (u.monedas || 0) < it.precio;
-      const texto = consumible ? `Comprar · ${it.precio}` : reg ? (reg.equipado ? 'Quitar' : 'Poner') : `Comprar · ${it.precio}`;
+      const texto = consumible ? t('tienda.comprarPrecio', { n: it.precio }) : reg ? (reg.equipado ? t('tienda.quitar') : t('tienda.poner')) : t('tienda.comprarPrecio', { n: it.precio });
       const probable = PROBABLES.includes(it.categoria);
-      const imagen = probable ? h('button', { class: 'tienda__ver', type: 'button', 'aria-label': `Probar ${it.nombre} en mi cuarto`, onclick: () => { probando = probando?.id === it.id ? null : it; pintar(); cab.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }, vista(it)) : vista(it);
-      return h('article', { class: `tienda__item card ${reg?.equipado ? 'tienda__item--puesto' : ''}` }, imagen, h('strong', {}, it.nombre),
+      const imagen = probable ? h('button', { class: 'tienda__ver', type: 'button', 'aria-label': t('tienda.probarAria', { nombre: loc(it, 'nombre') }), onclick: () => { probando = probando?.id === it.id ? null : it; pintar(); cab.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }, vista(it)) : vista(it);
+      return h('article', { class: `tienda__item card ${reg?.equipado ? 'tienda__item--puesto' : ''}` }, imagen, h('strong', {}, loc(it, 'nombre')),
         it.slot ? h('small', { class: 'tienda__zona' }, ZONAS[it.slot] || '') : null,
-        it.descripcion ? h('small', { class: 'suave' }, it.descripcion) : null,
-        consumible ? h('small', { class: 'suave' }, `Tienes ${u.protectores || 0} de 3`) : null,
+        it.descripcion ? h('small', { class: 'suave' }, loc(it, 'descripcion')) : null,
+        consumible ? h('small', { class: 'suave' }, t('tienda.tienes', { a: u.protectores || 0 })) : null,
         h('button', { class: `btn btn--sm ${reg ? 'btn--suave' : 'btn--primary'}`, type: 'button', disabled: sinMax || faltan, onclick: () => accion(it) }, !reg || consumible ? icono('coin', { tam: 16 }) : null, texto),
-        reg?.equipado ? h('span', { class: 'etiqueta tienda__puesto' }, 'Puesto') : null);
+        reg?.equipado ? h('span', { class: 'etiqueta tienda__puesto' }, t('tienda.puesto')) : null);
     }));
   }
   pintar();

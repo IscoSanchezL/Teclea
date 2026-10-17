@@ -102,3 +102,4 @@
 .puntos { display: grid; grid-template-columns: repeat(14, 1fr); gap: 5px; }
 .puntos i { aspect-ratio: 1; border-radius: 50%; background: var(--superficie-2); border: 1px solid var(--borde); }
 .puntos i.on { background: linear-gradient(135deg, var(--violeta-400), #22D3EE); border-color: transparent; box-shadow: 0 0 10px rgba(138,112,250,.5); }
+.login__idioma { align-self: flex-end; max-width: 26rem; }

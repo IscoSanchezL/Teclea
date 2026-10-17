@@ -9,6 +9,7 @@ import { state, setState } from './state.js';
 import { buscarRuta } from './routes.js';
 import { movimientoReducido, anunciar, h } from './utils.js';
 import { CONFIG } from './config.js';
+import { t } from '../i18n/index.js';
 
 let vistaActual = null;   // módulo de la vista montada (para destroy())
 let token = 0;            // evita condiciones de carrera entre navegaciones rápidas
@@ -18,6 +19,13 @@ export function iniciarRouter({ onRuta }) {
   alMontar = onRuta || alMontar;
   window.addEventListener('hashchange', resolver);
   resolver();
+}
+
+/** Vuelve a pintar la vista actual (p. ej. al cambiar de idioma) sin recargar la página. */
+export function refrescar() {
+  // Las vistas con un ejercicio en curso (lección, práctica, juegos) no se reinician: se actualizan al navegar.
+  if (vistaActual?.conservarAlCambiarIdioma) return;
+  return resolver();
 }
 
 /** Navega a una ruta: navegar('/aprende') */
@@ -41,7 +49,7 @@ function aplicarGuardas(ruta, query) {
     return { redirigir: `/entrar?volver=${encodeURIComponent(location.hash.replace(/^#/, ''))}` };
   }
   if (Array.isArray(ruta.acceso) && !ruta.acceso.includes(u?.rol)) {
-    return { redirigir: '/', aviso: 'Esa zona es solo para docentes o administración.' };
+    return { redirigir: '/', aviso: t('router.soloStaff') };
   }
   // Docente que aún no fue aprobado (o fue rechazado): solo ve la pantalla de estado.
   if (u && (u.rol === 'pendiente' || u.rol === 'rechazado') && !['/pendiente', '/privacidad'].includes(ruta.path)) {
@@ -88,9 +96,9 @@ async function resolver() {
   } catch (e) {
     console.error('[router] error cargando vista', e);
     nodo = h('section', { class: 'estado-error card' },
-      h('h1', {}, 'Ups, algo no cargó'),
-      h('p', {}, 'Revisa tu conexión e inténtalo otra vez.'),
-      h('button', { class: 'btn btn--primary', onclick: () => location.reload() }, 'Reintentar'));
+      h('h1', {}, t('router.error.titulo')),
+      h('p', {}, t('router.error.texto')),
+      h('button', { class: 'btn btn--primary', onclick: () => location.reload() }, t('router.error.reintentar')));
     mod = null;
   }
   clearTimeout(temporizador);

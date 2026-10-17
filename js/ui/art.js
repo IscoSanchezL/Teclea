@@ -12,6 +12,7 @@
  * Así NUNCA hay errores 404 en consola y, al subir tus imágenes, se reemplazan solas.
  */
 import { h } from '../core/utils.js';
+import { t } from '../i18n/index.js';
 
 let manifiesto = {};
 
@@ -27,13 +28,13 @@ export const urlAsset = (clave) => manifiesto[clave] || null;
 
 /** Poses de la mascota "Tecli" (8 expresiones). Emoji = placeholder mientras no hay arte. */
 export const POSES = {
-  saludo:     { emoji: '🦊', nombre: 'Tecli saluda' },
-  celebra:    { emoji: '🥳', nombre: 'Tecli celebra' },
-  piensa:     { emoji: '🤔', nombre: 'Tecli piensa' },
-  anima:      { emoji: '💪', nombre: 'Tecli te anima' },
-  dormido:    { emoji: '😴', nombre: 'Tecli duerme' },
-  triste:     { emoji: '🥺', nombre: 'Tecli te acompaña' },
-  senala:     { emoji: '👉', nombre: 'Tecli señala' },
+  saludo:     { emoji: '🦊', get nombre() { return t('pose.saludo'); } },
+  celebra:    { emoji: '🥳', get nombre() { return t('pose.celebra'); } },
+  piensa:     { emoji: '🤔', get nombre() { return t('pose.piensa'); } },
+  anima:      { emoji: '💪', get nombre() { return t('pose.anima'); } },
+  dormido:    { emoji: '😴', get nombre() { return t('pose.dormido'); } },
+  triste:     { emoji: '🥺', get nombre() { return t('pose.triste'); } },
+  senala:     { emoji: '👉', get nombre() { return t('pose.senala'); } },
   sorprendido:{ emoji: '😮', nombre: 'Tecli se sorprende' },
 };
 
