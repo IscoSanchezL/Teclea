@@ -1,6 +1,7 @@
 # Publica Teclea en Firebase Hosting (proyecto teclea-colegio) cada vez que se sube código a main.
 name: Deploy to Firebase Hosting on merge
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
