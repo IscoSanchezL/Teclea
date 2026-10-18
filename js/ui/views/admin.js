@@ -13,6 +13,7 @@ import { icono } from '../icons.js';
 import { toast, confirmar, abrirCapa } from '../overlay.js';
 import { campo, interruptor } from '../componentes.js';
 import { textoUltima } from '../../db/analitica.js';
+import { textoVersion } from '../../core/version.js';
 
 const TABS = [['resumen', 'Resumen'], ['docentes', 'Docentes'], ['marca', 'Marca'], ['colores', 'Colores'], ['ajustes', 'Ajustes'], ['datos', 'Datos y respaldo']];
 const fila = (clave, valor, estado) => h('li', { class: 'estado-fila' }, h('span', {}, clave), h('strong', { class: estado ? `estado--${estado}` : '' }, valor));
@@ -22,10 +23,15 @@ async function diagnostico() {
   const sw = 'serviceWorker' in navigator ? ((await navigator.serviceWorker.getRegistration())?.active ? 'Activo' : 'No instalado') : 'No compatible';
   let cache = '—';
   try { cache = (await (await fetch('precache.json', { cache: 'no-store' })).json()).version; } catch { /* sin red */ }
-  let archivos = 0;
-  try { for (const k of await caches.keys()) archivos += (await (await caches.open(k)).keys()).length; } catch { /* sin caché */ }
+  let archivos = 0, instalada = '—';
+  try {
+    for (const k of await caches.keys()) {
+      archivos += (await (await caches.open(k)).keys()).length;
+      const m = /^teclea-([0-9a-f]{8,})$/.exec(k); if (m) instalada = m[1];
+    }
+  } catch { /* sin caché */ }
   const est = navigator.storage?.estimate ? await navigator.storage.estimate() : null;
-  return { sw, cache, archivos, usoMB: est ? (est.usage / 1048576).toFixed(1) : '—' };
+  return { sw, cache, instalada, archivos, usoMB: est ? (est.usage / 1048576).toFixed(1) : '—' };
 }
 
 export async function render({ query }) {
@@ -49,7 +55,9 @@ export async function render({ query }) {
       fila('Protección App Check', CONFIG.appCheckSiteKey ? 'Activada' : 'Sin activar (recomendado)', CONFIG.appCheckSiteKey ? 'ok' : 'alerta'),
       fila('Modo sin conexión (service worker)', d.sw, d.sw === 'Activo' ? 'ok' : 'alerta'),
       fila('Archivos guardados en el dispositivo', `${d.archivos} · ${d.usoMB} MB`),
-      fila('Versión de la app', `v${CONFIG.version} · caché ${d.cache}`),
+      fila('Versión publicada (la última)', String(d.cache).slice(0, 8)),
+      fila('Versión instalada en este equipo', String(d.instalada).slice(0, 8), d.instalada === '—' || d.cache === '—' ? undefined : (String(d.instalada) === String(d.cache) ? 'ok' : 'alerta')),
+      ...(d.instalada !== '—' && d.cache !== '—' && String(d.instalada) !== String(d.cache) ? [fila('Qué hacer', 'Recarga con Ctrl+Shift+R para usar la última', 'alerta')] : []),
       fila('Docentes pendientes de aprobar', String(pend.length), pend.length ? 'alerta' : 'ok'));
     const botonCat = cat ? h('button', { class: `btn ${cat.completo ? 'btn--suave' : 'btn--primary'} btn--sm`, type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.sembrarCatalogos(); toast(`Catálogos publicados (${n})`); await pintar(); } catch (er) { toast(er.message || 'No se pudo publicar', { tipo: 'error' }); e.currentTarget.disabled = false; } } }, cat.completo ? 'Volver a publicar catálogos' : 'Publicar catálogos ahora') : null;
     return [
@@ -234,7 +242,7 @@ export async function render({ query }) {
   /* ═════ Marco ═════ */
   async function pintar() {
     raiz.replaceChildren(...[
-      h('header', { class: 'pagina__cab' }, h('div', {}, h('h1', {}, 'Administración'), h('p', { class: 'suave' }, 'Docentes, marca, ajustes y respaldo')),
+      h('header', { class: 'pagina__cab' }, h('div', {}, h('h1', {}, 'Administración'), h('p', { class: 'suave' }, 'Docentes, marca, ajustes y respaldo · ', textoVersion(h('strong', {}, ''))) ),
         h('a', { class: 'btn btn--suave btn--sm', href: 'configurar.html' }, icono('settings', { tam: 16 }), 'Asistente de configuración')),
       !nube ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, 'Modo demostración: los cambios se guardan solo en este navegador. Conecta Firebase con el asistente de configuración.')) : null,
       h('div', { class: 'tabs tabs--5 tabs--staff', role: 'tablist' }, TABS.map(([id, t]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, t))),
