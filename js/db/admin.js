@@ -96,7 +96,7 @@ export async function revisarEstudiantes() {
   return us.map((u) => {
     const uid = u.uid || u.id, p = porUid.get(uid) || { lecciones: 0, estrellas: 0 }, faltan = faltantesDe(u);
     return { uid, nombre: u.nombre || u.apodo || uid, grado: u.grado ?? null, entra: u.authTipo === 'google' ? 'Google' : 'Código', xp: u.xp ?? 0, monedas: u.monedas ?? 0,
-      lecciones: p.lecciones, estrellas: p.estrellas, faltan, estado: faltan.length ? 'incompleto' : (p.estrellas === 0 && !(u.xp > 0) ? 'sin-avance' : 'ok') };
+      lecciones: p.lecciones, estrellas: p.estrellas, faltan, manual36: u.authTipo !== 'google' && u.grado >= 3, estado: faltan.length ? 'incompleto' : (p.estrellas === 0 && !(u.xp > 0) ? 'sin-avance' : 'ok') };
   }).sort((a, b) => (b.estado === 'incompleto') - (a.estado === 'incompleto') || a.nombre.localeCompare(b.nombre));
 }
 

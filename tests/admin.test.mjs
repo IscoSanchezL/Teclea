@@ -29,9 +29,13 @@ state.modo = 'firebase'; state.user = { uid: 'adm', rol: 'admin' };
 console.log('Administrador (correo verificado)');
 usar('adm', { email: 'franksanlo@gmail.com', email_verified: true });
 await env.withSecurityRulesDisabled((ctx) => fs.setDoc(fs.doc(ctx.firestore(), 'users/viejo'), { uid: 'viejo', nombre: 'Est Viejo', apodo: 'Viejo', rol: 'estudiante', grado: 3, authTipo: 'google', avatar: { emoji: '🦊', fondo: 'violeta' }, xp: 10, nivel: 1, monedas: 100 }));
+const perfilCodigo = { uid: 'porcodigo', nombre: 'Por Codigo', apodo: 'Codigo', rol: 'estudiante', grado: 4, authTipo: 'pin', avatar: { emoji: '🦊', fondo: 'violeta' }, xp: 0, nivel: 1, monedas: 0, racha: 0, rachaMax: 0, protectores: 0, prefs: {}, creadoPor: 'prof' };
 {
   let filas = await A.revisarEstudiantes(); const v = filas.find((f) => f.uid === 'viejo');
   t('revisión: detecta el perfil antiguo (faltan protectores, racha…)', v && v.estado === 'incompleto' && v.faltan.includes('protectores') && v.faltan.includes('rachaMax'));
+  await env.withSecurityRulesDisabled((ctx) => fs.setDoc(fs.doc(ctx.firestore(), 'users/porcodigo'), { ...perfilCodigo }));
+  filas = await A.revisarEstudiantes();
+  t('revisión: Google de 3.º no cuenta como creado a mano; el de código de 4.º sí', filas.find((f) => f.uid === 'viejo').manual36 === false && filas.find((f) => f.uid === 'porcodigo').manual36 === true);
   t('revisión: un perfil completo sale bien', filas.find((f) => f.uid === 'est1').faltan.length === 0);
   const n = await A.repararPerfiles(filas);
   const u = await store.leer('users/viejo');

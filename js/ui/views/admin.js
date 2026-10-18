@@ -68,8 +68,18 @@ export async function render({ query }) {
     const cuerpo = h('div', {}, h('p', { class: 'suave' }, 'Muestra quién tiene el perfil incompleto (no guarda estrellas ni compras) o aún no tiene avance, y lo repara con un clic.'));
     const pintarFilas = (filas) => {
       const malos = filas.filter((f) => f.faltan.length), sin = filas.filter((f) => f.estado === 'sin-avance');
-      const chip = (f) => f.estado === 'incompleto' ? h('span', { class: 'pill pill--inactivo' }, `Perfil incompleto (${f.faltan.join(', ')})`) : f.estado === 'sin-avance' ? h('span', { class: 'pill' }, 'Sin avance') : h('span', { class: 'pill pill--ok' }, 'Bien');
+      const chip = (f) => f.manual36 ? h('span', { class: 'pill pill--inactivo' }, f.xp || f.estrellas ? 'Creada con código · con avance' : 'Creada con código · sin avance') : f.estado === 'incompleto' ? h('span', { class: 'pill pill--inactivo' }, `Perfil incompleto (${f.faltan.join(', ')})`) : f.estado === 'sin-avance' ? h('span', { class: 'pill' }, 'Sin avance') : h('span', { class: 'pill pill--ok' }, 'Bien');
+      const m36 = filas.filter((f) => f.manual36), g36 = filas.filter((f) => f.grado >= 3 && !f.manual36);
+      const m36vacias = m36.filter((f) => !f.xp && !f.estrellas && !f.lecciones), m36conAvance = m36.length - m36vacias.length;
+      const borrarVacias = async (e) => {
+        if (!m36vacias.length) return;
+        if (!(await confirmar({ titulo: `¿Borrar ${m36vacias.length} cuentas creadas a mano?`, mensaje: `Son cuentas de 3.º a 6.º con código del docente que NO tienen avance (0 XP, 0 estrellas, 0 lecciones). Se borran sus datos en la plataforma. No se puede deshacer. Las ${m36conAvance} cuentas con avance NO se tocan.`, si: 'Sí, borrar', peligro: true }))) return;
+        e.currentTarget.disabled = true;
+        try { for (const f of m36vacias) await A.borrarDatosUsuario(f.uid); toast(`${m36vacias.length} cuentas borradas`); pintarFilas(await A.revisarEstudiantes()); } catch (er) { toast(er.message || 'No se pudo borrar', { tipo: 'error' }); }
+      };
       cuerpo.replaceChildren(...[
+        h('p', {}, h('strong', {}, `Grados 3.º–6.º: ${g36.length} entran con Google · ${m36.length} creados con código (${m36vacias.length} sin avance, ${m36conAvance} con avance)`)),
+        m36vacias.length ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: borrarVacias }, `Borrar ${m36vacias.length} cuentas con código sin avance (3.º–6.º)`) : null,
         h('p', {}, h('strong', {}, `${filas.length} estudiantes · ${malos.length} con perfil incompleto · ${sin.length} sin avance`)),
         malos.length ? h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.repararPerfiles(filas); toast(`${n} perfiles reparados`); pintarFilas(await A.revisarEstudiantes()); } catch (er) { toast(er.message || 'No se pudo reparar', { tipo: 'error' }); e.currentTarget.disabled = false; } } }, `Reparar ${malos.length} perfiles`) : null,
         filas.length ? h('input', { class: 'input input--sm', type: 'search', placeholder: 'Buscar estudiante por nombre…', 'aria-label': 'Buscar estudiante', style: { margin: '.5rem 0' }, oninput: (e) => { const q = e.target.value.trim().toLowerCase(); cuerpo.querySelectorAll('tbody tr').forEach((tr) => { tr.hidden = q && !tr.textContent.toLowerCase().includes(q); }); } }) : null,
