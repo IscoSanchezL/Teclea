@@ -32,6 +32,12 @@
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js">
   <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js">
+  <script>
+    // Precarga de módulos propios solo en navegadores que la integran bien (Chrome/Edge/Firefox). Safari la descarga dos veces y avisa en consola.
+    if (!/^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent)) {
+      for (const h of ['js/i18n/index.js','js/i18n/es.js','js/i18n/en.js','js/core/state.js','js/core/config.js','js/core/utils.js','js/core/router.js','js/core/routes.js','js/core/marca.js','js/core/levels.js','js/core/grados.js','js/ui/theme.js','js/ui/art.js','js/ui/nav.js','js/ui/efectos.js','js/ui/conexion.js','js/ui/paleta.js','js/ui/logo.js','js/ui/icons.js','js/ui/avatar.js','js/ui/sync-prefs.js','js/ui/overlay.js','js/ui/componentes.js','js/ui/graficas.js','js/ui/medallas.js','js/ui/teclado-deco.js','js/ui/mundos.js','js/ui/hero3d.js','js/ui/views/portada.js','js/auth/auth.js','js/db/firebase.js','js/db/users.js','js/db/store.js']) { const l = document.createElement('link'); l.rel = 'modulepreload'; l.href = h; document.head.appendChild(l); }
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Lexend:wght@400;500;600&family=Nunito:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -52,39 +58,6 @@
   <link rel="stylesheet" href="css/clases.css">
   <link rel="stylesheet" href="css/reto-vivo.css">
 
-  <link rel="modulepreload" href="js/i18n/index.js">
-  <link rel="modulepreload" href="js/i18n/es.js">
-  <link rel="modulepreload" href="js/i18n/en.js">
-  <link rel="modulepreload" href="js/core/state.js">
-  <link rel="modulepreload" href="js/core/config.js">
-  <link rel="modulepreload" href="js/core/utils.js">
-  <link rel="modulepreload" href="js/core/router.js">
-  <link rel="modulepreload" href="js/core/routes.js">
-  <link rel="modulepreload" href="js/core/marca.js">
-  <link rel="modulepreload" href="js/core/levels.js">
-  <link rel="modulepreload" href="js/core/grados.js">
-  <link rel="modulepreload" href="js/ui/theme.js">
-  <link rel="modulepreload" href="js/ui/art.js">
-  <link rel="modulepreload" href="js/ui/nav.js">
-  <link rel="modulepreload" href="js/ui/efectos.js">
-  <link rel="modulepreload" href="js/ui/conexion.js">
-  <link rel="modulepreload" href="js/ui/paleta.js">
-  <link rel="modulepreload" href="js/ui/logo.js">
-  <link rel="modulepreload" href="js/ui/icons.js">
-  <link rel="modulepreload" href="js/ui/avatar.js">
-  <link rel="modulepreload" href="js/ui/sync-prefs.js">
-  <link rel="modulepreload" href="js/ui/overlay.js">
-  <link rel="modulepreload" href="js/ui/componentes.js">
-  <link rel="modulepreload" href="js/ui/graficas.js">
-  <link rel="modulepreload" href="js/ui/medallas.js">
-  <link rel="modulepreload" href="js/ui/teclado-deco.js">
-  <link rel="modulepreload" href="js/ui/mundos.js">
-  <link rel="modulepreload" href="js/ui/hero3d.js">
-  <link rel="modulepreload" href="js/ui/views/portada.js">
-  <link rel="modulepreload" href="js/auth/auth.js">
-  <link rel="modulepreload" href="js/db/firebase.js">
-  <link rel="modulepreload" href="js/db/users.js">
-  <link rel="modulepreload" href="js/db/store.js">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
