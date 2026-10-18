@@ -5,6 +5,7 @@
    "id": "acc-0",
    "categoria": "accesorio",
    "nombre": "Sombrero de copa",
+   "nombre_en": "Top hat",
    "precio": 60,
    "emoji": "🎩",
    "slot": "cabeza"
@@ -13,6 +14,7 @@
    "id": "acc-1",
    "categoria": "accesorio",
    "nombre": "Corona",
+   "nombre_en": "Crown",
    "precio": 120,
    "emoji": "👑",
    "slot": "cabeza"
@@ -21,6 +23,7 @@
    "id": "acc-2",
    "categoria": "accesorio",
    "nombre": "Gafas de sol",
+   "nombre_en": "Sunglasses",
    "precio": 50,
    "emoji": "🕶️",
    "slot": "cara"
@@ -29,6 +32,7 @@
    "id": "acc-3",
    "categoria": "accesorio",
    "nombre": "Auriculares",
+   "nombre_en": "Headphones",
    "precio": 70,
    "emoji": "🎧",
    "slot": "cabeza"
@@ -37,6 +41,7 @@
    "id": "acc-4",
    "categoria": "accesorio",
    "nombre": "Gorra",
+   "nombre_en": "Cap",
    "precio": 40,
    "emoji": "🧢",
    "slot": "cabeza"
@@ -45,6 +50,7 @@
    "id": "acc-5",
    "categoria": "accesorio",
    "nombre": "Birrete",
+   "nombre_en": "Graduation cap",
    "precio": 80,
    "emoji": "🎓",
    "slot": "cabeza"
@@ -53,15 +59,18 @@
    "id": "acc-6",
    "categoria": "accesorio",
    "nombre": "Capa de héroe",
+   "nombre_en": "Hero cape",
    "precio": 100,
    "emoji": "🦸",
    "slot": "espalda",
-   "descripcion": "Se ve detrás de tu personaje."
+   "descripcion": "Se ve detrás de tu personaje.",
+   "descripcion_en": "Shows behind your character."
   },
   {
    "id": "acc-7",
    "categoria": "accesorio",
    "nombre": "Lentes de sabio",
+   "nombre_en": "Wise glasses",
    "precio": 45,
    "emoji": "👓",
    "slot": "cara"
@@ -70,6 +79,7 @@
    "id": "acc-8",
    "categoria": "accesorio",
    "nombre": "Parche pirata",
+   "nombre_en": "Pirate eye patch",
    "precio": 90,
    "emoji": "🏴‍☠️",
    "slot": "cara"
@@ -78,6 +88,7 @@
    "id": "acc-9",
    "categoria": "accesorio",
    "nombre": "Arcoíris",
+   "nombre_en": "Rainbow",
    "precio": 150,
    "emoji": "🌈",
    "slot": "espalda"
@@ -86,6 +97,7 @@
    "id": "fondo-coral",
    "categoria": "fondo",
    "nombre": "Fondo coral",
+   "nombre_en": "Coral background",
    "precio": 25,
    "fondo": "coral"
   },
@@ -93,6 +105,7 @@
    "id": "fondo-menta",
    "categoria": "fondo",
    "nombre": "Fondo menta",
+   "nombre_en": "Mint background",
    "precio": 25,
    "fondo": "menta"
   },
@@ -100,6 +113,7 @@
    "id": "fondo-sol",
    "categoria": "fondo",
    "nombre": "Fondo sol",
+   "nombre_en": "Sun background",
    "precio": 25,
    "fondo": "sol"
   },
@@ -107,6 +121,7 @@
    "id": "fondo-cielo",
    "categoria": "fondo",
    "nombre": "Fondo cielo",
+   "nombre_en": "Sky background",
    "precio": 30,
    "fondo": "cielo"
   },
@@ -114,6 +129,7 @@
    "id": "fondo-noche",
    "categoria": "fondo",
    "nombre": "Fondo noche",
+   "nombre_en": "Night background",
    "precio": 30,
    "fondo": "noche"
   },
@@ -121,6 +137,7 @@
    "id": "marco-oro",
    "categoria": "marco",
    "nombre": "Marco dorado",
+   "nombre_en": "Golden frame",
    "precio": 90,
    "marco": "oro"
   },
@@ -128,6 +145,7 @@
    "id": "marco-arcoiris",
    "categoria": "marco",
    "nombre": "Marco arcoíris",
+   "nombre_en": "Rainbow frame",
    "precio": 130,
    "marco": "arcoiris"
   },
@@ -135,6 +153,7 @@
    "id": "tema-bosque",
    "categoria": "tema",
    "nombre": "Tema Bosque",
+   "nombre_en": "Forest theme",
    "precio": 120,
    "tema": "bosque"
   },
@@ -142,6 +161,7 @@
    "id": "tema-oceano",
    "categoria": "tema",
    "nombre": "Tema Océano",
+   "nombre_en": "Ocean theme",
    "precio": 120,
    "tema": "oceano"
   },
@@ -149,6 +169,7 @@
    "id": "tema-atardecer",
    "categoria": "tema",
    "nombre": "Tema Atardecer",
+   "nombre_en": "Sunset theme",
    "precio": 120,
    "tema": "atardecer"
   },
@@ -156,6 +177,7 @@
    "id": "tema-neon",
    "categoria": "tema",
    "nombre": "Tema Neón",
+   "nombre_en": "Neon theme",
    "precio": 200,
    "tema": "neon"
   },
@@ -163,58 +185,71 @@
    "id": "protector-racha",
    "categoria": "consumible",
    "nombre": "Protector de racha",
+   "nombre_en": "Streak shield",
    "precio": 50,
-   "descripcion": "Cubre un día en el que no practiques (máximo 3)."
+   "descripcion": "Cubre un día en el que no practiques (máximo 3).",
+   "descripcion_en": "Covers a day you do not practice (maximum 3)."
   },
   {
    "id": "escena-espacio",
    "categoria": "escena",
    "nombre": "Escena Espacio",
+   "nombre_en": "Space scene",
    "precio": 140,
    "emoji": "🌌",
    "escena": "espacio",
-   "descripcion": "Tu cuarto flota entre las estrellas."
+   "descripcion": "Tu cuarto flota entre las estrellas.",
+   "descripcion_en": "Your room floats among the stars."
   },
   {
    "id": "escena-playa",
    "categoria": "escena",
    "nombre": "Escena Playa",
+   "nombre_en": "Beach scene",
    "precio": 110,
    "emoji": "🏖️",
    "escena": "playa",
-   "descripcion": "Sol, arena y mar."
+   "descripcion": "Sol, arena y mar.",
+   "descripcion_en": "Sun, sand and sea."
   },
   {
    "id": "escena-bosque",
    "categoria": "escena",
    "nombre": "Escena Bosque",
+   "nombre_en": "Forest scene",
    "precio": 110,
    "emoji": "🌳",
    "escena": "bosque",
-   "descripcion": "Un rincón verde y tranquilo."
+   "descripcion": "Un rincón verde y tranquilo.",
+   "descripcion_en": "A green, quiet corner."
   },
   {
    "id": "escena-ciudad",
    "categoria": "escena",
    "nombre": "Escena Ciudad",
+   "nombre_en": "City scene",
    "precio": 130,
    "emoji": "🌆",
    "escena": "ciudad",
-   "descripcion": "Atardecer sobre los edificios."
+   "descripcion": "Atardecer sobre los edificios.",
+   "descripcion_en": "Sunset over the buildings."
   },
   {
    "id": "escena-arcade",
    "categoria": "escena",
    "nombre": "Salón de juegos",
+   "nombre_en": "Arcade",
    "precio": 220,
    "emoji": "🕹️",
    "escena": "arcade",
-   "descripcion": "Luces de neón y diversión."
+   "descripcion": "Luces de neón y diversión.",
+   "descripcion_en": "Neon lights and fun."
   },
   {
    "id": "deco-planta",
    "categoria": "deco",
    "nombre": "Planta",
+   "nombre_en": "Plant",
    "precio": 35,
    "emoji": "🪴",
    "slot": "izquierda"
@@ -223,6 +258,7 @@
    "id": "deco-sofa",
    "categoria": "deco",
    "nombre": "Sofá",
+   "nombre_en": "Sofa",
    "precio": 120,
    "emoji": "🛋️",
    "slot": "izquierda"
@@ -231,6 +267,7 @@
    "id": "deco-cama",
    "categoria": "deco",
    "nombre": "Cama",
+   "nombre_en": "Bed",
    "precio": 150,
    "emoji": "🛏️",
    "slot": "izquierda"
@@ -239,6 +276,7 @@
    "id": "deco-arcade",
    "categoria": "deco",
    "nombre": "Máquina arcade",
+   "nombre_en": "Arcade machine",
    "precio": 200,
    "emoji": "🕹️",
    "slot": "derecha"
@@ -247,6 +285,7 @@
    "id": "deco-tele",
    "categoria": "deco",
    "nombre": "Televisor",
+   "nombre_en": "Television",
    "precio": 140,
    "emoji": "📺",
    "slot": "derecha"
@@ -255,6 +294,7 @@
    "id": "deco-piano",
    "categoria": "deco",
    "nombre": "Piano",
+   "nombre_en": "Piano",
    "precio": 170,
    "emoji": "🎹",
    "slot": "derecha"
@@ -263,6 +303,7 @@
    "id": "deco-cuadro",
    "categoria": "deco",
    "nombre": "Cuadro",
+   "nombre_en": "Painting",
    "precio": 45,
    "emoji": "🖼️",
    "slot": "pared"
@@ -271,6 +312,7 @@
    "id": "deco-reloj",
    "categoria": "deco",
    "nombre": "Reloj",
+   "nombre_en": "Clock",
    "precio": 40,
    "emoji": "🕰️",
    "slot": "pared"
@@ -279,6 +321,7 @@
    "id": "deco-bandera",
    "categoria": "deco",
    "nombre": "Bandera",
+   "nombre_en": "Flag",
    "precio": 50,
    "emoji": "🚩",
    "slot": "pared"
@@ -287,6 +330,7 @@
    "id": "deco-lampara",
    "categoria": "deco",
    "nombre": "Lámpara",
+   "nombre_en": "Lamp",
    "precio": 60,
    "emoji": "💡",
    "slot": "techo"
@@ -295,6 +339,7 @@
    "id": "deco-disco",
    "categoria": "deco",
    "nombre": "Bola de discoteca",
+   "nombre_en": "Disco ball",
    "precio": 110,
    "emoji": "🪩",
    "slot": "techo"
@@ -303,6 +348,7 @@
    "id": "deco-trofeo",
    "categoria": "deco",
    "nombre": "Trofeo",
+   "nombre_en": "Trophy",
    "precio": 80,
    "emoji": "🏆",
    "slot": "estante"
@@ -311,6 +357,7 @@
    "id": "deco-libros",
    "categoria": "deco",
    "nombre": "Libros",
+   "nombre_en": "Books",
    "precio": 40,
    "emoji": "📚",
    "slot": "estante"
@@ -319,6 +366,7 @@
    "id": "deco-globo",
    "categoria": "deco",
    "nombre": "Globo terráqueo",
+   "nombre_en": "Globe",
    "precio": 65,
    "emoji": "🌍",
    "slot": "estante"
@@ -327,78 +375,95 @@
    "id": "mas-gato",
    "categoria": "mascota",
    "nombre": "Gato",
+   "nombre_en": "Cat",
    "precio": 120,
    "emoji": "🐱",
    "especie": "gato",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-conejo",
    "categoria": "mascota",
    "nombre": "Conejo",
+   "nombre_en": "Rabbit",
    "precio": 120,
    "emoji": "🐰",
    "especie": "conejo",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-dragon",
    "categoria": "mascota",
    "nombre": "Dragón",
+   "nombre_en": "Dragon",
    "precio": 250,
    "emoji": "🐲",
    "especie": "dragon",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-robot",
    "categoria": "mascota",
    "nombre": "Robot",
+   "nombre_en": "Robot",
    "precio": 300,
    "emoji": "🤖",
    "especie": "robot",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-buho",
    "categoria": "mascota",
    "nombre": "Búho",
+   "nombre_en": "Owl",
    "precio": 150,
    "emoji": "🦉",
    "especie": "buho",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-pinguino",
    "categoria": "mascota",
    "nombre": "Pingüino",
+   "nombre_en": "Penguin",
    "precio": 150,
    "emoji": "🐧",
    "especie": "pinguino",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-leon",
    "categoria": "mascota",
    "nombre": "León",
+   "nombre_en": "Lion",
    "precio": 200,
    "emoji": "🦁",
    "especie": "leon",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "mas-unicornio",
    "categoria": "mascota",
    "nombre": "Unicornio",
+   "nombre_en": "Unicorn",
    "precio": 320,
    "emoji": "🦄",
    "especie": "unicornio",
-   "descripcion": "Una mascota nueva para personalizar."
+   "descripcion": "Una mascota nueva para personalizar.",
+   "descripcion_en": "A new pet to personalize."
   },
   {
    "id": "acc-10",
    "categoria": "accesorio",
    "nombre": "Moño",
+   "nombre_en": "Bow",
    "precio": 55,
    "emoji": "🎀",
    "slot": "cabeza"
@@ -407,6 +472,7 @@
    "id": "acc-11",
    "categoria": "accesorio",
    "nombre": "Sombrero de mago",
+   "nombre_en": "Wizard hat",
    "precio": 110,
    "emoji": "🧙",
    "slot": "cabeza"
@@ -415,6 +481,7 @@
    "id": "acc-12",
    "categoria": "accesorio",
    "nombre": "Antifaz de héroe",
+   "nombre_en": "Hero mask",
    "precio": 65,
    "emoji": "🥸",
    "slot": "cara"
@@ -423,6 +490,7 @@
    "id": "acc-13",
    "categoria": "accesorio",
    "nombre": "Bufanda",
+   "nombre_en": "Scarf",
    "precio": 60,
    "emoji": "🧣",
    "slot": "cuello"
@@ -431,6 +499,7 @@
    "id": "acc-14",
    "categoria": "accesorio",
    "nombre": "Alas de ángel",
+   "nombre_en": "Angel wings",
    "precio": 180,
    "emoji": "🪽",
    "slot": "espalda"

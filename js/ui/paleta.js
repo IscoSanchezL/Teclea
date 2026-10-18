@@ -11,17 +11,18 @@ import { abrirCapa } from './overlay.js';
 import { alternarTema } from './theme.js';
 import { sincronizarPrefs } from './sync-prefs.js';
 import { cerrarSesion } from '../auth/auth.js';
+import { t } from '../i18n/index.js';
 
 const sinTildes = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function comandos() {
   const lista = rutasVisibles().map(({ ruta, item }) => ({
-    icono: item.icono, texto: item.etiqueta, pista: 'Ir a', accion: () => navegar(ruta.path),
+    icono: item.icono, texto: item.etiqueta, pista: t('paleta.ir'), accion: () => navegar(ruta.path),
   }));
   lista.push(
-    { icono: 'moon', texto: 'Cambiar tema claro / oscuro', pista: 'Acción', accion: () => alternarTema(sincronizarPrefs) },
-    { icono: 'book', texto: 'Aviso de privacidad', pista: 'Ir a', accion: () => navegar('/privacidad') },
-    { icono: 'logout', texto: 'Cerrar sesión', pista: 'Cuenta', accion: async () => { await cerrarSesion(); navegar('/', { reemplazar: true }); } });
+    { icono: 'moon', texto: t('paleta.tema'), pista: t('paleta.accion'), accion: () => alternarTema(sincronizarPrefs) },
+    { icono: 'book', texto: t('ruta.privacidad'), pista: t('paleta.ir'), accion: () => navegar('/privacidad') },
+    { icono: 'logout', texto: t('nav.cerrarSesion'), pista: t('paleta.cuenta'), accion: async () => { await cerrarSesion(); navegar('/', { reemplazar: true }); } });
   return lista;
 }
 
@@ -30,7 +31,7 @@ function abrir() {
   const todos = comandos();
   let visibles = todos, indice = 0, capa;
 
-  const input = h('input', { class: 'paleta__input', type: 'text', placeholder: 'Escribe para buscar…', 'aria-label': 'Buscar sección o acción', autocomplete: 'off', spellcheck: 'false' });
+  const input = h('input', { class: 'paleta__input', type: 'text', placeholder: t('paleta.placeholder'), 'aria-label': t('paleta.aria'), autocomplete: 'off', spellcheck: 'false' });
   const lista = h('ul', { class: 'paleta__lista', role: 'listbox' });
 
   const pintar = () => {
@@ -38,7 +39,7 @@ function abrir() {
       class: `paleta__item ${i === indice ? 'paleta__item--on' : ''}`, role: 'option', 'aria-selected': String(i === indice),
       onclick: () => elegir(i), onpointermove: () => { if (indice !== i) { indice = i; pintar(); } },
     }, icono(c.icono, { tam: 20 }), h('span', {}, c.texto), h('small', {}, c.pista))));
-    if (!visibles.length) lista.append(h('li', { class: 'paleta__vacio' }, 'Sin resultados'));
+    if (!visibles.length) lista.append(h('li', { class: 'paleta__vacio' }, t('paleta.sinResultados')));
   };
   const elegir = (i) => { const c = visibles[i]; if (!c) return; capa.cerrar(); setTimeout(c.accion, 120); };
 
@@ -53,7 +54,7 @@ function abrir() {
     else if (e.key === 'Enter') { e.preventDefault(); elegir(indice); }
   });
 
-  capa = abrirCapa({ titulo: 'Búsqueda rápida', tipo: 'paleta', contenido: h('div', {}, input, lista) });
+  capa = abrirCapa({ titulo: t('paleta.titulo'), tipo: 'paleta', contenido: h('div', {}, input, lista) });
   pintar();
 }
 

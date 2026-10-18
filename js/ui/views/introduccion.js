@@ -11,6 +11,7 @@ import { crearManos } from '../../lessons/manos.js';
 import { confeti } from '../confeti.js';
 import { sonido } from '../sonido.js';
 import { guardarPerfil } from '../../auth/auth.js';
+import { t } from '../../i18n/index.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const s = (t, a = {}, ...hijos) => { const e = document.createElementNS(NS, t); for (const [k, v] of Object.entries(a)) e.setAttribute(k, v); hijos.forEach((x) => e.append(x)); return e; };
@@ -48,18 +49,18 @@ function figura({ espalda = 'recta', pies = 'suelo', codos = 90, pantalla = 'ojo
 }
 
 const PUNTOS = [
-  { id: 'espalda', titulo: 'Espalda recta', texto: 'Siéntate con la espalda recta y apoyada en el respaldo. Así no te cansas.', bien: { espalda: 'recta' }, mal: { espalda: 'encorvada' }, malTxt: 'Encorvarse cansa la espalda y el cuello.' },
-  { id: 'pies', titulo: 'Pies en el suelo', texto: 'Los dos pies planos en el piso, sin cruzar las piernas.', bien: { pies: 'suelo' }, mal: { pies: 'cruzados' }, malTxt: 'Con los pies en el aire o cruzados pierdes equilibrio.' },
-  { id: 'codos', titulo: 'Codos en ángulo recto (90°)', texto: 'Tus codos se doblan como una L: ni muy altos ni muy estirados.', bien: { codos: 90 }, mal: { codos: 160 }, malTxt: 'Con los brazos estirados te cansas rápido y fallas más.' },
-  { id: 'pantalla', titulo: 'Pantalla a la altura de los ojos', texto: 'Mira la pantalla de frente, a un brazo de distancia.', bien: { pantalla: 'ojos' }, mal: { pantalla: 'baja' }, malTxt: 'Mirar hacia abajo dobla el cuello. ¡Sube la pantalla!' },
-  { id: 'munecas', titulo: 'Muñecas flotando', texto: 'Las muñecas quedan en el aire, rectas. Solo tus dedos tocan las teclas.', bien: { munecas: 'flotan' }, mal: { munecas: 'apoyadas' }, malTxt: 'Apoyar las muñecas fuerte puede lastimarlas.' },
+  { id: 'espalda', get titulo() { return t('intro.p.espalda.titulo'); }, get texto() { return t('intro.p.espalda.texto'); }, bien: { espalda: 'recta' }, mal: { espalda: 'encorvada' }, get malTxt() { return t('intro.p.espalda.mal'); } },
+  { id: 'pies', get titulo() { return t('intro.p.pies.titulo'); }, get texto() { return t('intro.p.pies.texto'); }, bien: { pies: 'suelo' }, mal: { pies: 'cruzados' }, get malTxt() { return t('intro.p.pies.mal'); } },
+  { id: 'codos', get titulo() { return t('intro.p.codos.titulo'); }, get texto() { return t('intro.p.codos.texto'); }, bien: { codos: 90 }, mal: { codos: 160 }, get malTxt() { return t('intro.p.codos.mal'); } },
+  { id: 'pantalla', get titulo() { return t('intro.p.pantalla.titulo'); }, get texto() { return t('intro.p.pantalla.texto'); }, bien: { pantalla: 'ojos' }, mal: { pantalla: 'baja' }, get malTxt() { return t('intro.p.pantalla.mal'); } },
+  { id: 'munecas', get titulo() { return t('intro.p.munecas.titulo'); }, get texto() { return t('intro.p.munecas.texto'); }, bien: { munecas: 'flotan' }, mal: { munecas: 'apoyadas' }, get malTxt() { return t('intro.p.munecas.mal'); } },
 ];
 
-const REGLAS = [
-  ['No mires el teclado', 'Tus dedos aprenden dónde está cada tecla. Mira solo la pantalla.', 'eye'],
-  ['Ritmo antes que velocidad', 'Escribe parejo, como un tambor. La velocidad llega sola.', 'bolt'],
-  ['Precisión primero', 'Equivocarte frena más que ir despacio. Cada tecla cuenta.', 'target'],
-  ['Practica un poquito cada día', 'Diez minutos diarios valen más que una hora una vez por semana.', 'flame'],
+const reglas4 = () => [
+  [t('intro.r1.titulo'), t('intro.r1.texto'), 'eye'],
+  [t('intro.r2.titulo'), t('intro.r2.texto'), 'bolt'],
+  [t('intro.r3.titulo'), t('intro.r3.texto'), 'target'],
+  [t('intro.r4.titulo'), t('intro.r4.texto'), 'flame'],
 ];
 
 export async function render() {
@@ -68,8 +69,8 @@ export async function render() {
   const total = PUNTOS.length + 2; // postura(5) + manos + reglas
 
   const barra = () => h('div', { class: 'intro-curso__barra', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': total, 'aria-valuenow': paso + 1 }, h('i', { style: { width: `${((paso + 1) / total) * 100}%` } }));
-  const nav = (siguiente, textoSig = 'Continuar', deshabilitado = false) => h('div', { class: 'fila fila--fin' },
-    paso > 0 ? h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ir(paso - 1) }, 'Atrás') : null,
+  const nav = (siguiente, textoSig = t('intro.continuar'), deshabilitado = false) => h('div', { class: 'fila fila--fin' },
+    paso > 0 ? h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ir(paso - 1) }, t('intro.atras')) : null,
     h('button', { class: 'btn btn--primary btn--lg', type: 'button', disabled: deshabilitado, onclick: siguiente }, textoSig, icono('arrow', { tam: 18 })));
 
   function postura(i) {
@@ -80,18 +81,18 @@ export async function render() {
     const resolver = (diceBien) => {
       const correcto = diceBien === !mostrarMal;
       respuesta.className = `quiz__resp ${correcto ? 'quiz__resp--ok' : 'quiz__resp--no'}`;
-      respuesta.textContent = correcto ? (mostrarMal ? `¡Correcto! Está mal. ${p.malTxt}` : '¡Correcto! Así se hace.') : (mostrarMal ? `Mira otra vez: esta postura está mal. ${p.malTxt}` : 'Casi: esta es la postura correcta.');
+      respuesta.textContent = correcto ? (mostrarMal ? t('intro.resp.okMal', { txt: p.malTxt }) : t('intro.resp.okBien')) : (mostrarMal ? t('intro.resp.noMal', { txt: p.malTxt }) : t('intro.resp.noBien'));
       if (correcto) { aciertos.add(i); sonido.acierto(); } else sonido.error();
       btnSig.disabled = false;
     };
-    const btnSig = h('button', { class: 'btn btn--primary btn--lg', type: 'button', disabled: true, onclick: () => ir(paso + 1) }, 'Continuar', icono('arrow', { tam: 18 }));
+    const btnSig = h('button', { class: 'btn btn--primary btn--lg', type: 'button', disabled: true, onclick: () => ir(paso + 1) }, t('intro.continuar'), icono('arrow', { tam: 18 }));
     cont.replaceChildren(barra(), h('section', { class: 'card intro-curso__card' },
-      h('span', { class: 'etiqueta' }, `Postura ${i + 1} de ${PUNTOS.length}`), h('h1', {}, p.titulo), h('p', {}, p.texto),
-      h('div', { class: 'quiz' }, h('figure', { class: 'quiz__fig' }, figura(params), h('figcaption', {}, '¿Esta postura está bien o mal?')),
+      h('span', { class: 'etiqueta' }, t('intro.posturaN', { i: i + 1, n: PUNTOS.length })), h('h1', {}, p.titulo), h('p', {}, p.texto),
+      h('div', { class: 'quiz' }, h('figure', { class: 'quiz__fig' }, figura(params), h('figcaption', {}, t('intro.figura'))),
         h('div', { class: 'quiz__botones' },
-          h('button', { class: 'btn btn--mint btn--lg', type: 'button', onclick: () => resolver(true) }, icono('check', { tam: 20 }), 'Está bien'),
-          h('button', { class: 'btn btn--coral btn--lg', type: 'button', onclick: () => resolver(false) }, icono('x', { tam: 20 }), 'Está mal'), respuesta)),
-      h('div', { class: 'fila fila--fin' }, paso > 0 ? h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ir(paso - 1) }, 'Atrás') : null, btnSig)));
+          h('button', { class: 'btn btn--mint btn--lg', type: 'button', onclick: () => resolver(true) }, icono('check', { tam: 20 }), t('intro.estaBien')),
+          h('button', { class: 'btn btn--coral btn--lg', type: 'button', onclick: () => resolver(false) }, icono('x', { tam: 20 }), t('intro.estaMal')), respuesta)),
+      h('div', { class: 'fila fila--fin' }, paso > 0 ? h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ir(paso - 1) }, t('intro.atras')) : null, btnSig)));
   }
 
   function manos() {
@@ -99,20 +100,20 @@ export async function render() {
     let i = 0; m.resaltar(orden[0]);
     const id = setInterval(() => { if (!cont.isConnected) return clearInterval(id); i++; m.resaltar(orden[i % orden.length]); }, 1100);
     cont.replaceChildren(barra(), h('section', { class: 'card intro-curso__card' },
-      h('span', { class: 'etiqueta' }, 'Posición de las manos'), h('h1', {}, 'La fila base: tu casa'),
-      h('p', {}, 'Tus dedos descansan sobre ', h('strong', {}, 'A S D F'), ' (mano izquierda) y ', h('strong', {}, 'J K L Ñ'), ' (mano derecha). Los pulgares están sobre la barra espaciadora.'),
-      h('p', { class: 'intro__tip' }, icono('bulb', { tam: 20 }), 'Las teclas F y J tienen un puntito en relieve: sirven para encontrar la posición sin mirar.'),
-      m.el, h('ul', { class: 'leyenda-dedos' }, [['menique', 'Meñique'], ['anular', 'Anular'], ['medio', 'Medio'], ['indice', 'Índice'], ['pulgar', 'Pulgar']].map(([d, n]) => h('li', {}, h('i', { class: `dedo-${d}` }), n))),
+      h('span', { class: 'etiqueta' }, t('intro.manos.etq')), h('h1', {}, t('intro.manos.titulo')),
+      h('p', {}, t('intro.manos.a'), ' ', h('strong', {}, 'A S D F'), ' ', t('intro.manos.b'), ' ', h('strong', {}, 'J K L Ñ'), ' ', t('intro.manos.c')),
+      h('p', { class: 'intro__tip' }, icono('bulb', { tam: 20 }), t('intro.manos.tip')),
+      m.el, h('ul', { class: 'leyenda-dedos' }, ['menique', 'anular', 'medio', 'indice', 'pulgar'].map((d) => h('li', {}, h('i', { class: `dedo-${d}` }), t(`dedo.${d}`)))),
       nav(() => ir(paso + 1))));
   }
 
   function reglas() {
     cont.replaceChildren(barra(), h('section', { class: 'card intro-curso__card' },
-      h('div', { class: 'fila' }, mascota('celebra', { tam: 'md' }), h('div', {}, h('span', { class: 'etiqueta' }, 'Reglas de oro'), h('h1', {}, '¡Ya estás listo!'))),
-      h('ul', { class: 'reglas' }, REGLAS.map(([t, x, ic]) => h('li', {}, h('span', { class: 'reglas__ic' }, icono(ic, { tam: 22 })), h('div', {}, h('strong', {}, t), h('p', {}, x))))),
-      h('p', { class: 'suave' }, `Acertaste ${aciertos.size} de ${PUNTOS.length} preguntas de postura.`),
-      h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ir(paso - 1) }, 'Atrás'),
-        h('button', { class: 'btn btn--sun btn--lg', type: 'button', onclick: async () => { try { await guardarPerfil({ prefs: { ...state.prefs, introHecha: true } }); } catch { /* sin red: se repite después */ } confeti(); navegar('/aprende'); } }, icono('play', { tam: 20 }), '¡A la primera lección!'))));
+      h('div', { class: 'fila' }, mascota('celebra', { tam: 'md' }), h('div', {}, h('span', { class: 'etiqueta' }, t('intro.reglas.etq')), h('h1', {}, t('intro.reglas.titulo')))),
+      h('ul', { class: 'reglas' }, reglas4().map(([tit, x, ic]) => h('li', {}, h('span', { class: 'reglas__ic' }, icono(ic, { tam: 22 })), h('div', {}, h('strong', {}, tit), h('p', {}, x))))),
+      h('p', { class: 'suave' }, t('intro.reglas.aciertos', { a: aciertos.size, b: PUNTOS.length })),
+      h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ir(paso - 1) }, t('intro.atras')),
+        h('button', { class: 'btn btn--sun btn--lg', type: 'button', onclick: async () => { try { await guardarPerfil({ prefs: { ...state.prefs, introHecha: true } }); } catch { /* sin red: se repite después */ } confeti(); navegar('/aprende'); } }, icono('play', { tam: 20 }), t('intro.reglas.alaLeccion')))));
   }
 
   function ir(n) { paso = Math.max(0, Math.min(total - 1, n)); if (paso < PUNTOS.length) postura(paso); else if (paso === PUNTOS.length) manos(); else reglas(); window.scrollTo({ top: 0 }); }

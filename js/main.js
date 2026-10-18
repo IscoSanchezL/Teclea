@@ -6,7 +6,8 @@
 import { aplicarMarca, cargarMarca } from './core/marca.js';
 import { CONFIG } from './core/config.js';
 import { state } from './core/state.js';
-import { iniciarRouter } from './core/router.js';
+import { iniciarRouter, refrescar } from './core/router.js';
+import { montar as montarIdioma, alCambiar } from './i18n/index.js';
 import { iniciarTema, aplicarEstiloUsuario } from './ui/theme.js';
 import { cargarManifiestoAssets } from './ui/art.js';
 import { iniciarNav, marcarRutaActiva, redibujarNav } from './ui/nav.js';
@@ -19,6 +20,7 @@ import { iniciarRendimiento, vigilarFluidez } from './core/rendimiento.js';
 
 async function arrancar() {
   iniciarRendimiento();
+  montarIdioma(); // <html lang> y textos estáticos de index.html en el idioma guardado
   aplicarMarca();
   iniciarTema();
 
@@ -31,6 +33,8 @@ async function arrancar() {
   aplicarEstiloUsuario(state.user);
   iniciarNav();
   document.addEventListener('teclea:marca', redibujarNav);
+  // Cambio de idioma sin recargar: título del documento, menús y vista actual se vuelven a pintar.
+  alCambiar(() => { aplicarMarca(); refrescar(); });
   cargarMarca(); // en segundo plano: se pinta con la caché local y se actualiza si cambió
   iniciarRouter({ onRuta: (ruta) => marcarRutaActiva(ruta.path) });
 

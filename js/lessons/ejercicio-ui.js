@@ -15,6 +15,7 @@ import { crearTeclado } from './teclado-virtual.js';
 import { vincularEntrada } from './entrada.js';
 import { personajeSVG, especieDe } from '../ui/personaje.js';
 import { confeti } from '../ui/confeti.js';
+import { t } from '../i18n/index.js';
 
 const fmt = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 
@@ -26,8 +27,8 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
   // ── Compañero (solo 2.º y 3.º): tu mascota anima, celebra cada racha de aciertos y consuela al fallar ──
   const infantil = document.documentElement.dataset.estilo === 'ludico';
   let amigo = null, burbuja = null, racha = 0, hablaFin = 0, escena3d = null, destruido = false;
-  const FRASES_RACHA = ['¡Súper! 🌟', '¡Wow, qué rápido! 🚀', '¡Sigue así! 💪', '¡Eres genial! 🎉', '¡Increíble! ✨', '¡Qué bien escribes! 👏'];
-  const FRASES_ERROR = ['¡Casi! Tú puedes 💪', 'Sin problema, ¡otra vez! 😊', '¡Con calma, vas muy bien! 🌈'];
+  const FRASES_RACHA = [1, 2, 3, 4, 5, 6].map((n) => t(`ej.frase.racha${n}`));
+  const FRASES_ERROR = [1, 2, 3].map((n) => t(`ej.frase.err${n}`));
   const azar = (l) => l[Math.floor(Math.random() * l.length)];
   function decir(texto, estado, ms = 1600) {
     if (!amigo) return;
@@ -37,10 +38,10 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
   }
   function animarAmigo(ev) {
     if (!infantil || !amigo) return;
-    if (ev.tipo === 'inicio') decir('¡Vamos, tú puedes! 🚀', 'salta', 1400);
+    if (ev.tipo === 'inicio') decir(t('ej.frase.inicio'), 'salta', 1400);
     else if (ev.tipo === 'avance') { racha++; if (racha % 10 === 0) { decir(azar(FRASES_RACHA), 'salta'); sonido.acierto(); const r = amigo.getBoundingClientRect(); confeti({ cantidad: 28, duracion: 1300, origen: { x: r.left + r.width / 2, y: r.top + r.height / 2 } }); } }
     else if (ev.tipo === 'error') { racha = 0; decir(azar(FRASES_ERROR), 'ay', 1500); }
-    else if (ev.tipo === 'fin') decir('¡Lo lograste! 🎊', 'baila', 2500);
+    else if (ev.tipo === 'fin') decir(t('ej.frase.fin'), 'baila', 2500);
   }
 
   const motor = new MotorEscritura({
@@ -51,7 +52,7 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
       if (ev.tipo === 'error' && ev.avanzo) teclado.siguiente(motor.actual ?? null);
       if (ev.tipo === 'inicio') raiz.classList.add('ej--en-curso');
       if (ev.tipo === 'fin') terminar();
-      if (ev.tipo === 'pegado') { aviso.textContent = 'Escribe tú mismo el texto: pegar no está permitido 🙂'; aviso.classList.add('ej__aviso--alerta'); }
+      if (ev.tipo === 'pegado') { aviso.textContent = t('ej.pegar'); aviso.classList.add('ej__aviso--alerta'); }
     },
   });
 
@@ -61,18 +62,18 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
 
   // ── HUD ──
   const chipTiempo = h('span', { class: 'ej__dato' }, icono('clock', { tam: 18 }), h('b', {}, seg ? fmt(seg) : '0:00'));
-  const chipPpm = h('span', { class: 'ej__dato' }, h('small', {}, 'PPM'), h('b', {}, '0'));
-  const chipPre = h('span', { class: 'ej__dato' }, h('small', {}, 'Precisión'), h('b', {}, '100%'));
-  const chipErr = h('span', { class: 'ej__dato ej__dato--err' }, h('small', {}, 'Errores'), h('b', {}, '0'));
-  const bPausa = h('button', { class: 'btn btn--suave btn--sm', type: 'button', 'aria-label': 'Pausar', onclick: () => pausar() }, icono('pause', { tam: 16 }), 'Pausa');
-  const bReiniciar = h('button', { class: 'btn btn--suave btn--sm', type: 'button', 'aria-label': 'Reiniciar el ejercicio', onclick: () => reiniciar() }, icono('refresh', { tam: 16 }), 'Reiniciar');
-  const bSalir = alSalir ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: alSalir }, icono('x', { tam: 16 }), 'Salir') : null;
+  const chipPpm = h('span', { class: 'ej__dato' }, h('small', {}, t('ej.ppm')), h('b', {}, '0'));
+  const chipPre = h('span', { class: 'ej__dato' }, h('small', {}, t('ej.precision')), h('b', {}, '100%'));
+  const chipErr = h('span', { class: 'ej__dato ej__dato--err' }, h('small', {}, t('ej.errores')), h('b', {}, '0'));
+  const bPausa = h('button', { class: 'btn btn--suave btn--sm', type: 'button', 'aria-label': t('ej.pausar'), onclick: () => pausar() }, icono('pause', { tam: 16 }), t('ej.pausa'));
+  const bReiniciar = h('button', { class: 'btn btn--suave btn--sm', type: 'button', 'aria-label': t('ej.reiniciarAria'), onclick: () => reiniciar() }, icono('refresh', { tam: 16 }), t('ej.reiniciar'));
+  const bSalir = alSalir ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: alSalir }, icono('x', { tam: 16 }), t('ej.salir')) : null;
   const hud = h('div', { class: 'ej__hud' }, h('div', { class: 'ej__datos' }, chipTiempo, chipPpm, chipPre, chipErr), h('div', { class: 'fila' }, bPausa, bReiniciar, bSalir));
 
-  const aviso = h('p', { class: 'ej__aviso', role: 'status', 'aria-live': 'polite' }, 'Empieza a escribir cuando quieras.');
-  const pausaUI = h('div', { class: 'ej__pausa', hidden: true, role: 'dialog', 'aria-label': 'Pausa' },
-    h('strong', {}, 'En pausa'), h('p', {}, 'Haz clic o presiona una tecla para continuar.'),
-    h('button', { class: 'btn btn--primary', type: 'button', onclick: () => reanudar() }, icono('play', { tam: 18 }), 'Continuar'));
+  const aviso = h('p', { class: 'ej__aviso', role: 'status', 'aria-live': 'polite' }, t('ej.empieza'));
+  const pausaUI = h('div', { class: 'ej__pausa', hidden: true, role: 'dialog', 'aria-label': t('ej.pausa') },
+    h('strong', {}, t('ej.enPausa')), h('p', {}, t('ej.pausaTexto')),
+    h('button', { class: 'btn btn--primary', type: 'button', onclick: () => reanudar() }, icono('play', { tam: 18 }), t('ej.continuar')));
   const zonaTexto = h('div', { class: `ej__texto card ${grande ? 'ej__texto--grande' : ''}` }, vista.el, pausaUI);
   if (infantil) {
     const u = state.user;
@@ -89,7 +90,7 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
       }).catch((er) => console.warn('[3d]', er));
     }
   }
-  const raiz = h('section', { class: 'ej', 'aria-label': titulo || 'Ejercicio' }, hud, zonaTexto, aviso, teclado.el, amigo);
+  const raiz = h('section', { class: 'ej', 'aria-label': titulo || t('ej.ejercicio') }, hud, zonaTexto, aviso, teclado.el, amigo);
 
   entrada = vincularEntrada({
     motor, teclado, zona: zonaTexto,
@@ -116,14 +117,14 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
     raiz.classList.add('ej--fin');
     teclado.siguiente(null);
     sonido.fin();
-    aviso.textContent = '¡Listo! Calculando tu resultado…';
+    aviso.textContent = t('ej.listo');
     // un respiro para ver el último carácter pintado
     setTimeout(() => alFin({ resultado: motor.resultado(), motor }), 450);
   }
 
   function reiniciar() {
     clearInterval(intervalo); motor.reiniciar(); vista.reiniciar();
-    raiz.classList.remove('ej--en-curso', 'ej--fin'); pausaUI.hidden = true; aviso.textContent = 'Empieza a escribir cuando quieras.';
+    raiz.classList.remove('ej--en-curso', 'ej--fin'); pausaUI.hidden = true; aviso.textContent = t('ej.empieza');
     chipTiempo.classList.remove('ej__dato--urgente'); actualizarHud(); teclado.siguiente(motor.actual ?? null);
     intervalo = setInterval(actualizarHud, 200); entrada.enfocar();
   }

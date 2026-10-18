@@ -6,6 +6,7 @@
 import { CONFIG } from './config.js';
 import { almacen } from './utils.js';
 import { aplicarPaleta, hexValido } from './paleta.js';
+import { t } from '../i18n/index.js';
 
 const CLAVE = 'teclea:marca';
 const CAMPOS = ['nombre', 'lema', 'colegio', 'logo', 'hero', 'colores'];
@@ -17,9 +18,13 @@ export const marca = {
 const coloresOk = (c) => (c && hexValido(c.primario) && hexValido(c.acento) ? { primario: c.primario.toUpperCase(), acento: c.acento.toUpperCase() } : null);
 aplicarPaleta(coloresOk(marca.colores)); // desde la caché local: los colores se ven desde el primer pintado
 
+/** Lema y colegio: si siguen siendo los valores por defecto se traducen; si el administrador los cambió, se muestran tal cual. */
+export const lemaMarca = () => (marca.lema === CONFIG.lema ? t('marca.lema') : marca.lema);
+export const colegioMarca = () => (marca.colegio === CONFIG.colegio ? t('marca.colegio') : marca.colegio);
+
 /** Aplica nombre y logo al documento (título de pestaña e ícono). */
 export function aplicarMarca() {
-  document.title = `${marca.nombre} · ${marca.lema}`;
+  document.title = `${marca.nombre} · ${lemaMarca()}`;
   const icono = document.querySelector('link[rel="icon"]');
   if (icono && marca.logo) { icono.href = marca.logo; icono.type = ''; }
   aplicarPaleta(coloresOk(marca.colores));

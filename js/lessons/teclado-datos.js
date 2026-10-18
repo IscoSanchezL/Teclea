@@ -4,17 +4,19 @@
  * (incluye Shift, AltGr y teclas muertas para á é í ó ú ü).
  */
 
+import { t } from '../i18n/index.js';
+
 export const DEDOS = {
-  'menique-izq': { nombre: 'meñique izquierdo', color: 'menique' },
-  'anular-izq': { nombre: 'anular izquierdo', color: 'anular' },
-  'medio-izq': { nombre: 'dedo medio izquierdo', color: 'medio' },
-  'indice-izq': { nombre: 'índice izquierdo', color: 'indice' },
-  'indice-der': { nombre: 'índice derecho', color: 'indice' },
-  'medio-der': { nombre: 'dedo medio derecho', color: 'medio' },
-  'anular-der': { nombre: 'anular derecho', color: 'anular' },
-  'menique-der': { nombre: 'meñique derecho', color: 'menique' },
-  'pulgar-izq': { nombre: 'pulgar izquierdo', color: 'pulgar' },
-  'pulgar-der': { nombre: 'pulgar derecho', color: 'pulgar' },
+  'menique-izq': { get nombre() { return t('dedo.menique-izq'); }, color: 'menique' },
+  'anular-izq': { get nombre() { return t('dedo.anular-izq'); }, color: 'anular' },
+  'medio-izq': { get nombre() { return t('dedo.medio-izq'); }, color: 'medio' },
+  'indice-izq': { get nombre() { return t('dedo.indice-izq'); }, color: 'indice' },
+  'indice-der': { get nombre() { return t('dedo.indice-der'); }, color: 'indice' },
+  'medio-der': { get nombre() { return t('dedo.medio-der'); }, color: 'medio' },
+  'anular-der': { get nombre() { return t('dedo.anular-der'); }, color: 'anular' },
+  'menique-der': { get nombre() { return t('dedo.menique-der'); }, color: 'menique' },
+  'pulgar-izq': { get nombre() { return t('dedo.pulgar-izq'); }, color: 'pulgar' },
+  'pulgar-der': { get nombre() { return t('dedo.pulgar-der'); }, color: 'pulgar' },
 };
 
 /** Dedo asignado a cada tecla física (por event.code). */

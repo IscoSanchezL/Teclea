@@ -3,24 +3,48 @@
  * (Lógica pura salvo `fetch`, para poder probarla en Node.)
  */
 import { perfilDeGrado } from '../core/grados.js';
+import { idioma } from '../i18n/index.js';
 
 const cacheMundos = new Map();
-let cacheIndice = null;
+const cacheIndice = new Map();
 
 /** Base de la URL de datos (en Node se inyecta un lector de archivos). */
 let cargador = async (ruta) => { const r = await fetch(ruta); if (!r.ok) throw new Error(`HTTP ${r.status} en ${ruta}`); return r.json(); };
-export const _inyectarCargador = (f) => { cargador = f; };
+export const _inyectarCargador = (f) => { cargador = f; cacheMundos.clear(); cacheIndice.clear(); };
 
-/** Índice liviano de TODAS las lecciones (≈ 15 KB). */
+/** Datos en inglés (data/en/lessons/): títulos, objetivos, tips y, cuando cambian, los textos de los ejercicios. Si no están, se usa el español. */
+const cargarEN = async (ruta) => { try { return await cargador(ruta); } catch { return null; } };
+
+/** Índice liviano de TODAS las lecciones (≈ 15 KB), con los títulos en el idioma activo. */
 export async function cargarIndice() {
-  if (!cacheIndice) cacheIndice = (await cargador('data/lessons/index.json')).lecciones;
-  return cacheIndice;
+  const lang = idioma();
+  if (!cacheIndice.has(lang)) {
+    cacheIndice.set(lang, (async () => {
+      const base = (await cargador('data/lessons/index.json')).lecciones;
+      if (lang !== 'en') return base;
+      const en = await cargarEN('data/en/lessons/index.json');
+      const titulos = new Map((en?.lecciones || []).map((l) => [l.id, l.titulo]));
+      return base.map((l) => (titulos.has(l.id) ? { ...l, titulo: titulos.get(l.id) } : l));
+    })());
+  }
+  return cacheIndice.get(lang);
 }
 
-/** Lecciones completas de un mundo (≈ 12 KB). */
+/** Lecciones completas de un mundo (≈ 12 KB) en el idioma activo. La lógica (teclas, metas, flags) es la misma; solo cambian los textos. */
 export async function cargarMundo(n) {
-  if (!cacheMundos.has(n)) cacheMundos.set(n, cargador(`data/lessons/m${n}.json`));
-  return cacheMundos.get(n);
+  const lang = idioma();
+  const clave = `${lang}:${n}`;
+  if (!cacheMundos.has(clave)) {
+    cacheMundos.set(clave, (async () => {
+      const base = await cargador(`data/lessons/m${n}.json`);
+      if (lang !== 'en') return base;
+      const en = await cargarEN(`data/en/lessons/m${n}.json`);
+      if (!en) return base;
+      const por = new Map(en.lecciones.map((l) => [l.id, l]));
+      return { ...base, lecciones: base.lecciones.map((l) => { const o = por.get(l.id); return o ? { ...l, titulo: o.titulo, objetivo: o.objetivo, tip: o.tip, ...(o.ejercicios ? { ejercicios: o.ejercicios } : {}) } : l; }) };
+    })());
+  }
+  return cacheMundos.get(clave);
 }
 
 export async function cargarLeccion(id) {

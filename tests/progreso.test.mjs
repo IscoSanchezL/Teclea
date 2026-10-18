@@ -9,6 +9,7 @@ import { state } from '../js/core/state.js';
 import * as store from '../js/db/store.js';
 import * as P from '../js/db/progreso.js';
 import { MotorEscritura } from '../js/lessons/motor.js';
+import { poner } from '../js/i18n/index.js'; poner('es'); // los mensajes que se comprueban están en español
 
 let ok = 0, mal = 0;
 const t = (n, c, extra = '') => { c ? ok++ : mal++; console.log(`  ${c ? '✓' : '✗'} ${n}${c ? '' : '  ' + extra}`); };

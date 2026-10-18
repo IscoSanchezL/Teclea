@@ -21,8 +21,10 @@ import { cuarto } from '../cuarto.js';
 import { cargarTienda } from '../../db/tienda.js';
 import { icono } from '../icons.js';
 import { nivelPorXP } from '../../core/levels.js';
+import { t, locale } from '../../i18n/index.js';
+import { selectorIdioma } from '../idioma.js';
 
-const ROLES = { estudiante: 'Estudiante', docente: 'Docente', admin: 'Administración' };
+const rolTxt = (r) => (['estudiante', 'docente', 'admin'].includes(r) ? t(`rol.${r}`) : r);
 
 const cambiar = (parche) => cambiarPrefs(parche, { alGuardar: sincronizarPrefs });
 
@@ -32,11 +34,11 @@ export async function render() {
   const nivel = nivelPorXP(u.xp);
 
   // ── Cabecera de perfil ──
-  const apodo = campo({ etiqueta: 'Mi nombre en la plataforma', value: u.apodo, maxlength: 30, autocomplete: 'off' });
+  const apodo = campo({ etiqueta: t('perfil.miNombre'), value: u.apodo, maxlength: 30, autocomplete: 'off' });
   apodo.input.addEventListener('change', async () => {
     const v = apodo.input.value.trim().slice(0, 30);
     if (!v) { apodo.input.value = u.apodo; return; }
-    try { await guardarPerfil({ apodo: v }); toast('Nombre actualizado'); } catch { toast('No se pudo guardar', { tipo: 'error' }); }
+    try { await guardarPerfil({ apodo: v }); toast(t('perfil.nombreOk')); } catch { toast(t('perfil.noGuardar'), { tipo: 'error' }); }
   });
 
   // ── Avatar y foto ──
@@ -46,7 +48,7 @@ export async function render() {
   const pintarVista = () => { vista.replaceChildren(avatar(state.user, { tam: 'xl' })); document.querySelector('.perfil__avatar')?.replaceChildren(avatar(state.user, { tam: 'xl' })); };
   pintarVista();
   const guardarAvatar = async (parche) => {
-    try { await guardarPerfil(parche); pintarVista(); } catch (e) { console.warn(e); toast('No se pudo guardar el cambio', { tipo: 'error' }); }
+    try { await guardarPerfil(parche); pintarVista(); } catch (e) { console.warn(e); toast(t('perfil.noGuardarCambio'), { tipo: 'error' }); }
   };
   const refrescarMarcas = () => {
     const av = state.user.avatar || {};
@@ -59,119 +61,120 @@ export async function render() {
     const dibujada = Object.keys(ESPECIES).find((k) => ESPECIES[k].gratis && EMOJI_ESPECIE[k] === e) || null;
     await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: e, mascota: dibujada } }); refrescarMarcas();
   };
-  const emojis = h('div', { class: 'rejilla-avatares rejilla-avatares--larga', role: 'group', 'aria-label': 'Elegir animal de avatar' },
-    EMOJIS_AVATAR.map((e) => h('button', { type: 'button', class: 'opcion-avatar', dataset: { emoji: e }, 'aria-pressed': 'false', 'aria-label': `Avatar ${e}`, onclick: () => elegirEmoji(e) }, e)));
+  const emojis = h('div', { class: 'rejilla-avatares rejilla-avatares--larga', role: 'group', 'aria-label': t('perfil.animalAria') },
+    EMOJIS_AVATAR.map((e) => h('button', { type: 'button', class: 'opcion-avatar', dataset: { emoji: e }, 'aria-pressed': 'false', 'aria-label': t('perfil.avatarAria', { e }), onclick: () => elegirEmoji(e) }, e)));
   const libres = Object.entries(ESPECIES).filter(([, v]) => v.gratis);
-  const mascotas = h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': 'Mascotas dibujadas' },
-    libres.map(([k, v]) => h('button', { type: 'button', class: 'opcion-avatar opcion-mascota', dataset: { especie: k }, 'aria-pressed': 'false', 'aria-label': `Mascota ${v.nombre}`,
+  const mascotas = h('div', { class: 'rejilla-avatares', role: 'group', 'aria-label': t('perfil.mascotasAria') },
+    libres.map(([k, v]) => h('button', { type: 'button', class: 'opcion-avatar opcion-mascota', dataset: { especie: k }, 'aria-pressed': 'false', 'aria-label': t('perfil.mascotaAria', { n: v.nombre }),
       onclick: async () => { await guardarAvatar({ avatar: { ...(state.user.avatar || {}), emoji: EMOJI_ESPECIE[k] || '🦊', mascota: k } }); refrescarMarcas(); } },
       personajeSVG(k, { cabeza: true, tam: 56 }), h('span', {}, v.nombre))));
   refrescarMarcas();
-  const fondos = h('div', { class: 'fondos', role: 'group', 'aria-label': 'Color de fondo del avatar' },
-    FONDOS_AVATAR.map((f) => h('button', { type: 'button', class: 'fondos__op', dataset: { fondo: f }, 'aria-label': `Fondo ${f}`, 'aria-pressed': String(f === (state.user.avatar?.fondo || 'violeta')),
+  const fondos = h('div', { class: 'fondos', role: 'group', 'aria-label': t('perfil.fondoColorAria') },
+    FONDOS_AVATAR.map((f) => h('button', { type: 'button', class: 'fondos__op', dataset: { fondo: f }, 'aria-label': t('perfil.fondoAria', { f: t(`fondo.${f}`) }), 'aria-pressed': String(f === (state.user.avatar?.fondo || 'violeta')),
       onclick: (ev) => { fondos.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false')); ev.currentTarget.setAttribute('aria-pressed', 'true'); guardarAvatar({ avatar: { ...(state.user.avatar || {}), fondo: f } }); } },
       h('span', { class: 'avatar avatar--sm', dataset: { fondo: f } }))));
   const archivo = h('input', { type: 'file', accept: 'image/*', class: 'sr-only', id: 'foto-archivo', onchange: async (ev) => {
     const f = ev.target.files[0]; ev.target.value = '';
     if (!f) return;
-    try { await guardarAvatar({ foto: await fotoPerfil(f) }); toast('Foto actualizada'); } catch (e) { toast(e.message || 'No se pudo usar esa imagen', { tipo: 'error' }); }
+    try { await guardarAvatar({ foto: await fotoPerfil(f) }); toast(t('perfil.fotoOk')); } catch (e) { toast(e.message || t('perfil.fotoNo'), { tipo: 'error' }); }
   } });
   const bloqueFoto = fotosOk ? h('div', { class: 'pila' },
     h('div', { class: 'fila fila--envuelve' },
       archivo,
-      h('label', { class: 'btn btn--primary btn--sm', for: 'foto-archivo' }, icono('download', { tam: 16 }), 'Subir mi foto'),
-      state.user.foto ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => guardarAvatar({ foto: null }) }, 'Quitar foto') : null),
-    h('p', { class: 'suave pequeno' }, 'Tu foto solo la ven tú y el administrador del colegio. No aparece en rankings ni la ven tus compañeros. Se guarda reducida y puedes quitarla cuando quieras.'))
-    : h('p', { class: 'suave pequeno' }, 'El colegio desactivó las fotos de perfil. Puedes usar un avatar.');
+      h('label', { class: 'btn btn--primary btn--sm', for: 'foto-archivo' }, icono('download', { tam: 16 }), t('perfil.subirFoto')),
+      state.user.foto ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => guardarAvatar({ foto: null }) }, t('perfil.quitarFoto')) : null),
+    h('p', { class: 'suave pequeno' }, t('perfil.fotoPriv')))
+    : h('p', { class: 'suave pequeno' }, t('perfil.fotosOff'));
 
   // Mi cuarto: ahí se ven las compras de la tienda (siempre con el emoji del personaje, aunque haya foto)
   let catalogo = []; try { catalogo = await cargarTienda(); } catch { /* sin catálogo: se ve el cuarto básico */ }
-  const miCuarto = u.rol === 'estudiante' ? seccion('Mi cuarto', cuarto(u, catalogo), h('a', { class: 'btn btn--sun btn--sm', href: '#/tienda' }, icono('bag', { tam: 18 }), 'Ir a la tienda')) : null;
+  const miCuarto = u.rol === 'estudiante' ? seccion(t('perfil.miCuarto'), cuarto(u, catalogo), h('a', { class: 'btn btn--sun btn--sm', href: '#/tienda' }, icono('bag', { tam: 18 }), t('perfil.irTienda'))) : null;
   // ── Diagnóstico de guardado: sirve a docentes/soporte para ver el error real en el equipo del estudiante ──
   const diagSalida = h('p', { class: 'pequeno', role: 'status' }, '');
   const diagBoton = h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async () => {
-    diagBoton.disabled = true; diagSalida.textContent = 'Probando…';
+    diagBoton.disabled = true; diagSalida.textContent = t('perfil.probando');
     const t0 = Date.now();
     try {
       const r = await Promise.race([
         store.actualizar(`users/${state.user.uid}`, { monedas: state.user.monedas || 0 }).then(() => 'ok'),
         new Promise((res) => setTimeout(() => res('pendiente'), 9000)),
       ]);
-      diagSalida.textContent = r === 'ok' ? `✓ Guardado funciona (${Date.now() - t0} ms).` : '⚠ El servidor no respondió en 9 s: el avance queda pendiente (red o firewall).';
-    } catch (e) { diagSalida.textContent = `✗ El servidor rechazó el guardado: ${e?.code || e?.message || e}`; }
-    let ult = ''; try { const f = JSON.parse(localStorage.getItem('teclea.ultimoFallo') || 'null'); if (f) ult = ` · Último fallo en este equipo: ${f.codigo} (${new Date(f.en).toLocaleString('es')})`; } catch { /* nada */ }
-    diagSalida.textContent += `${ult} · modo ${state.modo} · ${navigator.onLine ? 'con internet' : 'sin internet'}`;
+      diagSalida.textContent = r === 'ok' ? t('perfil.diag.ok', { ms: Date.now() - t0 }) : t('perfil.diag.lento');
+    } catch (e) { diagSalida.textContent = t('perfil.diag.rechazo', { e: e?.code || e?.message || e }); }
+    let ult = ''; try { const f = JSON.parse(localStorage.getItem('teclea.ultimoFallo') || 'null'); if (f) ult = ' ' + t('perfil.diag.ultimo', { c: f.codigo, f: new Date(f.en).toLocaleString(locale()) }); } catch { /* nada */ }
+    diagSalida.textContent += `${ult} ${t('perfil.diag.modo', { m: state.modo, red: navigator.onLine ? t('perfil.diag.conInternet') : t('perfil.diag.sinInternet') })}`;
     diagBoton.disabled = false;
-  } }, 'Probar guardado');
-  const diagnostico = h('details', { class: 'pequeno' }, h('summary', {}, '¿No se guarda tu avance?'), h('p', { class: 'suave' }, 'Pulsa el botón y dile el resultado a tu docente.'), diagBoton, diagSalida);
+  } }, t('perfil.diag.probar'));
+  const diagnostico = h('details', { class: 'pequeno' }, h('summary', {}, t('perfil.diag.titulo')), h('p', { class: 'suave' }, t('perfil.diag.texto')), diagBoton, diagSalida);
 
-  const seccionAvatar = seccion('Mi avatar y mi foto',
+  const seccionAvatar = seccion(t('perfil.miAvatar'),
     h('div', { class: 'avatar-editor' }, vista, h('div', { class: 'pila' }, apodo.nodo, bloqueFoto)),
-    h('strong', {}, 'Mi mascota dibujada (más en la tienda)'), mascotas, h('strong', {}, 'O elige un animal'), emojis, h('strong', {}, 'Color de fondo'), fondos);
+    h('strong', {}, t('perfil.miMascota')), mascotas, h('strong', {}, t('perfil.otroAnimal')), emojis, h('strong', {}, t('perfil.colorFondo')), fondos);
 
   const cabecera = h('section', { class: 'card card--hero perfil__cab' },
     h('div', { class: 'perfil__avatar', 'aria-hidden': 'true' }, avatar(u, { tam: 'xl' })),
     h('div', { class: 'perfil__datos' },
       h('h1', {}, u.nombre),
-      h('p', {}, h('span', { class: 'etiqueta' }, ROLES[u.rol] || u.rol), u.grado ? h('span', { class: 'etiqueta etiqueta--sol' }, `${u.grado}.º grado`) : null),
-      u.rol === 'estudiante' ? h('p', { class: 'suave' }, `Nivel ${nivel.nivel} · ${nivel.nombre} · ${u.xp.toLocaleString('es-CO')} XP`) : h('p', { class: 'suave' }, u.email || '')),
+      h('p', {}, h('span', { class: 'etiqueta' }, rolTxt(u.rol)), u.grado ? h('span', { class: 'etiqueta etiqueta--sol' }, t('perfil.grado', { g: u.grado })) : null),
+      u.rol === 'estudiante' ? h('p', { class: 'suave' }, t('perfil.nivelXp', { n: nivel.nivel, nombre: nivel.nombre, xp: u.xp.toLocaleString(locale()) })) : h('p', { class: 'suave' }, u.email || '')),
     mascota('celebra', { tam: 'md' }));
 
   // ── Apariencia ──
-  const apariencia = seccion('Apariencia',
-    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, 'Tema'),
-      segmentado({ nombre: 'tema', etiqueta: 'Tema', valor: p.tema, alCambiar: (v) => cambiar({ tema: v }),
-        opciones: [{ valor: 'auto', etiqueta: 'Automático' }, { valor: 'claro', etiqueta: 'Claro' }, { valor: 'oscuro', etiqueta: 'Oscuro' }] })),
-    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, 'Tamaño del texto'),
-      segmentado({ nombre: 'texto', etiqueta: 'Tamaño del texto', valor: p.texto, alCambiar: (v) => cambiar({ texto: v }),
-        opciones: [{ valor: 'normal', etiqueta: 'Normal' }, { valor: 'grande', etiqueta: 'Grande' }, { valor: 'enorme', etiqueta: 'Muy grande' }] })));
+  const apariencia = seccion(t('perfil.apariencia'),
+    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, t('perfil.idioma')), selectorIdioma()),
+    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, t('perfil.tema')),
+      segmentado({ nombre: 'tema', etiqueta: t('perfil.tema'), valor: p.tema, alCambiar: (v) => cambiar({ tema: v }),
+        opciones: [{ valor: 'auto', etiqueta: t('perfil.tema.auto') }, { valor: 'claro', etiqueta: t('perfil.tema.claro') }, { valor: 'oscuro', etiqueta: t('perfil.tema.oscuro') }] })),
+    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, t('perfil.textoTam')),
+      segmentado({ nombre: 'texto', etiqueta: t('perfil.textoTam'), valor: p.texto, alCambiar: (v) => cambiar({ texto: v }),
+        opciones: [{ valor: 'normal', etiqueta: t('perfil.texto.normal') }, { valor: 'grande', etiqueta: t('perfil.texto.grande') }, { valor: 'enorme', etiqueta: t('perfil.texto.enorme') }] })));
 
   // ── Accesibilidad ──
-  const accesibilidad = seccion('Accesibilidad',
-    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, 'Letra'),
-      segmentado({ nombre: 'fuente', etiqueta: 'Tipo de letra', valor: p.fuente, alCambiar: (v) => cambiar({ fuente: v }),
-        opciones: [{ valor: 'normal', etiqueta: 'Estándar' }, { valor: 'dislexia', etiqueta: 'Fácil de leer (Lexend)' }] })),
-    interruptor({ etiqueta: 'Modo daltónico', descripcion: 'Usa azul y naranja en lugar de verde y rojo, y agrega símbolos.', activo: p.daltonico, alCambiar: (v) => cambiar({ daltonico: v }) }),
-    interruptor({ etiqueta: 'Menos movimiento', descripcion: 'Reduce animaciones y efectos.', activo: p.movimiento === 'reducido', alCambiar: (v) => cambiar({ movimiento: v ? 'reducido' : 'auto' }) }));
+  const accesibilidad = seccion(t('perfil.accesibilidad'),
+    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, t('perfil.letra')),
+      segmentado({ nombre: 'fuente', etiqueta: t('perfil.tipoLetra'), valor: p.fuente, alCambiar: (v) => cambiar({ fuente: v }),
+        opciones: [{ valor: 'normal', etiqueta: t('perfil.letra.normal') }, { valor: 'dislexia', etiqueta: t('perfil.letra.dislexia') }] })),
+    interruptor({ etiqueta: t('perfil.dalt'), descripcion: t('perfil.daltDesc'), activo: p.daltonico, alCambiar: (v) => cambiar({ daltonico: v }) }),
+    interruptor({ etiqueta: t('perfil.mov'), descripcion: t('perfil.movDesc'), activo: p.movimiento === 'reducido', alCambiar: (v) => cambiar({ movimiento: v ? 'reducido' : 'auto' }) }));
 
   // ── Sonido ──
   const volumen = h('input', {
-    type: 'range', min: 0, max: 100, value: Math.round(p.volumen * 100), class: 'rango', 'aria-label': 'Volumen',
+    type: 'range', min: 0, max: 100, value: Math.round(p.volumen * 100), class: 'rango', 'aria-label': t('perfil.volumen'),
     oninput: (e) => cambiar({ volumen: Number(e.target.value) / 100 }),
   });
-  const sonido = seccion('Sonido y vibración',
-    interruptor({ etiqueta: 'Sonidos suaves', descripcion: 'Efectos al escribir y ganar medallas.', activo: p.sonido, alCambiar: (v) => cambiar({ sonido: v }) }),
-    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, 'Volumen'), volumen),
-    interruptor({ etiqueta: 'Vibración en tablet o celular', descripcion: 'Una pequeña vibración cuando te equivocas.', activo: p.vibracion, alCambiar: (v) => cambiar({ vibracion: v }) }));
+  const sonido = seccion(t('perfil.sonidoSec'),
+    interruptor({ etiqueta: t('perfil.sonidos'), descripcion: t('perfil.sonidosDesc'), activo: p.sonido, alCambiar: (v) => cambiar({ sonido: v }) }),
+    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, t('perfil.volumen')), volumen),
+    interruptor({ etiqueta: t('perfil.vib'), descripcion: t('perfil.vibDesc'), activo: p.vibracion, alCambiar: (v) => cambiar({ vibracion: v }) }));
 
   // ── Escritura ──
-  const escritura = seccion('Escritura',
-    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, 'Distribución del teclado'),
-      segmentado({ nombre: 'teclado', etiqueta: 'Distribución del teclado', valor: p.tecladoIdioma, alCambiar: (v) => cambiar({ tecladoIdioma: v }),
-        opciones: [{ valor: 'es-LA', etiqueta: 'Español Latinoamérica' }, { valor: 'es-ES', etiqueta: 'Español España' }] })),
-    interruptor({ etiqueta: 'Modo estricto', descripcion: 'No avanza hasta que escribas la letra correcta.', activo: p.modoEstricto, alCambiar: (v) => cambiar({ modoEstricto: v }) }),
-    interruptor({ etiqueta: 'Permitir borrar (retroceso)', descripcion: 'Puedes corregir tus errores con la tecla de borrar.', activo: p.permitirRetroceso, alCambiar: (v) => cambiar({ permitirRetroceso: v }) }));
+  const escritura = seccion(t('perfil.escritura'),
+    h('div', { class: 'fila-ajuste fila-ajuste--columna' }, h('strong', {}, t('perfil.distribucion')),
+      segmentado({ nombre: 'teclado', etiqueta: t('perfil.distribucion'), valor: p.tecladoIdioma, alCambiar: (v) => cambiar({ tecladoIdioma: v }),
+        opciones: [{ valor: 'es-LA', etiqueta: t('perfil.dist.la') }, { valor: 'es-ES', etiqueta: t('perfil.dist.es') }] })),
+    interruptor({ etiqueta: t('perfil.estricto'), descripcion: t('perfil.estrictoDesc'), activo: p.modoEstricto, alCambiar: (v) => cambiar({ modoEstricto: v }) }),
+    interruptor({ etiqueta: t('perfil.retroceso'), descripcion: t('perfil.retrocesoDesc'), activo: p.permitirRetroceso, alCambiar: (v) => cambiar({ permitirRetroceso: v }) }));
 
   // ── Privacidad ──
-  const privacidad = seccion('Mis datos y privacidad',
-    h('p', { class: 'suave' }, 'Tus datos son tuyos. Puedes descargarlos o pedir que se eliminen.'),
+  const privacidad = seccion(t('perfil.datos'),
+    h('p', { class: 'suave' }, t('perfil.datosTexto')),
     h('div', { class: 'fila fila--envuelve' },
       h('button', { class: 'btn btn--suave', type: 'button', onclick: () => {
         descargarJSON(`mis-datos-${u.apodo}.json`, { perfil: state.user, preferencias: state.prefs, exportadoEn: new Date().toISOString() });
-        toast('Descargué tus datos en un archivo.');
-      } }, icono('download', { tam: 20 }), 'Descargar mis datos'),
+        toast(t('perfil.descargado'));
+      } }, icono('download', { tam: 20 }), t('perfil.descargar')),
       h('button', { class: 'btn btn--suave btn--peligro-suave', type: 'button', onclick: async () => {
-        const ok = await confirmar({ titulo: '¿Pedir que borren mis datos?', mensaje: 'Se enviará una solicitud a tu docente o administración para eliminar tu cuenta y tu progreso. Esto no se puede deshacer.', si: 'Sí, enviar solicitud', peligro: true });
+        const ok = await confirmar({ titulo: t('perfil.borrarQ'), mensaje: t('perfil.borrarMsg'), si: t('perfil.borrarSi'), peligro: true });
         if (!ok) return;
-        try { await guardarPerfil({ solicitudEliminacion: true }); toast('Solicitud enviada. El administrador la revisará.', { tipo: 'info' }); }
-        catch { toast('No se pudo enviar la solicitud', { tipo: 'error' }); }
-      } }, icono('trash', { tam: 20 }), 'Pedir eliminar mis datos')),
-    h('p', { class: 'pequeno' }, h('a', { href: '#/privacidad' }, 'Leer el aviso de privacidad')));
+        try { await guardarPerfil({ solicitudEliminacion: true }); toast(t('perfil.solicitudOk'), { tipo: 'info' }); }
+        catch { toast(t('perfil.solicitudNo'), { tipo: 'error' }); }
+      } }, icono('trash', { tam: 20 }), t('perfil.pedirEliminar'))),
+    h('p', { class: 'pequeno' }, h('a', { href: '#/privacidad' }, t('perfil.leerAviso'))));
 
   const salir = h('button', { class: 'btn btn--suave btn--bloque', type: 'button', onclick: async () => {
     await cerrarSesion();
     navegar('/', { reemplazar: true });
-  } }, icono('logout', { tam: 20 }), 'Cerrar sesión');
+  } }, icono('logout', { tam: 20 }), t('nav.cerrarSesion'));
 
   return h('div', { class: 'perfil' }, cabecera,
     h('div', { class: 'perfil__rejilla' }, seccionAvatar, miCuarto, apariencia, accesibilidad, sonido, escritura, privacidad),

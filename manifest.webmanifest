@@ -1,8 +1,8 @@
 {
-  "name": "TECLEA · Aprende a teclear jugando",
+  "name": "TECLEA · Aprende a teclear jugando / Learn to type by playing",
   "short_name": "TECLEA",
-  "description": "Práctica de mecanografía en español para primaria.",
-  "lang": "es-CO",
+  "description": "Práctica de mecanografía en español e inglés para primaria. / Typing practice in Spanish and English for elementary school.",
+  "lang": "es",
   "start_url": "./#/",
   "scope": "./",
   "display": "standalone",

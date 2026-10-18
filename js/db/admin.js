@@ -5,6 +5,7 @@
 import { CONFIG } from '../core/config.js';
 import { state } from '../core/state.js';
 import * as store from './store.js';
+import { t } from '../i18n/index.js';
 
 const AJUSTES_BASE = { permitirFotos: true, dominiosAlumnos: [] };
 
@@ -24,7 +25,7 @@ export async function cambiarRol(usuario, rol) {
 export const listaBlanca = () => store.consultar('teacher_whitelist', {});
 export async function agregarWhitelist(correo, area = '') {
   const c = String(correo).trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)) throw new Error('Escribe un correo válido.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)) throw new Error(t('adm.err.correo'));
   await store.esperarMax(store.escribir(`teacher_whitelist/${c}`, { correo: c, area: String(area).slice(0, 60), creadoEn: store.ahora() }));
   auditar('Agregó docente a la lista blanca', c);
 }

@@ -3,6 +3,7 @@
  * Topes alineados con firestore.rules: +600 XP y +300 monedas por escritura, racha +1 por escritura.
  */
 import { perfilDeGrado } from '../core/grados.js';
+import { t } from '../i18n/index.js';
 
 const pad = (n) => String(n).padStart(2, '0');
 /** Fecha local AAAA-MM-DD */
@@ -15,12 +16,12 @@ const diasEntre = (a, b) => {
 /** XP de una lección. Devuelve {total, desglose:[[motivo, puntos]]}. */
 export function xpLeccion({ estrellas, precision, ppm, primeraVez = false, grado = 4 }) {
   const d = [];
-  if (estrellas >= 1) d.push(['Lección completada', 20]);
-  if (estrellas > 0) d.push([`${estrellas} ${estrellas === 1 ? 'estrella' : 'estrellas'}`, estrellas * 15]);
-  if (precision >= 98) d.push(['Precisión casi perfecta', 20]); else if (precision >= 95) d.push(['Gran precisión', 10]);
+  if (estrellas >= 1) d.push([t('xp.leccionCompletada'), 20]);
+  if (estrellas > 0) d.push([`${estrellas} ${estrellas === 1 ? t('xp.estrella') : t('xp.estrellas')}`, estrellas * 15]);
+  if (precision >= 98) d.push([t('xp.precisionPerfecta'), 20]); else if (precision >= 95) d.push([t('xp.granPrecision'), 10]);
   const p = perfilDeGrado(grado);
-  if (ppm >= p.ppmMax) d.push(['Velocidad de tu grado', 20]); else if (ppm >= p.ppmMin) d.push(['Buen ritmo', 10]);
-  if (primeraVez && estrellas >= 1) d.push(['Primera vez', 25]);
+  if (ppm >= p.ppmMax) d.push([t('xp.velocidadGrado'), 20]); else if (ppm >= p.ppmMin) d.push([t('xp.buenRitmo'), 10]);
+  if (primeraVez && estrellas >= 1) d.push([t('xp.primeraVez'), 25]);
   const total = Math.min(150, d.reduce((s, [, x]) => s + x, 0));
   return { total, desglose: d };
 }
@@ -28,14 +29,14 @@ export function xpLeccion({ estrellas, precision, ppm, primeraVez = false, grado
 /** XP de una práctica libre (1–5 min). */
 export function xpPractica({ segundos, precision, ppm, grado = 4 }) {
   const min = segundos / 60;
-  const d = [[`${Math.max(1, Math.round(min))} min de práctica`, Math.min(40, Math.round(min * 8))]];
-  if (precision >= 95) d.push(['Gran precisión', 10]);
-  if (ppm >= perfilDeGrado(grado).ppmMin) d.push(['Buen ritmo', 10]);
+  const d = [[t('xp.minPractica', { n: Math.max(1, Math.round(min)) }), Math.min(40, Math.round(min * 8))]];
+  if (precision >= 95) d.push([t('xp.granPrecision'), 10]);
+  if (ppm >= perfilDeGrado(grado).ppmMin) d.push([t('xp.buenRitmo'), 10]);
   return { total: Math.min(70, d.reduce((s, [, x]) => s + x, 0)), desglose: d };
 }
 
 /** XP de un minijuego a partir de sus puntos (0–1000). */
-export const xpJuego = (puntos) => ({ total: Math.max(5, Math.min(60, Math.round(puntos / 12))), desglose: [['Minijuego', Math.max(5, Math.min(60, Math.round(puntos / 12)))]] });
+export const xpJuego = (puntos) => ({ total: Math.max(5, Math.min(60, Math.round(puntos / 12))), desglose: [[t('xp.minijuego'), Math.max(5, Math.min(60, Math.round(puntos / 12)))]] });
 
 /** Monedas ganadas: 1 por cada 4 XP (tope 300 por escritura, igual que las reglas). */
 export const monedasDeXP = (xp) => Math.min(300, Math.floor(xp / 4));

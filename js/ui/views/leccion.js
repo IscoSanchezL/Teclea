@@ -16,30 +16,21 @@ import { icono } from '../icons.js';
 import { panelResultado } from '../resultado.js';
 import { confirmar, toast } from '../overlay.js';
 import { sonido } from '../sonido.js';
+import { t } from '../../i18n/index.js';
 
 let actual = null;     // ejercicio activo (para limpiar al salir)
 let detenerDemo = null;
 let quitarEscucha = null;
 
-const ETAPAS = [['intro', 'Introducción'], ['guiado', 'Guiado'], ['libre', 'Sin ayuda'], ['prueba', 'Prueba']];
-const MENSAJE_TIPO = {
-  nueva: 'Vamos con teclas nuevas. Mira bien qué dedo usa cada una.',
-  repaso: 'Repasar es la clave de la memoria muscular. ¡Sin prisa!',
-  palabras: 'Ahora escribimos palabras de verdad. Ritmo parejo.',
-  ritmo: 'Un ritmo constante vale más que correr y equivocarse.',
-  tema: 'Textos reales: lee un poquito adelante mientras escribes.',
-  precision: 'Hoy cada tecla cuenta: si te equivocas, no avanzas.',
-  velocidad: 'Reto de velocidad: ¡rápido pero sin perder la precisión!',
-  jefe: '¡Jefe del mundo! Demuestra todo lo que aprendiste.',
-  reto: '¡Un reto para campeones del teclado!',
-};
+const etapas = () => ['intro', 'guiado', 'libre', 'prueba'].map((k) => [k, t(`leccion.etapa.${k}`)]);
+const mensajeTipo = (tipo) => (['nueva', 'repaso', 'palabras', 'ritmo', 'tema', 'precision', 'velocidad', 'jefe', 'reto'].includes(tipo) ? t(`leccion.msg.${tipo}`) : t('leccion.msg.vamos'));
 
 export async function render({ query }) {
   const u = state.user;
   const [leccion, indice, progreso, opciones] = await Promise.all([cargarLeccion(query.id || ''), cargarIndice(), cargarProgreso(u.uid), opcionesRapidas(state.user)]);
-  if (!leccion) { toast('No encontré esa lección.', { tipo: 'error' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
+  if (!leccion) { toast(t('leccion.noEncontre'), { tipo: 'error' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
   const estados = estadoLecciones(indice, progreso, opciones);
-  if (estados[leccion.id] === 'bloqueada') { toast('Completa la lección anterior para abrir esta. 🔒', { tipo: 'info' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
+  if (estados[leccion.id] === 'bloqueada') { toast(t('leccion.completaAnterior'), { tipo: 'info' }); navegar('/aprende', { reemplazar: true }); return h('div'); }
 
   const grado = u.grado || 4;
   const cont = h('div', { class: 'leccion' });
@@ -47,16 +38,16 @@ export async function render({ query }) {
   const mezclarTeclas = (pt) => { for (const [c, v] of Object.entries(pt || {})) { const a = (acumTeclas[c] ||= { ok: 0, err: 0 }); a.ok += v.ok; a.err += v.err; } };
   const limpiar = () => { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; quitarEscucha?.(); quitarEscucha = null; };
 
-  const pasos = (activo) => h('ol', { class: 'pasos-ej', 'aria-label': 'Etapas de la lección' },
-    ETAPAS.map(([k, t], i) => h('li', { class: `pasos-ej__p ${k === activo ? 'pasos-ej__p--on' : ETAPAS.findIndex(([x]) => x === activo) > i ? 'pasos-ej__p--ok' : ''}`, 'aria-current': k === activo ? 'step' : null }, h('span', {}, String(i + 1)), t)));
+  const pasos = (activo) => h('ol', { class: 'pasos-ej', 'aria-label': t('leccion.etapasAria') },
+    etapas().map(([k, txt], i) => h('li', { class: `pasos-ej__p ${k === activo ? 'pasos-ej__p--on' : etapas().findIndex(([x]) => x === activo) > i ? 'pasos-ej__p--ok' : ''}`, 'aria-current': k === activo ? 'step' : null }, h('span', {}, String(i + 1)), txt)));
 
   const cabecera = (activo) => h('header', { class: 'leccion__cab' },
-    h('div', {}, h('span', { class: 'etiqueta' }, `Mundo ${leccion.mundo} · Lección ${leccion.n}`), h('h1', {}, leccion.titulo)),
+    h('div', {}, h('span', { class: 'etiqueta' }, t('leccion.cab', { m: leccion.mundo, n: leccion.n })), h('h1', {}, leccion.titulo)),
     pasos(activo),
-    h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: salir }, icono('x', { tam: 16 }), 'Salir'));
+    h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: salir }, icono('x', { tam: 16 }), t('leccion.salir')));
 
   async function salir() {
-    const ok = await confirmar({ titulo: '¿Salir de la lección?', mensaje: 'Perderás el ejercicio en curso, pero tu progreso anterior se conserva.', si: 'Sí, salir', no: 'Seguir practicando' });
+    const ok = await confirmar({ titulo: t('leccion.salir.titulo'), mensaje: t('leccion.salir.mensaje'), si: t('leccion.salir.si'), no: t('leccion.salir.no') });
     if (ok) { limpiar(); navegar('/aprende'); }
   }
   const montar = (...nodos) => { limpiar(); cont.replaceChildren(...nodos.filter(Boolean)); window.scrollTo({ top: 0 }); };
@@ -75,18 +66,18 @@ export async function render({ query }) {
     // Primera vez (y con teclado físico): se activa al presionar la tecla que brilla. Ya jugada o en pantalla táctil: libre.
     const conTeclado = !window.matchMedia('(pointer: coarse)').matches;
     const bloqueado = !mejor && conTeclado;
-    const boton = h('button', { class: `btn btn--primary btn--lg ${bloqueado ? 'btn--esperando' : ''}`, type: 'button', disabled: bloqueado || null, onclick: () => ejercicio(0), autofocus: !bloqueado }, icono('play', { tam: 20 }), '¡Empezar!');
-    const pista = h('p', { class: `intro__pista ${bloqueado ? '' : 'intro__pista--oculta'}`, 'aria-live': 'polite' }, bloqueado ? '👆 Presiona la tecla que brilla para empezar' : '');
+    const boton = h('button', { class: `btn btn--primary btn--lg ${bloqueado ? 'btn--esperando' : ''}`, type: 'button', disabled: bloqueado || null, onclick: () => ejercicio(0), autofocus: !bloqueado }, icono('play', { tam: 20 }), t('leccion.empezar'));
+    const pista = h('p', { class: `intro__pista ${bloqueado ? '' : 'intro__pista--oculta'}`, 'aria-live': 'polite' }, bloqueado ? t('leccion.pista') : '');
     montar(cabecera('intro'),
       h('div', { class: 'intro' },
         h('section', { class: 'intro__info card' },
-          h('div', { class: 'fila' }, mascota('senala', { tam: 'sm' }), h('p', { class: 'burbuja' }, MENSAJE_TIPO[leccion.tipo] || '¡Vamos!')),
-          h('h2', {}, 'Tu objetivo'), h('p', {}, leccion.objetivo),
-          chips.length ? h('ul', { class: 'tecla-chips', 'aria-label': 'Teclas nuevas' }, chips) : null,
+          h('div', { class: 'fila' }, mascota('senala', { tam: 'sm' }), h('p', { class: 'burbuja' }, mensajeTipo(leccion.tipo))),
+          h('h2', {}, t('leccion.objetivo')), h('p', {}, leccion.objetivo),
+          chips.length ? h('ul', { class: 'tecla-chips', 'aria-label': t('leccion.teclasNuevas') }, chips) : null,
           leccion.tip ? h('p', { class: 'intro__tip' }, icono('bulb', { tam: 20 }), leccion.tip) : null,
-          mejor ? h('p', { class: 'suave' }, `Tu mejor resultado: ${'★'.repeat(mejor.estrellas)}${'☆'.repeat(3 - mejor.estrellas)} · ${mejor.mejorWpm} PPM · ${mejor.mejorPrecision} %`) : null,
+          mejor ? h('p', { class: 'suave' }, t('leccion.mejor', { est: `${'★'.repeat(mejor.estrellas)}${'☆'.repeat(3 - mejor.estrellas)}`, ppm: mejor.mejorWpm, pre: mejor.mejorPrecision })) : null,
           boton, pista),
-        h('section', { class: 'intro__demo card' }, h('h2', {}, 'Así se hace'), h('p', { class: 'suave' }, 'La tecla iluminada y el dedo que sube te muestran cómo escribirla.'), kb.el)));
+        h('section', { class: 'intro__demo card' }, h('h2', {}, t('leccion.asiSeHace')), h('p', { class: 'suave' }, t('leccion.asiTexto')), kb.el)));
     detenerDemo = kb.demo(chars);
     if (bloqueado) {
       let saltar = null;
@@ -94,7 +85,7 @@ export async function render({ query }) {
       const habilitar = () => {
         if (!boton.disabled) return;
         boton.disabled = false; boton.classList.remove('btn--esperando'); boton.classList.add('btn--listo');
-        pista.textContent = '¡Muy bien! Ya puedes empezar (pulsa Enter o el botón).'; sonido.acierto(); clearTimeout(saltar); boton.focus({ preventScroll: true });
+        pista.textContent = t('leccion.pistaOk'); sonido.acierto(); clearTimeout(saltar); boton.focus({ preventScroll: true });
       };
       const alTecla = (e) => {
         if (e.ctrlKey || e.metaKey || e.altKey && e.key !== 'AltGraph') return;
@@ -106,23 +97,23 @@ export async function render({ query }) {
       document.addEventListener('keydown', alTecla, true);
       quitarEscucha = () => { document.removeEventListener('keydown', alTecla, true); clearTimeout(saltar); };
       // Por si el teclado no responde: a los 12 s se ofrece continuar igual
-      saltar = setTimeout(() => { if (boton.disabled) { boton.disabled = false; boton.classList.remove('btn--esperando'); pista.textContent = '¿No funciona el teclado? Igual puedes empezar.'; } }, 6000);
+      saltar = setTimeout(() => { if (boton.disabled) { boton.disabled = false; boton.classList.remove('btn--esperando'); pista.textContent = t('leccion.pistaNoFunciona'); } }, 6000);
     }
   }
 
   /* ── Ejercicios ── */
-  const NOMBRES = [['guiado', 'Ejercicio guiado', 'Sigue la tecla iluminada y el dedo señalado. ⭐ Las estrellas se ganan al terminar la Prueba final (paso 4).'], ['libre', 'Ejercicio sin ayuda', 'Ahora sin pistas: ¡confía en tus dedos! ⭐ Las estrellas llegan al terminar la Prueba final (paso 4).'], ['prueba', 'Prueba final', 'Consigue tus estrellas. ¡Tú puedes!']];
+  const nombres = () => [['guiado', t('leccion.ej.guiado'), t('leccion.ej.guiadoAyuda')], ['libre', t('leccion.ej.libre'), t('leccion.ej.libreAyuda')], ['prueba', t('leccion.ej.prueba'), t('leccion.ej.pruebaAyuda')]];
   function ejercicio(i, repetido = false) {
     const def = leccion.ejercicios[i];
-    const [clave, titulo, ayuda] = NOMBRES[i];
+    const [clave, titulo, ayuda] = nombres()[i];
     const modo = def.ocultarTeclado ? 'oculto' : clave === 'guiado' ? 'guiado' : 'libre';
     const texto = textoParaGrado(def, leccion, grado);
     const ej = crearEjercicio({
       texto, modo, estricto: Boolean(def.estricto), seg: def.modo === 'tiempo' ? segundosParaGrado(def, grado) : 0, grande: grado <= 3, titulo,
       alFin: ({ resultado, motor }) => { mezclarTeclas(motor.porTecla); if (i < 2) entre(i, resultado); else resultadoFinal(resultado); },
     });
-    const nota = def.estricto ? 'Modo estricto: si te equivocas, repite la tecla hasta acertar.' : def.ocultarTeclado ? 'El teclado está oculto: ¡a ciegas!' : ayuda;
-    montar(cabecera(clave), h('div', { class: 'ej-cab' }, h('h2', {}, `${titulo} ${i + 1} de 3`), h('p', { class: 'suave' }, nota)), ej.el);
+    const nota = def.estricto ? t('leccion.ej.estricto') : def.ocultarTeclado ? t('leccion.ej.oculto') : ayuda;
+    montar(cabecera(clave), h('div', { class: 'ej-cab' }, h('h2', {}, t('leccion.ej.num', { titulo, i: i + 1 })), h('p', { class: 'suave' }, nota)), ej.el);
     actual = ej; // después de montar(): montar() limpia el ejercicio anterior
     ej.enfocar();
   }
@@ -135,19 +126,19 @@ export async function render({ query }) {
     if (!premiados.has(i) && !r.banderas?.pegado && !r.banderas?.imposible) {
       premiados.add(i);
       registrarActividad({ user: state.user, tipo: 'practica', refId: `${leccion.id}:paso${i + 1}`, resultado: r })
-        .then((g) => { if (g?.xp) { premio.textContent = `+${g.xp} XP · +${g.monedas} monedas por este paso`; premio.hidden = false; } })
+        .then((g) => { if (g?.xp) { premio.textContent = t('leccion.premio', { xp: g.xp, monedas: g.monedas }); premio.hidden = false; } })
         .catch((e) => console.warn('[leccion] premio del paso', e?.code || e));
     }
     montar(cabecera(i === 0 ? 'guiado' : 'libre'),
       h('section', { class: 'entre card card--vidrio' },
         mascota(r.precision >= 90 ? 'celebra' : 'anima', { tam: 'md' }),
-        h('h2', {}, r.precision >= 95 ? '¡Excelente!' : r.precision >= 85 ? '¡Muy bien!' : '¡Buen intento!'),
-        h('p', {}, `${r.ppm} PPM · ${r.precision} % de precisión · ${r.errores} ${r.errores === 1 ? 'error' : 'errores'}`),
+        h('h2', {}, r.precision >= 95 ? t('leccion.entre.excelente') : r.precision >= 85 ? t('leccion.entre.muyBien') : t('leccion.entre.intento')),
+        h('p', {}, t('leccion.entre.resumen', { ppm: r.ppm, pre: r.precision, err: r.errores, errTxt: r.errores === 1 ? t('leccion.error') : t('leccion.errores') })),
         premio,
-        h('p', { class: 'suave' }, ultimoGuiado ? 'Ahora vienen los mismos movimientos, pero sin ayudas.' : 'Último paso: la prueba final con estrellas.'),
+        h('p', { class: 'suave' }, ultimoGuiado ? t('leccion.entre.siguiente1') : t('leccion.entre.siguiente2')),
         h('div', { class: 'fila fila--envuelve' },
-          h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ejercicio(i) }, icono('refresh', { tam: 18 }), 'Repetir'),
-          h('button', { class: 'btn btn--primary btn--lg', type: 'button', onclick: () => ejercicio(i + 1), autofocus: true }, 'Continuar', icono('arrow', { tam: 18 })))));
+          h('button', { class: 'btn btn--suave', type: 'button', onclick: () => ejercicio(i) }, icono('refresh', { tam: 18 }), t('leccion.repetir')),
+          h('button', { class: 'btn btn--primary btn--lg', type: 'button', onclick: () => ejercicio(i + 1), autofocus: true }, t('leccion.continuar'), icono('arrow', { tam: 18 })))));
     sonido.acierto();
   }
 
@@ -166,18 +157,18 @@ export async function render({ query }) {
     const esJefe = leccion.tipo === 'jefe';
     const p = perfilDeGrado(grado);
     const acciones = [];
-    if (estrellas >= 1 && sig) acciones.push({ texto: esJefe && sig.mundo !== leccion.mundo ? `¡Al mundo ${sig.mundo}!` : 'Siguiente lección', clase: 'btn--primary btn--lg', principal: true, icono: 'arrow', onclick: () => navegar(`/leccion?id=${sig.id}`) });
-    if (estrellas >= 1 && !sig) acciones.push({ texto: '¡Curso completado! Ver logros', clase: 'btn--primary btn--lg', principal: true, onclick: () => navegar('/logros') });
-    acciones.push({ texto: estrellas >= 1 ? 'Repetir para más estrellas' : 'Intentar de nuevo', clase: estrellas >= 1 ? 'btn--suave' : 'btn--primary btn--lg', principal: estrellas < 1, icono: 'refresh', onclick: () => { acumTeclas = {}; ejercicio(2); } });
-    if (estrellas < 1) acciones.push({ texto: 'Repasar el ejercicio guiado', onclick: () => { acumTeclas = {}; ejercicio(0); } });
-    acciones.push({ texto: 'Volver al mapa', onclick: () => navegar('/aprende') });
+    if (estrellas >= 1 && sig) acciones.push({ texto: esJefe && sig.mundo !== leccion.mundo ? t('leccion.alMundo', { n: sig.mundo }) : t('leccion.siguienteLeccion'), clase: 'btn--primary btn--lg', principal: true, icono: 'arrow', onclick: () => navegar(`/leccion?id=${sig.id}`) });
+    if (estrellas >= 1 && !sig) acciones.push({ texto: t('leccion.cursoCompleto'), clase: 'btn--primary btn--lg', principal: true, onclick: () => navegar('/logros') });
+    acciones.push({ texto: estrellas >= 1 ? t('leccion.repetirEstrellas') : t('leccion.intentarOtra'), clase: estrellas >= 1 ? 'btn--suave' : 'btn--primary btn--lg', principal: estrellas < 1, icono: 'refresh', onclick: () => { acumTeclas = {}; ejercicio(2); } });
+    if (estrellas < 1) acciones.push({ texto: t('leccion.repasarGuiado'), onclick: () => { acumTeclas = {}; ejercicio(0); } });
+    acciones.push({ texto: t('leccion.volverMapa'), onclick: () => navegar('/aprende') });
 
     const panel = panelResultado({
-      titulo: esJefe && estrellas >= 1 ? `¡Mundo ${leccion.mundo} completado!` : estrellas >= 1 ? '¡Lección superada!' : 'Todavía no, ¡sigue practicando!',
-      subtitulo: `Mundo ${leccion.mundo} · ${leccion.titulo}`, estrellas, resultado, resumen, acciones,
+      titulo: esJefe && estrellas >= 1 ? t('leccion.res.mundoCompleto', { n: leccion.mundo }) : estrellas >= 1 ? t('leccion.res.superada') : t('leccion.res.todaviaNo'),
+      subtitulo: t('inicio.sigLeccion', { m: leccion.mundo, titulo: leccion.titulo }), estrellas, resultado, resumen, acciones,
     });
-    const aviso = sospechoso ? h('p', { class: 'mensaje-error' }, 'Detectamos pegado de texto o una velocidad imposible, por eso esta vez no suma estrellas. ¡Escribe tú mismo!') : null;
-    const meta = h('p', { class: 'suave pequeno' }, `Meta de ${grado}.º para esta lección: ${Math.round(p.ppmMax * leccion.meta.ppm)} PPM y ${Math.max(p.precision, Math.round(leccion.meta.precision * 100))} % de precisión para 3 estrellas.`);
+    const aviso = sospechoso ? h('p', { class: 'mensaje-error' }, t('leccion.res.sospechoso')) : null;
+    const meta = h('p', { class: 'suave pequeno' }, t('leccion.res.meta', { g: grado, ppm: Math.round(p.ppmMax * leccion.meta.ppm), pre: Math.max(p.precision, Math.round(leccion.meta.precision * 100)) }));
     montar(cabecera('prueba'), panel, aviso, meta);
     setTimeout(() => cont.querySelector('[autofocus]')?.focus(), 1800);
   }
@@ -188,5 +179,8 @@ export async function render({ query }) {
 }
 
 export function despues(nodo) { nodo?.__iniciar?.(); }
+
+/** Hay un ejercicio en curso: el cambio de idioma no reinicia la vista (se actualiza al navegar). */
+export const conservarAlCambiarIdioma = true;
 
 export function destroy() { actual?.destruir(); actual = null; detenerDemo?.(); detenerDemo = null; quitarEscucha?.(); quitarEscucha = null; }

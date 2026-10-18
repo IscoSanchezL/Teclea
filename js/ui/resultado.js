@@ -10,12 +10,13 @@ import { confeti } from './confeti.js';
 import { personajeSVG, especieDe } from './personaje.js';
 import { state } from '../core/state.js';
 import { medallaSVG } from './medallas.js';
+import { t, loc } from '../i18n/index.js';
 
 const MENSAJES = {
-  3: ['¡Increíble! Tus dedos ya conocen el camino.', '¡Perfecto! Eso fue de campeón.', '¡Tres estrellas! Cada vez escribes mejor.'],
-  2: ['¡Muy bien! Un poco más de precisión y llegas a las 3 estrellas.', '¡Casi perfecto! Sigue así.'],
-  1: ['¡Lo lograste! Repite para mejorar tu marca.', '¡Bien hecho! La práctica te hará más rápido.'],
-  0: ['Casi lo logras. Ve más despacio: la precisión viene primero.', 'No pasa nada, equivocarse es aprender. ¡Inténtalo otra vez!'],
+  3: () => [t('res.msg.3a'), t('res.msg.3b'), t('res.msg.3c')],
+  2: () => [t('res.msg.2a'), t('res.msg.2b')],
+  1: () => [t('res.msg.1a'), t('res.msg.1b')],
+  0: () => [t('res.msg.0a'), t('res.msg.0b')],
 };
 const POSES = { 3: 'celebra', 2: 'anima', 1: 'saludo', 0: 'piensa' };
 const elige = (a, sem) => a[sem % a.length];
@@ -28,9 +29,9 @@ function estrella(llena) {
 export function panelResultado({ titulo, subtitulo = '', estrellas = null, resultado, resumen, acciones = [], sinMensaje = false }) {
   const pose = estrellas == null ? 'celebra' : POSES[estrellas];
   const infantil = document.documentElement.dataset.estilo === 'ludico';
-  const msg = estrellas == null ? '¡Buen trabajo! Cada práctica cuenta.' : elige(MENSAJES[estrellas], Math.round(resultado.ppm + resultado.precision));
+  const msg = estrellas == null ? t('res.msg.null') : elige(MENSAJES[estrellas](), Math.round(resultado.ppm + resultado.precision));
 
-  const fila = estrellas == null ? null : h('div', { class: 'res__estrellas', role: 'img', 'aria-label': `${estrellas} de 3 estrellas` },
+  const fila = estrellas == null ? null : h('div', { class: 'res__estrellas', role: 'img', 'aria-label': t('res.estrellasAria', { n: estrellas }) },
     [1, 2, 3].map((i) => estrella(i <= estrellas)));
 
   const num = (valor, sufijo = '', dec = 0) => { const b = h('b', { dataset: { valor: 0 } }, '0'); setTimeout(() => contar(b, valor, { duracion: 900 }), 350); if (sufijo) b.dataset.sufijo = sufijo; return b; };
@@ -38,10 +39,10 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
   const bPpm = num(resultado.ppm), bPre = num(resultado.precision);
   const mins = Math.floor(resultado.duracionSeg / 60), sg = resultado.duracionSeg % 60;
   const grid = h('div', { class: 'res__grid' },
-    metrica('PPM', bPpm), metrica('Precisión %', bPre),
-    metrica('Errores', h('b', {}, String(resultado.errores))), metrica('Tiempo', h('b', {}, `${mins}:${String(sg).padStart(2, '0')}`)));
+    metrica(t('res.ppm'), bPpm), metrica(t('res.precision'), bPre),
+    metrica(t('res.errores'), h('b', {}, String(resultado.errores))), metrica(t('res.tiempo'), h('b', {}, `${mins}:${String(sg).padStart(2, '0')}`)));
 
-  const cola = h('div', { class: 'res__cola' }, h('p', { class: 'suave pequeno' }, 'Guardando tu progreso…'));
+  const cola = h('div', { class: 'res__cola' }, h('p', { class: 'suave pequeno' }, t('res.guardando')));
   const zonaMedallas = h('div', { class: 'res__medallas' });
 
   const raiz = h('section', { class: 'res card card--vidrio', 'aria-live': 'polite' },
@@ -68,7 +69,7 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
     const nodos = [...raiz.querySelectorAll('.res__estrella--llena')];
     nodos.forEach((n, i) => { n.classList.add('res__estrella--oculta'); setTimeout(() => { n.classList.remove('res__estrella--oculta'); n.classList.add('res__estrella--pop'); sonido.estrella(i); }, 500 + i * 380); });
     if (estrellas === 3) setTimeout(() => confeti({ cantidad: infantil ? 220 : 130 }), 500 + 3 * 380);
-    if (infantil && estrellas >= 1) { [1500, 2200].forEach((t, i) => setTimeout(() => { confeti({ cantidad: 70, duracion: 1800, origen: { x: innerWidth * (i ? 0.8 : 0.2), y: innerHeight * 0.3 } }); sonido.estrella(i + 3); }, t)); }
+    if (infantil && estrellas >= 1) { [1500, 2200].forEach((ms, i) => setTimeout(() => { confeti({ cantidad: 70, duracion: 1800, origen: { x: innerWidth * (i ? 0.8 : 0.2), y: innerHeight * 0.3 } }); sonido.estrella(i + 3); }, ms)); }
   } else if (resultado.precision >= 95) confeti({ cantidad: 60 });
 
   // Resumen asíncrono (XP, monedas, racha, medallas…)
@@ -81,19 +82,19 @@ export function panelResultado({ titulo, subtitulo = '', estrellas = null, resul
         h('div', { class: 'res__xp-tit' }, icono('star', { tam: 22 }), h('strong', {}, `+${r.xp} XP`), r.monedas ? h('span', { class: 'res__moneda' }, icono('coin', { tam: 18 }), `+${r.monedas}`) : null),
         h('ul', { class: 'res__xp-lista' }, lineas)),
       h('div', { class: 'res__chips' },
-        r.racha?.racha ? h('span', { class: 'chip chip--racha' }, icono('flame', { tam: 18 }), `Racha: ${r.racha.racha} ${r.racha.racha === 1 ? 'día' : 'días'}`) : null,
-        r.esRecord && r.mejorAnterior ? h('span', { class: 'chip' }, icono('bolt', { tam: 18 }), '¡Nuevo récord personal!') : null,
-        mejora != null && !r.esRecord ? h('span', { class: 'chip' }, `Tu mejor: ${r.mejorAnterior} PPM`) : null,
-        r.racha?.usoProtector ? h('span', { class: 'chip' }, icono('shield', { tam: 18 }), 'Protector de racha usado') : null,
-        r.enCola ? h('span', { class: 'chip' }, icono('info', { tam: 18 }), 'Sin internet: se sincronizará al reconectar') : null),
-      r.subioNivel ? h('div', { class: 'res__nivel' }, icono('sparkle', { tam: 22 }), h('strong', {}, `¡Subiste al nivel ${r.nivel.nivel}: ${r.nivel.nombre}!`)) : null].filter(Boolean));
+        r.racha?.racha ? h('span', { class: 'chip chip--racha' }, icono('flame', { tam: 18 }), t('res.racha', { n: r.racha.racha, d: r.racha.racha === 1 ? t('res.dia') : t('res.dias') })) : null,
+        r.esRecord && r.mejorAnterior ? h('span', { class: 'chip' }, icono('bolt', { tam: 18 }), t('res.record')) : null,
+        mejora != null && !r.esRecord ? h('span', { class: 'chip' }, t('res.tuMejor', { n: r.mejorAnterior })) : null,
+        r.racha?.usoProtector ? h('span', { class: 'chip' }, icono('shield', { tam: 18 }), t('res.protector')) : null,
+        r.enCola ? h('span', { class: 'chip' }, icono('info', { tam: 18 }), t('res.sinInternet')) : null),
+      r.subioNivel ? h('div', { class: 'res__nivel' }, icono('sparkle', { tam: 22 }), h('strong', {}, t('res.subioNivel', { n: r.nivel.nivel, nombre: r.nivel.nombre }))) : null].filter(Boolean));
     if (r.subioNivel) { sonido.nivel(); confeti({ cantidad: 160 }); }
     if (r.insignias?.length) {
-      zonaMedallas.replaceChildren(h('h2', { class: 'res__tit2' }, r.insignias.length > 1 ? '¡Nuevas medallas!' : '¡Nueva medalla!'),
-        h('div', { class: 'res__medallas-fila' }, r.insignias.map((m) => h('figure', { class: 'res__medalla' }, medallaSVG({ nivel: m.nivel, icono: m.icono, tam: 84 }), h('figcaption', {}, h('strong', {}, m.nombre), h('small', {}, m.descripcion))))));
+      zonaMedallas.replaceChildren(h('h2', { class: 'res__tit2' }, r.insignias.length > 1 ? t('res.nuevasMedallas') : t('res.nuevaMedalla')),
+        h('div', { class: 'res__medallas-fila' }, r.insignias.map((m) => h('figure', { class: 'res__medalla' }, medallaSVG({ nivel: m.nivel, icono: m.icono, tam: 84 }), h('figcaption', {}, h('strong', {}, loc(m, 'nombre')), h('small', {}, loc(m, 'descripcion')))))));
       setTimeout(() => { sonido.medalla(); confeti({ cantidad: 120 }); }, 900);
     }
-  }).catch((e) => { console.warn(e); cola.replaceChildren(h('p', { class: 'mensaje-error' }, 'No se pudo guardar tu progreso. Revisa tu conexión: lo intentaremos de nuevo.')); });
+  }).catch((e) => { console.warn(e); cola.replaceChildren(h('p', { class: 'mensaje-error' }, t('res.noGuardo'))); });
 
   return raiz;
 }

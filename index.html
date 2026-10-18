@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es-CO" data-theme="light" data-textsize="normal" data-font="normal" data-colorblind="off" data-motion="completo" data-estilo="medio">
+<html lang="es" data-theme="light" data-textsize="normal" data-font="normal" data-colorblind="off" data-motion="completo" data-estilo="medio">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>TECLEA · Aprende a teclear jugando</title>
-  <meta name="description" content="Plataforma gratuita para aprender mecanografía en español, con juegos, medallas y teclado latinoamericano (ñ, tildes, ¿ ¡). Para primaria.">
+  <title data-i18n="pagina.titulo">TECLEA · Aprende a teclear jugando</title>
+  <meta name="description" content="Plataforma gratuita para aprender mecanografía en español, con juegos, medallas y teclado latinoamericano (ñ, tildes, ¿ ¡). Para primaria." data-i18n-attr="content:pagina.descripcion">
   <meta name="theme-color" content="#6C4CF5">
   <meta name="color-scheme" content="light dark">
   <link rel="manifest" href="manifest.webmanifest">
@@ -50,7 +50,11 @@
   <link rel="stylesheet" href="css/leccion.css">
   <link rel="stylesheet" href="css/juegos.css">
   <link rel="stylesheet" href="css/clases.css">
+  <link rel="stylesheet" href="css/reto-vivo.css">
 
+  <link rel="modulepreload" href="js/i18n/index.js">
+  <link rel="modulepreload" href="js/i18n/es.js">
+  <link rel="modulepreload" href="js/i18n/en.js">
   <link rel="modulepreload" href="js/core/state.js">
   <link rel="modulepreload" href="js/core/config.js">
   <link rel="modulepreload" href="js/core/utils.js">
@@ -84,7 +88,7 @@
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#view">Saltar al contenido</a>
+  <a class="skip-link" href="#view" data-i18n="nav.saltar">Saltar al contenido</a>
 
   <!-- Fondo vivo: malla de gradientes + formas orgánicas (decorativo) -->
   <div class="fondo" aria-hidden="true">
@@ -100,16 +104,16 @@
   <!-- Pantalla de carga inicial -->
   <div id="splash" class="splash" role="status" aria-live="polite">
     <div class="splash__tecla" aria-hidden="true">T</div>
-    <p>Preparando tu aventura…</p>
+    <p data-i18n="pagina.splash">Preparando tu aventura…</p>
   </div>
 
   <div id="app" class="app" data-shell="public" hidden>
-    <aside id="sidebar" class="sidebar" aria-label="Menú principal"></aside>
+    <aside id="sidebar" class="sidebar" aria-label="Menú principal" data-i18n-attr="aria-label:nav.menuPrincipal"></aside>
     <div class="principal">
       <header id="topbar" class="topbar"></header>
       <main id="view" class="vista" tabindex="-1"></main>
     </div>
-    <nav id="bottomnav" class="bottomnav" aria-label="Menú móvil"></nav>
+    <nav id="bottomnav" class="bottomnav" aria-label="Menú móvil" data-i18n-attr="aria-label:nav.menuMovil"></nav>
   </div>
 
   <div id="sheet-root"></div>
@@ -117,7 +121,7 @@
   <div id="sr-announcer" class="sr-only" aria-live="polite" role="status"></div>
 
   <noscript>
-    <p style="padding:2rem;font-family:sans-serif">Esta plataforma necesita JavaScript para funcionar. Actívalo en tu navegador e inténtalo de nuevo.</p>
+    <p style="padding:2rem;font-family:sans-serif">Esta plataforma necesita JavaScript para funcionar. Actívalo en tu navegador e inténtalo de nuevo.<br>This platform needs JavaScript to work. Turn it on in your browser and try again.</p>
   </noscript>
 </body>
 </html>
