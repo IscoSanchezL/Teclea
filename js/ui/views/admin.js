@@ -84,14 +84,27 @@ export async function render({ query }) {
         e.currentTarget.disabled = true;
         try { for (const f of m36vacias) await A.borrarDatosUsuario(f.uid); toast(t('adm.rev.borradas', { n: m36vacias.length })); pintarFilas(await A.revisarEstudiantes()); } catch (er) { toast(er.message || t('adm.rev.noBorrar'), { tipo: 'error' }); }
       };
+      const refrescar = async () => pintarFilas(await A.revisarEstudiantes());
+      const borrarUna = async (f) => {
+        if (!(await confirmar({ titulo: t('adm.rev.borrarUnaTitulo', { n: f.nombre }), mensaje: t('adm.rev.borrarUnaMsg', { xp: f.xp, e: f.estrellas, l: f.lecciones }), si: t('adm.rev.borrarSi'), peligro: true }))) return;
+        try { await A.borrarDatosUsuario(f.uid); toast(t('adm.rev.borradas', { n: 1 })); await refrescar(); } catch (er) { toast(er.message || t('adm.rev.noBorrar'), { tipo: 'error' }); }
+      };
+      const borrarTodas = async (e) => {
+        const btn = e.currentTarget;
+        if (!(await confirmar({ titulo: t('adm.rev.borrarTodasTitulo', { n: m36.length }), mensaje: t('adm.rev.borrarTodasMsg', { c: m36conAvance }), si: t('adm.rev.borrarSi'), peligro: true }))) return;
+        if (!(await confirmar({ titulo: t('adm.rev.ultimaConfirm'), mensaje: t('adm.rev.ultimaMsg', { n: m36.length }), si: t('adm.rev.borrarSi'), peligro: true }))) return;
+        btn.disabled = true;
+        try { for (const f of m36) await A.borrarDatosUsuario(f.uid); toast(t('adm.rev.borradas', { n: m36.length })); await refrescar(); } catch (er) { toast(er.message || t('adm.rev.noBorrar'), { tipo: 'error' }); btn.disabled = false; }
+      };
       cuerpo.replaceChildren(...[
         h('p', {}, h('strong', {}, t('adm.rev.m36', { g: g36.length, m: m36.length, v: m36vacias.length, c: m36conAvance }))),
         m36vacias.length ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: borrarVacias }, t('adm.rev.borrarBtn', { n: m36vacias.length })) : null,
+        m36conAvance ? h('button', { class: 'btn btn--peligro btn--sm', type: 'button', onclick: borrarTodas }, t('adm.rev.borrarTodasBtn', { n: m36.length, c: m36conAvance })) : null,
         h('p', {}, h('strong', {}, t('adm.rev.resumen', { a: filas.length, b: malos.length, c: sin.length }))),
         malos.length ? h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.repararPerfiles(filas); toast(t('adm.rev.reparados', { n })); pintarFilas(await A.revisarEstudiantes()); } catch (er) { toast(er.message || t('adm.rev.noReparar'), { tipo: 'error' }); e.currentTarget.disabled = false; } } }, t('adm.rev.reparar', { n: malos.length })) : null,
         filas.length ? h('input', { class: 'input input--sm', type: 'search', placeholder: t('adm.rev.buscar'), 'aria-label': t('adm.rev.buscar'), style: { margin: '.5rem 0' }, oninput: (e) => { const q = e.target.value.trim().toLowerCase(); cuerpo.querySelectorAll('tbody tr').forEach((tr) => { tr.hidden = q && !tr.textContent.toLowerCase().includes(q); }); } }) : null,
-        filas.length ? h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, [t('adm.rev.th.est'), t('adm.rev.th.grado'), t('adm.rev.th.entra'), t('adm.rev.th.xp'), t('adm.rev.th.monedas'), t('adm.rev.th.lecciones'), t('adm.rev.th.estrellas'), t('adm.rev.th.estado')].map((txt) => h('th', {}, txt)))),
-          h('tbody', {}, filas.map((f) => h('tr', {}, h('td', {}, f.nombre), h('td', {}, f.grado ? t('grado.etq', { g: f.grado }) : '—'), h('td', {}, f.entra === 'Google' ? t('adm.rev.entraGoogle') : t('adm.rev.entraCodigo')), h('td', {}, String(f.xp)), h('td', {}, String(f.monedas)), h('td', {}, String(f.lecciones)), h('td', {}, String(f.estrellas)), h('td', {}, chip(f))))))) : h('p', { class: 'suave' }, t('adm.rev.noHay'))].filter(Boolean));
+        filas.length ? h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' }, h('thead', {}, h('tr', {}, [t('adm.rev.th.est'), t('adm.rev.th.grado'), t('adm.rev.th.entra'), t('adm.rev.th.xp'), t('adm.rev.th.monedas'), t('adm.rev.th.lecciones'), t('adm.rev.th.estrellas'), t('adm.rev.th.estado'), ''].map((txt) => h('th', {}, txt)))),
+          h('tbody', {}, filas.map((f) => h('tr', {}, h('td', {}, f.nombre), h('td', {}, f.grado ? t('grado.etq', { g: f.grado }) : '—'), h('td', {}, f.entra === 'Google' ? t('adm.rev.entraGoogle') : t('adm.rev.entraCodigo')), h('td', {}, String(f.xp)), h('td', {}, String(f.monedas)), h('td', {}, String(f.lecciones)), h('td', {}, String(f.estrellas)), h('td', {}, chip(f)), h('td', {}, f.manual36 ? h('button', { class: 'btn btn--peligro btn--sm', type: 'button', onclick: () => borrarUna(f) }, t('adm.rev.borrarUna')) : null)))))) : h('p', { class: 'suave' }, t('adm.rev.noHay'))].filter(Boolean));
     };
     const boton = h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; cuerpo.replaceChildren(h('p', { class: 'suave' }, t('adm.rev.revisando'))); try { pintarFilas(await A.revisarEstudiantes()); } catch (er) { cuerpo.replaceChildren(h('p', { class: 'mensaje-error' }, er.message || t('adm.rev.noRevisar'))); } e.currentTarget.disabled = false; } }, t('adm.rev.btn'));
     return h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.rev.titulo')), boton), cuerpo);
