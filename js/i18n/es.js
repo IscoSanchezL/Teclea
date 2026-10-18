@@ -1182,6 +1182,7 @@ export default {
   "adm.err.correo": "Escribe un correo válido.",
   "adm.tab.resumen": "Resumen",
   "adm.tab.docentes": "Docentes",
+  "adm.tab.cuentas": "Cuentas",
   "adm.tab.marca": "Marca",
   "adm.tab.colores": "Colores",
   "adm.tab.ajustes": "Ajustes",

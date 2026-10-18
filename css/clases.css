@@ -63,6 +63,7 @@
 .certificado__nombre { font: italic 700 2.2rem Georgia, serif; border-bottom: 2px solid #000; display: inline-block; padding: 0 12mm 2mm; align-self: center; }
 
 .tabs--5 { grid-template-columns: repeat(5, 1fr); max-width: 44rem; }
+.tabs--7 { grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); max-width: 64rem; }
 @media (max-width: 40rem) { .tabs--5 { grid-template-columns: repeat(5, max-content); overflow-x: auto; max-width: 100%; } .tabs--5 .tab { padding-inline: .8rem; white-space: nowrap; } }
 .marca__vista { display: grid; place-items: center; min-height: 6rem; border: 1px dashed var(--borde); border-radius: var(--r-md); overflow: hidden; background: var(--superficie-2); }
 .marca__vista img { max-width: 100%; max-height: 9rem; object-fit: contain; }

@@ -1182,6 +1182,7 @@ export default {
   "adm.err.correo": "Enter a valid email.",
   "adm.tab.resumen": "Overview",
   "adm.tab.docentes": "Teachers",
+  "adm.tab.cuentas": "Accounts",
   "adm.tab.marca": "Brand",
   "adm.tab.colores": "Colors",
   "adm.tab.ajustes": "Settings",

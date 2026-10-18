@@ -16,7 +16,7 @@ import { textoUltima } from '../../db/analitica.js';
 import { t, locale } from '../../i18n/index.js';
 import { textoVersion, versionEnEjecucion, forzarActualizacion } from '../../core/version.js';
 
-const TABS = [['resumen', () => t('adm.tab.resumen')], ['docentes', () => t('adm.tab.docentes')], ['marca', () => t('adm.tab.marca')], ['colores', () => t('adm.tab.colores')], ['ajustes', () => t('adm.tab.ajustes')], ['datos', () => t('adm.tab.datos')]];
+const TABS = [['resumen', () => t('adm.tab.resumen')], ['docentes', () => t('adm.tab.docentes')], ['cuentas', () => t('adm.tab.cuentas')], ['marca', () => t('adm.tab.marca')], ['colores', () => t('adm.tab.colores')], ['ajustes', () => t('adm.tab.ajustes')], ['datos', () => t('adm.tab.datos')]];
 const fila = (clave, valor, estado) => h('li', { class: 'estado-fila' }, h('span', {}, clave), h('strong', { class: estado ? `estado--${estado}` : '' }, valor));
 const fechaHora = (ms) => (ms ? new Date(ms).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
 
@@ -67,7 +67,6 @@ export async function render({ query }) {
         h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.registro')), h('span', { class: 'suave' }, t('adm.ultimasAcciones'))),
           audit.length ? h('ul', { class: 'actividad' }, audit.map((a) => h('li', { class: 'actividad__item' }, h('span', { class: 'actividad__ic' }, icono('clock', { tam: 16 })), h('span', {}, h('strong', {}, a.rol || ''), ` ${a.accion}`, a.objetivo ? h('small', { class: 'suave' }, ` · ${a.objetivo}`) : null), h('time', { class: 'suave' }, fechaHora(a.creadoEn)))))
             : h('p', { class: 'suave' }, t('adm.sinAcciones')))),
-      panelRevision(),
       h('p', { class: 'suave pequeno' }, t('adm.resumenPie', { n: wl.length, f: ajustes.permitirFotos ? t('adm.fotosPerm') : t('adm.fotosOff') }))];
   }
 
@@ -245,9 +244,9 @@ export async function render({ query }) {
       h('header', { class: 'pagina__cab' }, h('div', {}, h('h1', {}, t('adm.titulo')), h('p', { class: 'suave' }, `${t('adm.sub')} · `, textoVersion(h('strong', {}, ''), t('adm.verPref')))),
         h('a', { class: 'btn btn--suave btn--sm', href: 'configurar.html' }, icono('settings', { tam: 16 }), t('adm.asistente'))),
       !nube ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, t('adm.demoAviso'))) : null,
-      h('div', { class: 'tabs tabs--5 tabs--staff', role: 'tablist' }, TABS.map(([id, etq]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, etq()))),
+      h('div', { class: 'tabs tabs--7 tabs--staff', role: 'tablist' }, TABS.map(([id, etq]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, etq()))),
       cargando].filter(Boolean));
-    const cont = tab === 'resumen' ? await resumen() : tab === 'docentes' ? await docentes() : tab === 'marca' ? marcaTab() : tab === 'colores' ? coloresTab() : tab === 'ajustes' ? await ajustesTab() : await datosTab();
+    const cont = tab === 'resumen' ? await resumen() : tab === 'docentes' ? await docentes() : tab === 'cuentas' ? h('div', { class: 'pila' }, panelRevision()) : tab === 'marca' ? marcaTab() : tab === 'colores' ? coloresTab() : tab === 'ajustes' ? await ajustesTab() : await datosTab();
     cargando.replaceWith(...[].concat(cont).filter(Boolean));
   }
   await pintar();
