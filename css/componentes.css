@@ -294,6 +294,8 @@
 @keyframes med-chispa { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1.15) rotate(45deg); } }
 @media (prefers-reduced-motion: reduce) { .medalla__brillo, .medalla__chispa { animation: none; } .medalla__chispa { opacity: .8; } }
 .tabs--3 { grid-template-columns: repeat(3, 1fr); }
+.tabs--4 { grid-template-columns: repeat(4, 1fr); }
+.tabs--4 .tab { font-size: .9rem; padding-inline: .3rem; }
 .tabs--3 .tab { font-size: .9rem; padding-inline: .3rem; }
 
 /* Cerrar sesión: siempre visible y reconocible */

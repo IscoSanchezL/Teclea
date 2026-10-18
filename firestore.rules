@@ -437,6 +437,63 @@ service cloud.firestore {
       allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
     }
 
+    // ═════════════════════════ Retos en vivo (los activa el docente) ═════════════════════════
+    // challenges: tipo 'parejas' (mismo texto, puntaje por pareja) o 'final' (mensajes entre compañeros).
+    match /challenges/{id} {
+      allow get: if signedIn() && (resource == null || isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(resource.data.classId));
+      allow list: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(resource.data.classId));
+      allow create: if isTeacher() && request.resource.data.docenteId == request.auth.uid && validChallenge(request.resource.data);
+      allow update: if isTeacher() && resource.data.docenteId == request.auth.uid && validChallenge(request.resource.data)
+                       && request.resource.data.docenteId == resource.data.docenteId
+                       && request.resource.data.classId == resource.data.classId;
+      allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+
+      function validChallenge(d) {
+        return d.keys().hasOnly(['docenteId','classId','claseNombre','tipo','estado','seg','texto','parejas','asignacion','creadoEn','iniciadoEn','cerradoEn'])
+          && d.keys().hasAll(['docenteId','classId','tipo','estado','seg'])
+          && d.tipo in ['parejas','final']
+          && d.estado in ['preparacion','jugando','cerrado']
+          && isInt(d.seg, 0, 600)
+          && isStr(d.classId, 1, 60)
+          && (!('claseNombre' in d) || isStr(d.claseNombre, 0, 80))
+          && (!('texto' in d) || isStr(d.texto, 0, 3000))
+          && (!('parejas' in d) || (d.parejas is list && d.parejas.size() <= 80))
+          && (!('asignacion' in d) || (d.asignacion is map && d.asignacion.size() <= 200))
+          && get(/databases/$(db)/documents/classes/$(d.classId)).data.docenteId == request.auth.uid;
+      }
+    }
+
+    // challenge_entries: el mensaje (reto final) y el resultado de cada estudiante. id = retoId_uid.
+    // Los compañeros de la clase pueden leerlas (el reto final reparte mensajes y todos ven el podio).
+    match /challenge_entries/{id} {
+      allow get: if signedIn() && (resource == null || isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(resource.data.classId));
+      allow list: if signedIn() && (isAdmin() || resource.data.docenteId == request.auth.uid || enrolled(resource.data.classId));
+      allow create: if request.auth.uid == request.resource.data.uid
+        && id == request.resource.data.challengeId + '_' + request.auth.uid
+        && enrolled(request.resource.data.classId)
+        && validEntry(request.resource.data)
+        && request.resource.data.creadoEn == request.time;
+      // El estudiante solo cambia lo suyo y mientras no haya terminado; después de terminar queda bloqueado.
+      allow update: if request.auth.uid == resource.data.uid && resource.data.terminado == false
+        && validEntry(request.resource.data)
+        && noTouch(['challengeId','classId','docenteId','uid','alias','creadoEn']);
+      allow delete: if isAdmin() || (isTeacher() && resource.data.docenteId == request.auth.uid);
+
+      function validEntry(d) {
+        return d.keys().hasOnly(['challengeId','classId','docenteId','uid','alias','mensaje','wpm','precision','puntos','terminado','creadoEn'])
+          && d.keys().hasAll(['challengeId','classId','docenteId','uid','alias','terminado'])
+          && isStr(d.alias, 1, 40)
+          && d.terminado is bool
+          && (!('mensaje' in d) || isStr(d.mensaje, 8, 90))
+          && (!('wpm' in d) || isNum(d.wpm, 0, 200))
+          && (!('precision' in d) || isNum(d.precision, 0, 100))
+          && (!('puntos' in d) || isNum(d.puntos, 0, 2000))
+          && get(/databases/$(db)/documents/challenges/$(d.challengeId)).data.classId == d.classId
+          && get(/databases/$(db)/documents/challenges/$(d.challengeId)).data.docenteId == d.docenteId
+          && get(/databases/$(db)/documents/challenges/$(d.challengeId)).data.estado != 'cerrado';
+      }
+    }
+
     // Estadísticas por tecla del estudiante (alimenta el refuerzo adaptativo)
     match /key_stats/{uid} {
       allow get: if signedIn() && (request.auth.uid == uid || isAdmin());

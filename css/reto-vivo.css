@@ -1,0 +1,61 @@
+/* Retos en vivo (parejas y final): panel del docente, vista del estudiante, banner del inicio y podio. */
+.rv { display: flex; flex-direction: column; gap: 1rem; max-width: 62rem; margin-inline: auto; width: 100%; }
+.rv--doc { max-width: none; }
+.rv-cab { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.rv-centro { display: flex; flex-direction: column; align-items: center; text-align: center; gap: .85rem; padding: 2rem 1.25rem; }
+.rv-espera { color: var(--texto-suave); font-weight: 600; max-width: 34rem; }
+.rv-pareja { display: flex; flex-direction: column; gap: .15rem; font-size: 1.35rem; }
+.rv-pareja strong { font-family: var(--fuente-titulo); font-size: 1.7rem; color: var(--primario); }
+.rv-mensaje { display: flex; flex-direction: column; gap: .8rem; }
+.rv-mensaje .input { font-size: 1.15rem; }
+.rv-error { color: var(--mal-texto); font-weight: 600; min-height: 1.2em; margin: 0; }
+.rv-enviado { display: flex; align-items: center; gap: .5rem; color: var(--ok-texto); font-weight: 700; margin: 0; }
+.rv-cuenta { font-family: var(--fuente-titulo); font-size: clamp(5rem, 22vw, 11rem); font-weight: 700; line-height: 1; color: var(--primario); animation: rv-pop .8s ease-out infinite; }
+@keyframes rv-pop { from { transform: scale(1.35); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+.rv-puntaje { font-family: var(--fuente-titulo); font-size: 2rem; font-weight: 700; margin: 0; color: var(--primario); }
+.rv-vacio { text-align: center; padding: 1rem; }
+.fila--entre { justify-content: space-between; align-items: center; }
+
+/* Docente */
+.rv-tipos { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
+.rv-tipo { align-items: flex-start; }
+.rv-tipo__ic { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border-radius: 1rem; background: var(--superficie-2); color: var(--primario); }
+.rv-tipo h3, .rv-activo h3, .rv-form h3 { margin: 0; }
+.rv-tipo .btn { margin-top: auto; }
+.rv-form { max-width: 40rem; }
+.rv-parejas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: .4rem .75rem; }
+.rv-parejas li { display: flex; align-items: center; gap: .55rem; padding: .4rem .6rem; border: 1px solid var(--borde); border-radius: var(--r-sm); background: var(--superficie-2); }
+.rv-parejas b { display: grid; place-items: center; min-width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--primario); color: var(--primario-tinta); font-size: .8rem; }
+.rv-mensajes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+.rv-mensajes li { display: grid; grid-template-columns: 8rem 1fr auto; gap: .6rem; align-items: center; padding: .45rem .7rem; border: 1px solid var(--borde); border-radius: var(--r-sm); }
+.rv-aviso { margin: 0; padding: .55rem .8rem; border-radius: var(--r-sm); background: var(--mal-fondo); color: var(--mal-texto); font-weight: 600; }
+.rv-texto { white-space: pre-wrap; padding: .6rem .8rem; background: var(--superficie-2); border-radius: var(--r-sm); }
+.rv-estado--preparacion { background: var(--superficie-2); color: var(--texto-suave); }
+.rv-estado--jugando { background: var(--ok-fondo); color: var(--ok-texto); }
+.rv-estado--cerrado { background: var(--superficie-2); color: var(--texto-suave); }
+.rv-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .4rem; }
+.rv-hist li { display: flex; justify-content: space-between; align-items: center; gap: .6rem; flex-wrap: wrap; padding: .45rem .7rem; border: 1px solid var(--borde); border-radius: var(--r-sm); }
+@media (max-width: 40rem) { .rv-mensajes li { grid-template-columns: 1fr; } }
+
+/* Banner en el inicio del estudiante */
+.rv-banner-slot:empty { display: none; }
+.rv-banner { display: flex; align-items: center; gap: .9rem; padding: .85rem 1.1rem; border-radius: var(--r-lg); text-decoration: none; color: var(--primario-tinta);
+  background: linear-gradient(120deg, var(--violeta-500), var(--coral-500)); box-shadow: var(--sombra-2); animation: rv-late 2.4s ease-in-out infinite; }
+.rv-banner__ic { display: grid; place-items: center; width: 2.8rem; height: 2.8rem; border-radius: 50%; background: rgba(255, 255, 255, .22); flex: none; }
+.rv-banner__txt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.rv-banner__txt small { opacity: .9; }
+@keyframes rv-late { 50% { transform: scale(1.012); } }
+@media (prefers-reduced-motion: reduce) { .rv-banner, .rv-cuenta { animation: none; } }
+
+/* Podio */
+.rv-podio { display: flex; flex-direction: column; gap: .9rem; }
+.rv-podio__tarima { list-style: none; margin: 0; padding: 1rem 0 0; display: flex; justify-content: center; align-items: flex-end; gap: .6rem; }
+.rv-podio__col { flex: 1 1 0; max-width: 11rem; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: .15rem; }
+.rv-podio__medalla { font-size: 2.2rem; line-height: 1; }
+.rv-podio__nombre { font-family: var(--fuente-titulo); overflow-wrap: anywhere; }
+.rv-podio__pts { font-size: .9rem; color: var(--texto-suave); font-weight: 700; }
+.rv-podio__base { width: 100%; display: grid; place-items: start center; padding-top: .4rem; border-radius: var(--r-sm) var(--r-sm) 0 0; color: #fff; font-family: var(--fuente-titulo); font-size: 1.6rem; }
+.rv-podio__col--1 .rv-podio__base { height: 8rem; background: linear-gradient(var(--sol-400), var(--sol-500)); color: #3A2A00; }
+.rv-podio__col--2 .rv-podio__base { height: 5.5rem; background: linear-gradient(#C9CEDD, #9EA6BF); }
+.rv-podio__col--3 .rv-podio__base { height: 4rem; background: linear-gradient(#E0A877, #B97A45); }
+.rv-tabla__top th, .rv-tabla__top td { font-weight: 700; }
