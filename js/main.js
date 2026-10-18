@@ -17,8 +17,10 @@ import { iniciarEfectos } from './ui/efectos.js';
 import { iniciarPaleta } from './ui/paleta.js';
 import { iniciarInactividad } from './core/inactividad.js';
 import { iniciarRendimiento, vigilarFluidez } from './core/rendimiento.js';
+import { registrarVersionEnEjecucion, vigilarVersionNueva } from './core/version.js';
 
 async function arrancar() {
+  registrarVersionEnEjecucion();   // antes de que un service worker nuevo cambie las cachés
   iniciarRendimiento();
   montarIdioma(); // <html lang> y textos estáticos de index.html en el idioma guardado
   aplicarMarca();
@@ -47,6 +49,7 @@ async function arrancar() {
   iniciarPaleta();
   iniciarInactividad();
   vigilarFluidez();
+  vigilarVersionNueva();
   // El docente debe ver el historial real del estudiante aunque haya trabajado antes de unirse a la clase
   if (state.user?.rol === 'estudiante') setTimeout(() => import('./db/progreso.js').then((m) => m.reconciliarInscripciones(state.user)).catch((e) => console.warn('[main] reconciliar', e?.code || e)), 5000);
   registrarServiceWorker();

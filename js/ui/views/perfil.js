@@ -13,7 +13,7 @@ import { confirmar, toast } from '../overlay.js';
 import { mascota } from '../art.js';
 import { avatar, EMOJIS_AVATAR, FONDOS_AVATAR } from '../avatar.js';
 import { ESPECIES, EMOJI_ESPECIE, personajeSVG } from '../personaje.js';
-import { textoVersion } from '../../core/version.js';
+import { textoVersion, forzarActualizacion } from '../../core/version.js';
 import { fotoPerfil } from '../imagen.js';
 import { leer } from '../../db/store.js';
 import * as store from '../../db/store.js';
@@ -179,6 +179,6 @@ export async function render() {
   return h('div', { class: 'perfil' }, cabecera,
     h('div', { class: 'perfil__rejilla' }, seccionAvatar, miCuarto, apariencia, accesibilidad, sonido, escritura, privacidad),
     diagnostico,
-    textoVersion(h('p', { class: 'suave pequeno', style: { opacity: .6, textAlign: 'center' } }, '')),
+    h('div', { class: 'fila', style: { justifyContent: 'center', alignItems: 'center', gap: '.75rem' } }, textoVersion(h('span', { class: 'suave pequeno', style: { opacity: .7 } }, '')), h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: forzarActualizacion }, 'Actualizar app')),
     salir);
 }

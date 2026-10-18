@@ -43,18 +43,18 @@ self.addEventListener('activate', (evento) => {
 
 async function redPrimero(req, limiteMs = 2500) {
   const cache = await caches.open(cachePrincipal);
+  // 'no-cache' = siempre revalida con el servidor (barato: 304 si no cambió). Sin esto el navegador podía dar su copia HTTP vieja (10 min – 1 h).
+  const red = fetch(req, { cache: 'no-cache' }).then((res) => { if (res && res.ok) cache.put(req, res.clone()); return res; });
   try {
-    const res = await Promise.race([
-      fetch(req),
+    return await Promise.race([
+      red,
       new Promise((_, rechazar) => setTimeout(() => rechazar(new Error('lenta')), limiteMs)),
     ]);
-    if (res && res.ok) cache.put(req, res.clone());
-    return res;
   } catch {
+    red.catch(() => {});   // la descarga sigue y deja guardada la versión nueva para la próxima vez (antes se descartaba)
     const guardado = await cache.match(req, { ignoreSearch: true });
     if (guardado) return guardado;
-    // Red lenta pero sin copia: espera la respuesta real sin límite.
-    return fetch(req);
+    return red;            // sin copia: espera la respuesta real sin límite
   }
 }
 

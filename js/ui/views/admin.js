@@ -14,7 +14,7 @@ import { toast, confirmar, abrirCapa } from '../overlay.js';
 import { campo, interruptor } from '../componentes.js';
 import { textoUltima } from '../../db/analitica.js';
 import { t, locale } from '../../i18n/index.js';
-import { textoVersion } from '../../core/version.js';
+import { textoVersion, versionEnEjecucion, forzarActualizacion } from '../../core/version.js';
 
 const TABS = [['resumen', () => t('adm.tab.resumen')], ['docentes', () => t('adm.tab.docentes')], ['marca', () => t('adm.tab.marca')], ['colores', () => t('adm.tab.colores')], ['ajustes', () => t('adm.tab.ajustes')], ['datos', () => t('adm.tab.datos')]];
 const fila = (clave, valor, estado) => h('li', { class: 'estado-fila' }, h('span', {}, clave), h('strong', { class: estado ? `estado--${estado}` : '' }, valor));
@@ -24,11 +24,10 @@ async function diagnostico() {
   const sw = 'serviceWorker' in navigator ? ((await navigator.serviceWorker.getRegistration())?.active ? 'activo' : 'noInstalado') : 'noCompatible';
   let cache = '—';
   try { cache = (await (await fetch('precache.json', { cache: 'no-store' })).json()).version; } catch { /* sin red */ }
-  let archivos = 0, instalada = '—';
+  let archivos = 0, instalada = (await versionEnEjecucion()) || '—';
   try {
     for (const k of await caches.keys()) {
       archivos += (await (await caches.open(k)).keys()).length;
-      const m = /^teclea-([0-9a-f]{8,})$/.exec(k); if (m) instalada = m[1];
     }
   } catch { /* sin caché */ }
   const est = navigator.storage?.estimate ? await navigator.storage.estimate() : null;
@@ -57,14 +56,14 @@ export async function render({ query }) {
       fila(t('adm.swFila'), d.swTxt, d.sw === 'activo' ? 'ok' : 'alerta'),
       fila(t('adm.archivos'), `${d.archivos} · ${d.usoMB} MB`),
       fila(t('adm.verPublicada'), String(d.cache).slice(0, 8)),
-      fila(t('adm.verInstalada'), String(d.instalada).slice(0, 8), d.instalada === '—' || d.cache === '—' ? undefined : (String(d.instalada) === String(d.cache) ? 'ok' : 'alerta')),
+      fila(t('adm.verEjecucion'), String(d.instalada).slice(0, 8), d.instalada === '—' || d.cache === '—' ? undefined : (String(d.instalada) === String(d.cache) ? 'ok' : 'alerta')),
       ...(d.instalada !== '—' && d.cache !== '—' && String(d.instalada) !== String(d.cache) ? [fila(t('adm.verQueHacer'), t('adm.verRecargar'), 'alerta')] : []),
       fila(t('adm.pendAprobar'), String(pend.length), pend.length ? 'alerta' : 'ok'));
     const botonCat = cat ? h('button', { class: `btn ${cat.completo ? 'btn--suave' : 'btn--primary'} btn--sm`, type: 'button', onclick: async (e) => { e.currentTarget.disabled = true; try { const n = await A.sembrarCatalogos(); toast(t('adm.catPublicadosN', { n })); await pintar(); } catch (er) { toast(er.message || t('adm.noPublicar'), { tipo: 'error' }); e.currentTarget.disabled = false; } } }, cat.completo ? t('adm.republicar') : t('adm.publicarAhora')) : null;
     return [
       pend.length ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, pend.length === 1 ? t('adm.hayPend1') : t('adm.hayPendN', { n: pend.length })), h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => { tab = 'docentes'; pintar(); } }, t('adm.revisar'))) : null,
       h('div', { class: 'rejilla-2' },
-        h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.estadoSistema')), botonCat), lista),
+        h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.estadoSistema')), h('div', { class: 'fila' }, botonCat, h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: forzarActualizacion }, t('adm.verActualizar')))), lista),
         h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.registro')), h('span', { class: 'suave' }, t('adm.ultimasAcciones'))),
           audit.length ? h('ul', { class: 'actividad' }, audit.map((a) => h('li', { class: 'actividad__item' }, h('span', { class: 'actividad__ic' }, icono('clock', { tam: 16 })), h('span', {}, h('strong', {}, a.rol || ''), ` ${a.accion}`, a.objetivo ? h('small', { class: 'suave' }, ` · ${a.objetivo}`) : null), h('time', { class: 'suave' }, fechaHora(a.creadoEn)))))
             : h('p', { class: 'suave' }, t('adm.sinAcciones')))),
