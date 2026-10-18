@@ -10,8 +10,9 @@
     "test:gamificacion": "firebase emulators:exec --only firestore --project demo-teclea \"node gamificacion.test.mjs\"",
     "test:clases": "firebase emulators:exec --only firestore --project demo-teclea \"node clases.test.mjs\"",
     "test:puras": "node motor.test.mjs && node curriculo.test.mjs",
-    "test:todo": "npm run test:puras && npm test && npm run test:progreso && npm run test:gamificacion && npm run test:clases && npm run test:admin && npm run test:antiguo",
+    "test:todo": "npm run test:puras && npm test && npm run test:progreso && npm run test:gamificacion && npm run test:clases && npm run test:admin && npm run test:antiguo && npm run test:reconciliar",
     "test:antiguo": "firebase emulators:exec --only firestore --project demo-teclea \"node perfil-antiguo.test.mjs\"",
+    "test:reconciliar": "firebase emulators:exec --only firestore --project demo-teclea \"node reconciliar.test.mjs\"",
     "test:admin": "firebase emulators:exec --only firestore --project demo-teclea \"node admin.test.mjs\""
   },
   "devDependencies": {

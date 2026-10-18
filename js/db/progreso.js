@@ -238,3 +238,61 @@ export async function otorgarInsignia(uid, badgeId) {
 
 export const _reiniciarCache = () => reiniciarCache(null);
 export { hoyISO };
+
+/**
+ * Completa el resumen que ve el docente con el HISTORIAL REAL del estudiante.
+ * Sirve cuando trabajó antes de unirse a la clase (p. ej. en casa) o cuando una escritura del resumen falló:
+ * sin esto, el docente lo ve "nuevo" y en 0 aunque tenga mucho avance. Solo sube datos, nunca los baja.
+ */
+export async function reconciliarInscripciones(user, { forzar = false } = {}) {
+  if (!user || user.rol !== 'estudiante') return 0;
+  const marca = `teclea:reconc:${user.uid}`;
+  try { if (!forzar && sessionStorage.getItem(marca)) return 0; } catch { /* sin almacenamiento */ }
+  const insc = await cargarInscripciones(user.uid);
+  if (!insc.length) return 0;
+  const ses = await store.consultar('sessions', { donde: [['uid', '==', user.uid]], limite: 500 });
+  const prog = Object.values(await cargarProgreso(user.uid));
+  if (!ses.length && !prog.length && !(user.xp > 0)) return 0;
+
+  const tiempos = ses.map((x) => Number(x.creadoEn) || 0).filter(Boolean).sort((a, b) => a - b);
+  const agg = {
+    sesiones: ses.length,
+    minutos: Math.round(ses.reduce((a, x) => a + (x.duracionSeg || 0), 0) / 6) / 10,
+    mejorWpm: ses.reduce((m, x) => Math.max(m, x.wpm || 0), 0),
+    precisionProm: ses.length ? Math.round(ses.reduce((a, x) => a + (x.precision || 0), 0) / ses.length * 10) / 10 : 0,
+    caracteres: Math.min(10000000, ses.reduce((a, x) => a + Math.min(5000, x.caracteres || 0), 0)),
+    lecciones: prog.filter((p) => p.completada).length,
+    mundo: prog.reduce((m, p) => Math.max(m, p.mundo || 0), 0),
+    ultima: tiempos.at(-1) || 0, primerWpm: ses.find((x) => Number(x.creadoEn) === tiempos[0])?.wpm,
+  };
+  let cambios = 0;
+  const ops = [];
+  for (const i of insc) {
+    const s = i.stats || {}, d = {};
+    if (agg.sesiones > (s.sesiones || 0)) {
+      d['stats.sesiones'] = agg.sesiones; d['stats.minutos'] = Math.max(s.minutos || 0, agg.minutos);
+      d['stats.caracteres'] = Math.max(s.caracteres || 0, agg.caracteres);
+      d['stats.precisionProm'] = agg.precisionProm;
+    }
+    if (agg.mejorWpm > (s.mejorWpm || 0)) d['stats.mejorWpm'] = agg.mejorWpm;
+    if (agg.lecciones > (s.lecciones || 0)) d['stats.lecciones'] = agg.lecciones;
+    if (agg.mundo && agg.mundo !== s.mundo) d['stats.mundo'] = agg.mundo;
+    if ((user.xp || 0) > (s.xp || 0)) d['stats.xp'] = user.xp;
+    if (agg.ultima > (Number(s.ultimaPractica) || 0)) d['stats.ultimaPractica'] = agg.ultima;
+    if (s.ppmInicial == null && agg.primerWpm != null) d['stats.ppmInicial'] = agg.primerWpm;
+    if (Object.keys(d).length) { ops.push({ tipo: 'update', ruta: `enrollments/${i.id}`, datos: d }); cambios++; }
+  }
+  // Que el docente también vea el detalle por lección: el progreso guarda a qué docentes les toca verlo
+  const docentes = [...new Set(insc.map((i) => i.docenteId))].slice(0, 3);
+  for (const p of prog) {
+    if (docentes.every((d) => (p.docenteIds || []).includes(d))) continue;
+    ops.push({ tipo: 'set', ruta: `lessons_progress/${p.id || `${user.uid}_${p.lessonId}`}`, datos: {
+      uid: p.uid, lessonId: p.lessonId, mundo: p.mundo, estrellas: p.estrellas, mejorWpm: p.mejorWpm, mejorPrecision: p.mejorPrecision,
+      intentos: p.intentos, completada: p.completada, docenteIds: [...new Set([...(p.docenteIds || []), ...docentes])].slice(0, 3), actualizadoEn: store.ahora() } });
+    cambios++;
+  }
+  for (let k = 0; k < ops.length; k += 100) await store.esperarMax(store.lote(ops.slice(k, k + 100)));
+  if (cambios) reiniciarCache(user.uid);
+  try { sessionStorage.setItem(marca, '1'); } catch { /* sin almacenamiento */ }
+  return cambios;
+}

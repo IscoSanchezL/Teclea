@@ -82,6 +82,8 @@ export async function unirse(user, codigoTexto) {
     grado: user.grado ?? null, estado: 'activo', stats: statsVacias(), unidoEn: store.ahora(), ultimaConexion: store.ahora(),
   }));
   refrescarInscripciones();
+  // Lo que ya había practicado antes de unirse (p. ej. en casa) también debe verlo el docente
+  import('./progreso.js').then((m) => m.reconciliarInscripciones(user, { forzar: true })).catch((e) => console.warn('[clases] reconciliar', e?.code || e));
   return { classId: cc.classId, id };
 }
 
