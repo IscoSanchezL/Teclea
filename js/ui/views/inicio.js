@@ -6,6 +6,7 @@
  */
 import { opcionesRapidas } from '../../db/clases.js';
 import { tarjetaRetos } from '../retos-ui.js';
+import { bannerReto } from '../reto-banner.js';
 import { state } from '../../core/state.js';
 import { h, movimientoReducido } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
@@ -111,6 +112,7 @@ function modulosPro(mundos, indice, estados, progreso) {
   }));
 }
 
+let banner = null;
 export async function render() {
   const u = state.user;
   const [mundos, indice, progreso, hoy, opciones] = await Promise.all([cargarMundos(), cargarIndice(), cargarProgreso(u.uid), resumenHoy(u.uid).catch(() => ({})), opcionesRapidas(state.user)]);
@@ -168,7 +170,9 @@ export async function render() {
     : h('section', { 'aria-labelledby': 'titulo-mapa' },
         h('h2', { id: 'titulo-mapa', class: 'titulo-mapa' }, t('inicio.mapa')), mapaZigzag(mundos, indice, estados, progreso));
 
+  banner?.destruir(); banner = bannerReto();
   return h('div', { class: `inicio inicio--${estilo}` },
+    banner.el,
     hero,
     estadisticas(u, meta, hoy),
     h('div', { class: 'inicio__cuerpo' },
@@ -224,4 +228,4 @@ export function despues(raiz) {
   observador.observe(mapa);
 }
 
-export function destroy() { observador?.disconnect(); observador = null; clearInterval(tecleo); }
+export function destroy() { observador?.disconnect(); observador = null; clearInterval(tecleo); banner?.destruir(); banner = null; }

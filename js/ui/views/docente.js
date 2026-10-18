@@ -10,16 +10,18 @@ import { icono } from '../icons.js';
 import { sparkline } from '../graficas.js';
 import { toast, confirmar } from '../overlay.js';
 import { pill } from './_staff.js';
+import { vistaRetos } from './docente-retos.js';
 import { t, idioma, locale } from '../../i18n/index.js';
 import { modalClase, modalCompartir, modalAlumnos, modalTarea, modalEstudiante } from './docente-modales.js';
 
-const TABS = [['estudiantes', () => t('doc.tab.estudiantes')], ['clases', () => t('doc.tab.clases')], ['tareas', () => t('doc.tab.tareas')]];
+let actualRetos = null;
+const TABS = [['estudiantes', () => t('doc.tab.estudiantes')], ['clases', () => t('doc.tab.clases')], ['tareas', () => t('doc.tab.tareas')], ['retos', () => t('rv.tab')]];
 
 export async function render({ query }) {
   const docente = state.user;
   let clases = [], inscs = [], sesiones = [];
   let tab = TABS.some(([id]) => id === query.tab) ? query.tab : 'estudiantes';
-  let claseSel = 'todas', texto = '', orden = { campo: 'alias', asc: true }, claseTareas = null;
+  let claseSel = 'todas', texto = '', orden = { campo: 'alias', asc: true }, claseTareas = null, claseRetos = null, retosVista = null;
   const raiz = h('div', { class: 'pagina' });
   const cuerpo = h('div', { class: 'pila' });
 
@@ -42,7 +44,7 @@ export async function render({ query }) {
       h('div', {}, h('h1', {}, t('doc.titulo')), h('p', { class: 'suave' }, `${clases.length} ${clases.length === 1 ? t('doc.clase1') : t('doc.clasesN')} · ${inscs.length} ${t('doc.estudiantes')} · `, textoVersion(h('span', { style: { opacity: .6 } }, ''), `${t('entrar.version', { v: '' }).trim()} `))),
       h('div', { class: 'fila' }, acciones));
   }
-  const tabs = () => h('div', { class: 'tabs tabs--3 tabs--staff', role: 'tablist' }, TABS.map(([id, etq]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, etq())));
+  const tabs = () => h('div', { class: 'tabs tabs--4 tabs--staff', role: 'tablist' }, TABS.map(([id, etq]) => h('button', { class: 'tab', role: 'tab', type: 'button', 'aria-selected': String(id === tab), onclick: () => { tab = id; pintar(); } }, etq())));
 
   /* ── Estudiantes ── */
   function exportarCSV() {
@@ -135,9 +137,16 @@ export async function render({ query }) {
   } }, t('doc.ejemploBtn'));
 
   async function pintar() {
-    const contenido = tab === 'tareas' ? await vistaTareas() : tab === 'clases' ? vistaClases() : vistaEstudiantes();
+    retosVista?.destruir(); retosVista = null;
+    if (tab === 'retos') {
+      retosVista = vistaRetos({ docente, clases, inscs, claseId: claseRetos || clases[0]?.id || null, alElegirClase: (id) => { claseRetos = id; pintar(); } });
+      actualRetos = retosVista;
+    }
+    const contenido = tab === 'retos' ? retosVista.el : tab === 'tareas' ? await vistaTareas() : tab === 'clases' ? vistaClases() : vistaEstudiantes();
     raiz.replaceChildren(...[cabecera(), state.modo === 'demo' ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, t('doc.demoAviso'))) : null, tabs(), contenido].filter(Boolean));
   }
   await cargar(); await pintar();
   return raiz;
 }
+
+export function destroy() { actualRetos?.destruir(); actualRetos = null; }

@@ -39,6 +39,7 @@ export const RUTAS = [
     path: '/juegos', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.juegos'); }, load: () => import('../ui/views/juegos.js'),
     nav: { icono: 'gamepad', get etiqueta() { return t('ruta.juegos'); }, orden: 4, movil: true },
   },
+  { path: '/reto', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.reto'); }, load: () => import('../ui/views/reto.js'), padre: '/' },
   {
     path: '/logros', acceso: 'sesion', solo: 'estudiante', get titulo() { return t('ruta.logros'); }, load: () => import('../ui/views/logros.js'),
     nav: { icono: 'trophy', get etiqueta() { return t('ruta.logros.nav'); }, orden: 5, movil: true },

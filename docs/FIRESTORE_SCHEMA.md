@@ -74,6 +74,18 @@ Lee **D**, **A** y estudiantes inscritos.
 ### `custom_exercises/{id}`
 `docenteId, classId|null, titulo, texto, tema, creadoEn` — el texto propio del docente.
 
+## Retos en vivo (los activa el docente)
+
+### `challenges/{id}`
+`docenteId`, `classId`, `claseNombre`, `tipo` (`parejas` | `final`), `estado` (`preparacion` → `jugando` → `cerrado`), `seg` (duración; 0 en el reto final), `texto` (reto por parejas: mismo texto para todos), `parejas[{n, uids[], alias[]}]`, `asignacion{uid → uid del autor}` (reto final: qué mensaje le toca a cada quien), `creadoEn`, `iniciadoEn`, `cerradoEn`.
+Lo crea y controla solo el docente de la clase; lo leen los estudiantes inscritos. Solo hay un reto activo por clase.
+
+### `challenge_entries/{retoId_uid}`
+`challengeId`, `classId`, `docenteId`, `uid`, `alias`, `mensaje` (reto final, 8–90 caracteres), `wpm`, `precision`, `puntos`, `terminado`, `creadoEn`.
+Cada estudiante escribe la suya; **al terminar queda bloqueada**. La leen los compañeros de la clase (para repartir mensajes y ver el podio). El docente puede borrarla (moderar mensajes).
+Puntos = PPM × precisión² × 10 (`js/game/reto-clase.js`). Pareja = suma de los puntos de sus integrantes.
+Las consultas llevan `challengeId + classId + docenteId` (igualdad) porque las reglas lo exigen para poder listar.
+
 ## Catálogos (leen **S**, escribe **A**)
 `lessons/{id}` · `texts/{id}` · `badges/{id}` · `shop_items/{id}` · `daily_challenges/{yyyyMMdd}` · `config/{app|grade_profiles}`
 
