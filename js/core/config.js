@@ -40,8 +40,8 @@ export const CONFIG = {
   },
   // App Check (recomendado): clave pública de reCAPTCHA v3 registrada en Firebase → App Check.
   // Evita que otros sitios o scripts usen tu proyecto. Déjala '' hasta registrarla (ver docs/CONFIABILIDAD.md).
-  // PAUSADO por rendimiento: la clave registrada es 6LfXV98tAAAAADio5LuvFva3uUuarPXmpEiLzEGN (reactivar solo junto con la exigencia en Firebase).
-  appCheckSiteKey: '',
+  // Activa (solo envía la credencial; NO se exige en Firebase hasta que las métricas lo permitan). Para pausarla: ''.
+  appCheckSiteKey: '6LfXV98tAAAAADio5LuvFva3uUuarPXmpEiLzEGN',
   appCheckProveedor: 'enterprise', // 'enterprise' (Fraud Defense / reCAPTCHA Enterprise) o 'v3' (clásico, obsoleto)
   firebaseSdk: '10.14.1', // versión del SDK modular cargado por CDN
 

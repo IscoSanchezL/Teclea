@@ -15,6 +15,7 @@ import { campo, interruptor } from '../componentes.js';
 import { textoUltima } from '../../db/analitica.js';
 import { t, locale } from '../../i18n/index.js';
 import { textoVersion, versionEnEjecucion, forzarActualizacion } from '../../core/version.js';
+import { probarAppCheck } from '../../db/firebase.js';
 
 const TABS = [['resumen', () => t('adm.tab.resumen')], ['docentes', () => t('adm.tab.docentes')], ['cuentas', () => t('adm.tab.cuentas')], ['marca', () => t('adm.tab.marca')], ['colores', () => t('adm.tab.colores')], ['ajustes', () => t('adm.tab.ajustes')], ['datos', () => t('adm.tab.datos')]];
 const fila = (clave, valor, estado) => h('li', { class: 'estado-fila' }, h('span', {}, clave), h('strong', { class: estado ? `estado--${estado}` : '' }, valor));
@@ -63,7 +64,7 @@ export async function render({ query }) {
     return [
       pend.length ? h('div', { class: 'aviso', role: 'note' }, icono('info', { tam: 18 }), h('span', {}, pend.length === 1 ? t('adm.hayPend1') : t('adm.hayPendN', { n: pend.length })), h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => { tab = 'docentes'; pintar(); } }, t('adm.revisar'))) : null,
       h('div', { class: 'rejilla-2' },
-        h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.estadoSistema')), h('div', { class: 'fila' }, botonCat, h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: forzarActualizacion }, t('adm.verActualizar')))), lista),
+        h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.estadoSistema')), h('div', { class: 'fila' }, botonCat, h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: async (e) => { const b = e.currentTarget; b.disabled = true; const r = await probarAppCheck(); b.disabled = false; if (r.estado === 'ok') toast(t('adm.acOk', { ms: r.ms })); else if (r.estado === 'apagado') toast(t('adm.acApagado'), { tipo: 'info' }); else toast(t('adm.acError', { c: r.codigo }), { tipo: 'error', ms: 12000 }); } }, t('adm.acProbar')), h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: forzarActualizacion }, t('adm.verActualizar')))), lista),
         h('section', { class: 'panel' }, h('header', { class: 'panel__cab' }, h('h2', {}, t('adm.registro')), h('span', { class: 'suave' }, t('adm.ultimasAcciones'))),
           audit.length ? h('ul', { class: 'actividad' }, audit.map((a) => h('li', { class: 'actividad__item' }, h('span', { class: 'actividad__ic' }, icono('clock', { tam: 16 })), h('span', {}, h('strong', {}, a.rol || ''), ` ${a.accion}`, a.objetivo ? h('small', { class: 'suave' }, ` · ${a.objetivo}`) : null), h('time', { class: 'suave' }, fechaHora(a.creadoEn)))))
             : h('p', { class: 'suave' }, t('adm.sinAcciones')))),
