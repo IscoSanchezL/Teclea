@@ -91,6 +91,14 @@ export function crearTeclado({ idioma = 'es-LA', manos = true } = {}) {
       paso();
       return () => clearInterval(id);
     },
+    /** Pista temporal: ilumina la tecla que toca aunque el modo sea "sin ayuda" (ayuda cuando alguien se atasca). */
+    pista(ch, ms = 4000) {
+      const p = ch == null ? null : pasosPara(ch, idioma)[0];
+      if (!p) return;
+      const k = mapa.get(p.code), mod = p.modificador ? mapa.get(p.modificador) : null;
+      k?.classList.add('kv__k--sig'); mod?.classList.add('kv__k--mod');
+      setTimeout(() => { if (modo !== 'guiado') { k?.classList.remove('kv__k--sig'); mod?.classList.remove('kv__k--mod'); } }, ms);
+    },
     pasosActuales: () => pasos,
     /** Código físico de la tecla iluminada ahora (y, si hay dos pasos, la del paso actual). */
     codigoIluminado: () => pasos[paso]?.code ?? null,

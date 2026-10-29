@@ -44,6 +44,33 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
     else if (ev.tipo === 'fin') decir(t('ej.frase.fin'), 'baila', 2500);
   }
 
+  // ── Ayuda automática cuando alguien se atasca (Bloq Mayús, Shift, o no encuentra la tecla) ──
+  let erroresSeguidos = 0, posError = -1, ayudaTimer = null, mayusActivo = false;
+  function ayudaAuto(texto) {
+    if (!avisoAyuda) return;
+    clearTimeout(ayudaTimer);
+    avisoAyuda.textContent = texto || ''; avisoAyuda.hidden = !texto;
+    if (texto) ayudaTimer = setTimeout(() => { avisoAyuda.hidden = true; }, 9000);
+  }
+  const esMinuscula = (c) => c && c !== c.toUpperCase() && c === c.toLowerCase();
+  const esMayuscula = (c) => c && c !== c.toLowerCase() && c === c.toUpperCase();
+  function alError(ev) {
+    erroresSeguidos = ev.pos === posError ? erroresSeguidos + 1 : 1; posError = ev.pos;
+    const esp = ev.esperado, rec = ev.recibido;
+    if (rec && esp && rec !== esp && rec.toLowerCase() === esp.toLowerCase()) {
+      ayudaAuto(esMayuscula(rec) ? t('ej.ayuda.mayus') : t('ej.ayuda.shift'));   // misma letra, otra caja
+    } else if (erroresSeguidos >= 3) {
+      ayudaAuto(t('ej.ayuda.pista', { c: esp === ' ' ? t('ej.ayuda.espacio') : esp }));
+      teclado.pista(esp);
+    }
+  }
+  function alMayus(on) {
+    mayusActivo = on;
+    const esp = motor.actual;
+    if (on && esMinuscula(esp)) ayudaAuto(t('ej.ayuda.mayus'));
+    else if (!on) { clearTimeout(ayudaTimer); if (avisoAyuda && avisoAyuda.textContent === t('ej.ayuda.mayus')) avisoAyuda.hidden = true; }
+  }
+
   const motor = new MotorEscritura({
     texto, estricto: estrictoFinal, retroceso: state.prefs.permitirRetroceso, seg,
     alEvento: (ev) => {
@@ -52,6 +79,8 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
       if (ev.tipo === 'error' && ev.avanzo) teclado.siguiente(motor.actual ?? null);
       if (ev.tipo === 'inicio') raiz.classList.add('ej--en-curso');
       if (ev.tipo === 'fin') terminar();
+      if (ev.tipo === 'avance' || ev.tipo === 'borrar') { erroresSeguidos = 0; ayudaAuto(null); }
+      if (ev.tipo === 'error') alError(ev);
       if (ev.tipo === 'pegado') { aviso.textContent = t('ej.pegar'); aviso.classList.add('ej__aviso--alerta'); }
     },
   });
@@ -71,6 +100,7 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
   const hud = h('div', { class: 'ej__hud' }, h('div', { class: 'ej__datos' }, chipTiempo, chipPpm, chipPre, chipErr), h('div', { class: 'fila' }, bPausa, bReiniciar, bSalir));
 
   const aviso = h('p', { class: 'ej__aviso', role: 'status', 'aria-live': 'polite' }, t('ej.empieza'));
+  const avisoAyuda = h('p', { class: 'ej__ayuda-auto', role: 'alert', hidden: true });
   const pausaUI = h('div', { class: 'ej__pausa', hidden: true, role: 'dialog', 'aria-label': t('ej.pausa') },
     h('strong', {}, t('ej.enPausa')), h('p', {}, t('ej.pausaTexto')),
     h('button', { class: 'btn btn--primary', type: 'button', onclick: () => reanudar() }, icono('play', { tam: 18 }), t('ej.continuar')));
@@ -90,11 +120,12 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
       }).catch((er) => console.warn('[3d]', er));
     }
   }
-  const raiz = h('section', { class: 'ej', 'aria-label': titulo || t('ej.ejercicio') }, hud, zonaTexto, aviso, teclado.el, amigo);
+  const raiz = h('section', { class: 'ej', 'aria-label': titulo || t('ej.ejercicio') }, hud, zonaTexto, aviso, avisoAyuda, teclado.el, amigo);
 
   entrada = vincularEntrada({
     motor, teclado, zona: zonaTexto,
     alPausar: () => pausar(),
+    alMayus,
     alFoco: (si) => { if (si && motor.pausado && !motor.terminado) reanudar(); else if (!si && !motor.terminado && motor.inicio != null) pausar(); },
   });
 

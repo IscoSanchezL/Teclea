@@ -10,7 +10,7 @@ import { t } from '../i18n/index.js';
 
 const CENTINELA = '​'; // permite detectar el retroceso en teclados móviles aunque el campo esté "vacío"
 
-export function vincularEntrada({ motor, teclado, zona, alPausar = () => {}, alFoco = () => {} }) {
+export function vincularEntrada({ motor, teclado, zona, alPausar = () => {}, alFoco = () => {}, alMayus = () => {} }) {
   const ta = document.createElement('textarea');
   ta.className = 'entrada-oculta';
   ta.setAttribute('aria-label', t('ej.entradaAria'));
@@ -34,6 +34,7 @@ export function vincularEntrada({ motor, teclado, zona, alPausar = () => {}, alF
     if (e.key === 'Escape') { e.preventDefault(); alPausar(); return; }
     if (e.ctrlKey || e.metaKey) { if (['v', 'x', 'c'].includes(e.key.toLowerCase())) { e.preventDefault(); if (e.key.toLowerCase() === 'v') motor.marcarPegado(); } return; }
     ultimoCodigo = e.code;
+    try { if (e.getModifierState) alMayus(e.getModifierState('CapsLock')); } catch { /* sin soporte */ }
     teclado?.presionar(e.code, true);
     if (e.key === 'Dead') { teclado?.avanzarPaso(); return; }
     if (e.key === 'Backspace') { if (!componiendo) { e.preventDefault(); motor.borrar(); } return; }

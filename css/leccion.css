@@ -214,3 +214,7 @@
 .res__amigo--3d { width: 230px; margin-block: -1rem; animation: none; }
 .res__amigo--3d .escena3d { display: block; width: 230px; height: 250px; max-width: 100%; }
 @media (max-width: 700px) { .ej__amigo--3d { width: 96px; } .ej__amigo--3d .escena3d { width: 96px; height: 110px; } .res__amigo--3d { width: 170px; } .res__amigo--3d .escena3d { width: 170px; height: 185px; } }
+
+/* Ayuda automática (Bloq Mayús, Shift, pista tras 3 errores) */
+.ej__ayuda-auto { margin: .4rem auto; max-width: 42rem; padding: .55rem .9rem; border-radius: 14px; text-align: center; font-weight: 700; background: var(--aviso-fondo, #FEF3C7); color: var(--aviso-texto, #92400E); border: 2px solid color-mix(in srgb, var(--aviso-texto, #92400E) 35%, transparent); }
+.ej__ayuda-auto[hidden] { display: none; }
