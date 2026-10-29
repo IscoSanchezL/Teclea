@@ -120,7 +120,7 @@ export function crearEjercicio({ texto, modo = 'libre', estricto = false, seg = 
       }).catch((er) => console.warn('[3d]', er));
     }
   }
-  const raiz = h('section', { class: 'ej', 'aria-label': titulo || t('ej.ejercicio') }, hud, zonaTexto, aviso, avisoAyuda, teclado.el, amigo);
+  const raiz = h('section', { class: 'ej', translate: 'no', 'aria-label': titulo || t('ej.ejercicio') }, hud, zonaTexto, aviso, avisoAyuda, teclado.el, amigo);
 
   entrada = vincularEntrada({
     motor, teclado, zona: zonaTexto,

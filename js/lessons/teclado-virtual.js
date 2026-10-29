@@ -17,7 +17,8 @@ const ESPECIALES = {
 
 function tecla(code, etiqueta, ancho, { dedo, sup = '', relleno = false, muerta = false } = {}) {
   const k = h('div', { class: `kv__k ${relleno ? 'kv__k--relleno' : ''} ${muerta ? 'kv__k--muerta' : ''}`, style: { '--w': ancho }, dataset: { code } },
-    sup ? h('span', { class: 'kv__sup' }, sup) : null, h('span', { class: 'kv__etq' }, etiqueta));
+    // Las etiquetas se pintan con CSS (content: attr) y translate="no": ningún traductor ni extensión puede cambiarlas ("Tab" → "Pestañ")
+    sup ? h('span', { class: 'kv__sup', translate: 'no', 'data-etq': sup, 'aria-hidden': 'true' }) : null, h('span', { class: 'kv__etq', translate: 'no', 'data-etq': etiqueta, 'aria-hidden': 'true' }));
   if (dedo) { k.dataset.dedo = dedo; k.classList.add(`dedo-${DEDOS[dedo].color}`); }
   return k;
 }

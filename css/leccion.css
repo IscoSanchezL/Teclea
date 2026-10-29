@@ -75,6 +75,7 @@
 .kv__k--relleno { visibility: hidden; }
 .kv__sup { position: absolute; top: 7%; left: 11%; font-size: .55em; opacity: .65; font-weight: 700; }
 .kv__etq { line-height: 1; }
+.kv__etq::before, .kv__sup::before { content: attr(data-etq); }
 .kv__k[data-code="KeyF"]::after, .kv__k[data-code="KeyJ"]::after { content: ''; position: absolute; bottom: 14%; width: 34%; height: 5%; border-radius: 4px; background: currentColor; opacity: .55; }
 .kv__k--muerta .kv__etq { color: var(--primario); }
 .kv__k--sig { background: linear-gradient(160deg, color-mix(in srgb, var(--dedo) 55%, #fff), var(--dedo)) !important; color: #1D1A3A !important; transform: translateY(calc(var(--k) * -.06)) scale(1.07); z-index: 2;
