@@ -1,6 +1,6 @@
 /**
  * Cierre de sesión por inactividad (equipos compartidos): se avisa un minuto antes y luego se cierra.
- * Cualquier tecla, clic, toque o desplazamiento reinicia el contador. Estudiantes 20 min; docentes y admin 40 min.
+ * Cualquier tecla, clic, toque o desplazamiento reinicia el contador. Estudiantes 45 min; docentes y admin 60 min.
  */
 import { state, subscribe, esDocente } from './state.js';
 import { t } from '../i18n/index.js';
@@ -8,7 +8,7 @@ import { t } from '../i18n/index.js';
 const AVISO_MS = 60 * 1000;
 let reloj = null, aviso = null, activo = false, ultimo = 0;
 
-const limite = () => (esDocente() ? 40 : 20) * 60 * 1000;
+const limite = () => (esDocente() ? 60 : 45) * 60 * 1000;
 
 function programar() {
   clearTimeout(reloj); clearTimeout(aviso);
@@ -19,7 +19,7 @@ function programar() {
     if (!state.user) return;
     const { cerrarSesion } = await import('../auth/auth.js');
     const { toast } = await import('../ui/overlay.js');
-    await cerrarSesion(); location.hash = '#/entrar';
+    await cerrarSesion('inactividad'); location.hash = '#/entrar';
     toast(t('inactividad.cerrada'), { tipo: 'info', ms: 6000 });
   }, ms);
 }

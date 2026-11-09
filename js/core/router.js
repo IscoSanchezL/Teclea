@@ -98,7 +98,7 @@ async function resolver() {
     nodo = h('section', { class: 'estado-error card' },
       h('h1', {}, t('router.error.titulo')),
       h('p', {}, t('router.error.texto')),
-      h('button', { class: 'btn btn--primary', onclick: () => location.reload() }, t('router.error.reintentar')));
+      h('button', { class: 'btn btn--primary', onclick: async () => { try { (await import('./version.js')).forzarActualizacion(); } catch { location.reload(); } } }, t('router.error.reintentar')));
     mod = null;
   }
   clearTimeout(temporizador);

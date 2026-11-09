@@ -53,8 +53,15 @@ export async function render({ query }) {
   const montar = (...nodos) => { limpiar(); cont.replaceChildren(...nodos.filter(Boolean)); window.scrollTo({ top: 0 }); };
 
   /* ── Introducción ── */
+  // Paso en el que iba (se guarda al terminar cada ejercicio): si lo sacan o se cierra la página, no repite todo
+  const clavePaso = `teclea.paso.${state.user?.uid}.${leccion.id}`;
+  const leerPaso = () => { try { const g = JSON.parse(localStorage.getItem(clavePaso) || 'null'); return g && g.paso >= 1 && g.paso <= 2 && Date.now() - g.en < 12 * 3600 * 1000 ? g.paso : 0; } catch { return 0; } };
+  const guardarPaso = (paso) => { try { localStorage.setItem(clavePaso, JSON.stringify({ paso, en: Date.now() })); } catch { /* sin almacenamiento */ } };
+  const borrarPaso = () => { try { localStorage.removeItem(clavePaso); } catch { /* sin almacenamiento */ } };
+
   function intro() {
     const mejor = progreso[leccion.id];
+    const pasoGuardado = leerPaso();
     const kb = crearTeclado({ idioma: state.prefs.tecladoIdioma, manos: true });
     kb.setModo('guiado');
     const demoChars = leccion.nuevas.length ? leccion.nuevas.filter((c) => c.length === 1) : [...leccion.alcance].filter((c) => /[a-zñ]/.test(c)).slice(-6);
@@ -66,7 +73,8 @@ export async function render({ query }) {
     // Primera vez (y con teclado físico): se activa al presionar la tecla que brilla. Ya jugada o en pantalla táctil: libre.
     const conTeclado = !window.matchMedia('(pointer: coarse)').matches;
     const bloqueado = !mejor && conTeclado;
-    const boton = h('button', { class: `btn btn--primary btn--lg ${bloqueado ? 'btn--esperando' : ''}`, type: 'button', disabled: bloqueado || null, onclick: () => ejercicio(0), autofocus: !bloqueado }, icono('play', { tam: 20 }), t('leccion.empezar'));
+    const boton = h('button', { class: `btn btn--primary btn--lg ${bloqueado ? 'btn--esperando' : ''}`, type: 'button', disabled: bloqueado || null, onclick: () => ejercicio(pasoGuardado), autofocus: !bloqueado }, icono('play', { tam: 20 }), pasoGuardado ? t('leccion.continuarPaso', { n: pasoGuardado + 1 }) : t('leccion.empezar'));
+    const reiniciar = pasoGuardado ? h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => { borrarPaso(); ejercicio(0); } }, t('leccion.desdeCero')) : null;
     const pista = h('p', { class: `intro__pista ${bloqueado ? '' : 'intro__pista--oculta'}`, 'aria-live': 'polite' }, bloqueado ? t('leccion.pista') : '');
     montar(cabecera('intro'),
       h('div', { class: 'intro' },
@@ -76,7 +84,7 @@ export async function render({ query }) {
           chips.length ? h('ul', { class: 'tecla-chips', 'aria-label': t('leccion.teclasNuevas') }, chips) : null,
           leccion.tip ? h('p', { class: 'intro__tip' }, icono('bulb', { tam: 20 }), leccion.tip) : null,
           mejor ? h('p', { class: 'suave' }, t('leccion.mejor', { est: `${'★'.repeat(mejor.estrellas)}${'☆'.repeat(3 - mejor.estrellas)}`, ppm: mejor.mejorWpm, pre: mejor.mejorPrecision })) : null,
-          boton, pista),
+          boton, reiniciar, pista),
         h('section', { class: 'intro__demo card' }, h('h2', {}, t('leccion.asiSeHace')), h('p', { class: 'suave' }, t('leccion.asiTexto')), kb.el)));
     detenerDemo = kb.demo(chars);
     if (bloqueado) {
@@ -121,6 +129,7 @@ export async function render({ query }) {
   // Premio por cada paso terminado (XP y monedas pequeños; las estrellas siguen siendo de la Prueba final)
   const premiados = new Set();
   function entre(i, r) {
+    guardarPaso(i + 1);
     const ultimoGuiado = i === 0;
     const premio = h('p', { class: 'chip', hidden: true });
     if (!premiados.has(i) && !r.banderas?.pegado && !r.banderas?.imposible) {
@@ -144,6 +153,7 @@ export async function render({ query }) {
 
   /* ── Resultado final (con estrellas) ── */
   async function resultadoFinal(resultado) {
+    borrarPaso();
     const sospechoso = resultado.banderas.pegado || resultado.banderas.imposible;
     const metaClase = null; // Fase 5: meta de la clase del estudiante
     const estrellas = sospechoso ? 0 : calcularEstrellas(resultado, leccion, grado, metaClase);

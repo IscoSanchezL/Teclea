@@ -3,6 +3,7 @@
  * Google para docentes (con aprobación del administrador) y modo demostración.
  */
 import { firebaseConfigurado } from '../../core/config.js';
+import { tomarSalida } from '../../core/salida.js';
 import { marca } from '../../core/marca.js';
 import { h } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
@@ -134,6 +135,8 @@ export async function render({ query }) {
   async function alDemo(rol, grado) { await entrarDemo(rol, grado); toast(t('entrar.demoOk', { rol }), { tipo: 'info' }); navegar(volver, { reemplazar: true }); }
 
   cambiarModo(modo);
+  // Si la sesión se cerró sola (inactividad, conexión…), se explica aquí (después de cambiarModo, que limpia los mensajes)
+  { const motivo = tomarSalida(); if (motivo && motivo !== 'manual') mostrarError(t(`salida.${motivo}`)); }
 
   return h('section', { class: 'login' },
     h('div', { class: 'login__visual' },

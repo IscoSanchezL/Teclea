@@ -9,6 +9,7 @@
  *  3) Modo demo local (si Firebase no está configurado).
  */
 import { CONFIG, firebaseConfigurado } from '../core/config.js';
+import { marcarSalida, limpiarSalida } from '../core/salida.js';
 import { state, setState } from '../core/state.js';
 import { slugUsuario } from '../core/utils.js';
 import { obtenerFirebase } from '../db/firebase.js';
@@ -33,13 +34,27 @@ export const mensajeError = (e) => t(ERRORES[e?.code] || 'auth.err.generico');
 
 /** Aplica el perfil cargado: estado, estilo por grado y preferencias guardadas en la nube. */
 function activarPerfil(perfil) {
+  try { sessionStorage.removeItem('teclea:saliendo'); } catch { /* sin almacenamiento */ }
+  limpiarSalida();
   setState({ user: perfil });
   aplicarEstiloUsuario(perfil);
   if (perfil?.prefs && Object.keys(perfil.prefs).length) cambiarPrefs(perfil.prefs);
 }
 
+const dormir = (ms) => new Promise((r) => setTimeout(r, ms));
+const claveCache = (uid) => `teclea.perfil.${uid}`;
+/** Lee el perfil con reintentos: un corte breve de la red del colegio no debe sacar al estudiante. */
+async function leerPerfilFirme(uid) {
+  let ultimo;
+  for (let k = 0; k < 3; k++) {
+    try { return await leerPerfil(uid); } catch (e) { ultimo = e; if (e?.code === 'permission-denied') break; await dormir(700 * (k + 1)); }
+  }
+  throw ultimo;
+}
+
 async function perfilDesdeFirebase(fbUser) {
-  let perfil = await leerPerfil(fbUser.uid);
+  let perfil = await leerPerfilFirme(fbUser.uid);
+  if (perfil) { try { localStorage.setItem(claveCache(fbUser.uid), JSON.stringify(perfil)); } catch { /* sin almacenamiento */ } }
   if (!perfil) {
     const email = fbUser.email || null;
     const intencion = sessionStorage.getItem('teclea:intencion') === 'docente';
@@ -79,10 +94,17 @@ export async function iniciarAuth() {
       fb.au.onAuthStateChanged(fb.auth, async (fbUser) => {
         try {
           if (fbUser) activarPerfil(await perfilDesdeFirebase(fbUser));
-          else { setState({ user: null }); aplicarEstiloUsuario(null); }
+          else {
+            // Si había alguien dentro y nadie pidió salir, la sesión se perdió sola: se anota para explicarlo
+            if (state.user && !sessionStorage.getItem('teclea:saliendo')) marcarSalida('sesion');
+            setState({ user: null }); aplicarEstiloUsuario(null);
+          }
         } catch (e) {
           console.error('[auth] no se pudo cargar el perfil', e);
-          setState({ user: null });
+          // Con la sesión válida pero sin red: se sigue con la última copia del perfil en vez de expulsar al estudiante
+          let copia = null; try { copia = fbUser ? JSON.parse(localStorage.getItem(claveCache(fbUser.uid)) || 'null') : null; } catch { /* nada */ }
+          if (copia) activarPerfil(copia);
+          else { marcarSalida('perfil'); setState({ user: null }); }
         }
         if (primera) { primera = false; resolver(); }
       });
@@ -124,7 +146,10 @@ export async function entrarDemo(rol, grado = 3) {
   activarPerfil(await demo.crear(rol, grado));
 }
 
-export async function cerrarSesion() {
+export async function cerrarSesion(motivo = 'manual') {
+  try { sessionStorage.setItem('teclea:saliendo', '1'); } catch { /* sin almacenamiento */ }
+  if (motivo !== 'manual') marcarSalida(motivo);
+  try { for (const k of Object.keys(localStorage)) if (k.startsWith('teclea.perfil.')) localStorage.removeItem(k); } catch { /* sin almacenamiento */ }
   if (state.modo === 'demo') {
     demo.borrar();
     setState({ user: null });
