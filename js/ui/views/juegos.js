@@ -32,6 +32,10 @@ export async function render({ query }) {
 
   function menu() {
     montar(h('header', { class: 'juegos__cab' }, h('h1', {}, t('juegos.titulo')), h('p', { class: 'suave' }, t('juegos.sub'))),
+      h('button', { class: 'juego-duelo reveal', type: 'button', onclick: () => navegar('/duelos') },
+        h('span', { class: 'juego-duelo__ic' }, icono('bolt', { tam: 38 })),
+        h('span', { class: 'juego-duelo__txt' }, h('strong', {}, t('duelo.tarjetaTitulo')), h('span', {}, t('duelo.tarjetaTexto'))),
+        h('span', { class: 'juego-duelo__ir' }, t('duelo.entrar'), icono('arrow', { tam: 18 }))),
       h('div', { class: 'juegos__rejilla' }, JUEGOS.map((j, i) => h('button', { class: 'juego-tarjeta reveal', style: { '--g1': j.color[0], '--g2': j.color[1], '--i': i }, type: 'button', onclick: () => jugar(j) },
         h('span', { class: 'juego-tarjeta__ic' }, icono(j.icono, { tam: 34 })),
         h('strong', {}, j.nombre), h('span', {}, j.texto),

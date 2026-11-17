@@ -20,7 +20,7 @@ export function generarCodigo() {
 export const codigoValido = (c) => /^[A-HJ-NP-Z2-9]{6}$/.test(c);
 
 export const COLORES_CLASE = ['#6C4CF5', '#1E78C8', '#0B8F6D', '#E39A00', '#E84F3F', '#C13C8F', '#4A5568'];
-export const CONFIG_CLASE = { rankingVisible: true, metaClase: 20000, mundosBloqueados: [], mundosAbiertos: [] };
+export const CONFIG_CLASE = { rankingVisible: true, duelos: true, metaClase: 20000, mundosBloqueados: [], mundosAbiertos: [] };
 
 /* ═════════════ Clases ═════════════ */
 export async function crearClase(docente, { nombre, grado, grupo = '', color = COLORES_CLASE[0] }) {

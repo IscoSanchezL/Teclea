@@ -77,6 +77,15 @@ service cloud.firestore {
     function noTouch(keys) { return !request.resource.data.diff(resource.data).affectedKeys().hasAny(keys); }
     function onlyTouch(keys) { return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys); }
 
+    function avatarMini(a) {
+      return a is map && a.size() <= 4 && isStr(a.get('emoji', '🦊'), 1, 16) && isStr(a.get('fondo', 'violeta'), 1, 16)
+        && (a.get('mascota', null) == null || isStr(a.get('mascota', ''), 1, 16));
+    }
+    // El docente puede apagar los duelos de su clase (config.duelos = false)
+    function duelosPermitidos(classId) {
+      return get(/databases/$(db)/documents/classes/$(classId)).data.config.get('duelos', true) == true;
+    }
+
     // ═════════════════════════ users ═════════════════════════
     match /users/{uid} {
       allow get: if signedIn() && (
@@ -212,6 +221,58 @@ service cloud.firestore {
           && isInt(request.resource.data.puntos, 0, 100000)
           && isNum(request.resource.data.mejora, -100, 200);
         allow delete: if isAdmin() || request.auth.uid == uid;
+      }
+
+      // ── Sala de duelos: quién está en línea (solo mientras tiene abierta la sala). Solo apodo y avatar. ──
+      match /en_linea/{uid} {
+        allow read: if signedIn() && (isAdmin() || enrolled(classId)
+                      || get(/databases/$(db)/documents/classes/$(classId)).data.docenteId == request.auth.uid);
+        allow create, update: if request.auth.uid == uid && enrolled(classId) && duelosPermitidos(classId)
+          && request.resource.data.keys().hasOnly(['apodo','avatar','visto','estado'])
+          && isStr(request.resource.data.apodo, 1, 30)
+          && avatarMini(request.resource.data.avatar)
+          && request.resource.data.estado in ['libre','jugando']
+          && request.resource.data.visto == request.time;
+        allow delete: if isAdmin() || request.auth.uid == uid;
+      }
+
+      // ── Duelos entre compañeros: solo los dos jugadores ven y escriben su duelo. ──
+      match /duelos/{id} {
+        allow get, list: if signedIn() && (resource.data.de == request.auth.uid || resource.data.a == request.auth.uid || isAdmin());
+        // Retar: yo soy quien reta, los dos son de la clase (el rival tiene que estar en la sala) y el duelo nace "invitado" y sin avance.
+        allow create: if request.auth.uid == request.resource.data.de && enrolled(classId) && duelosPermitidos(classId)
+          && request.resource.data.a != request.auth.uid
+          && exists(/databases/$(db)/documents/classes/$(classId)/en_linea/$(request.resource.data.a))
+          && request.resource.data.keys().hasOnly(['de','a','deApodo','aApodo','deAv','aAv','estado','texto','seg','creadoEn','prog'])
+          && isStr(request.resource.data.deApodo, 1, 30) && isStr(request.resource.data.aApodo, 1, 30)
+          && avatarMini(request.resource.data.deAv) && avatarMini(request.resource.data.aAv)
+          && request.resource.data.estado == 'invitado'
+          && isStr(request.resource.data.texto, 5, 300) && isInt(request.resource.data.seg, 20, 180)
+          && request.resource.data.creadoEn == request.time
+          && request.resource.data.prog.size() == 0;
+        allow update: if signedIn() && (resource.data.de == request.auth.uid || resource.data.a == request.auth.uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','prog','aceptadoEn'])
+          && cambioDueloValido();
+        allow delete: if isAdmin() || resource.data.de == request.auth.uid || resource.data.a == request.auth.uid;
+
+        function progOk(p) {
+          return p is map && p.keys().hasOnly(['pos','err','fin','completo','ms'])
+            && isInt(p.get('pos', 0), 0, 300) && isInt(p.get('err', 0), 0, 3000)
+            && p.get('fin', false) is bool && p.get('completo', false) is bool && isInt(p.get('ms', 0), 0, 400000);
+        }
+        function cambioDueloValido() {
+          let n = request.resource.data; let o = resource.data; let yo = request.auth.uid;
+          let otro = yo == o.de ? o.a : o.de;
+          return n.prog.keys().hasOnly([o.de, o.a])
+            && n.prog.get(otro, null) == o.prog.get(otro, null)          // nadie toca el avance del otro
+            && progOk(n.prog.get(yo, {}))
+            && (n.estado == o.estado
+                || (o.estado == 'invitado' && yo == o.a && n.estado in ['aceptado','rechazado'])
+                || (o.estado == 'invitado' && yo == o.de && n.estado == 'cancelado')
+                || (o.estado == 'aceptado' && n.estado == 'fin'))
+            && (n.estado != 'aceptado' || o.estado == 'aceptado' || n.get('aceptadoEn', null) == request.time)
+            && (o.estado == 'aceptado' || n.prog == o.prog);             // solo se escribe avance mientras se juega
+        }
       }
     }
 

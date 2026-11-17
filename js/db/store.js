@@ -9,6 +9,7 @@
  *   borrar(ruta)
  *   consultar(coleccion, {donde:[[campo,op,valor]], orden:[campo,'asc'|'desc'], limite})
  *   lote([{tipo:'set'|'update'|'delete', ruta, datos, fusionar}])
+ *   escucharColeccion(col, {donde}, cb, alError) / escucharDoc(ruta, cb, alError)  → función para dejar de escuchar
  *
  * Valores especiales: ahora() (hora del servidor), sumar(n) (incremento atómico), unirLista(...v).
  * Las fechas se devuelven SIEMPRE como milisegundos (número), en ambos modos.
@@ -201,6 +202,51 @@ export const borrar = async (...a) => elegir().borrar(...a);
 export const agregar = async (...a) => elegir().agregar(...a);
 export const consultar = async (...a) => elegir().consultar(...a);
 export const lote = async (...a) => elegir().lote(...a);
+
+/* ═════════════ Escucha en vivo (para duelos y salas) ═════════════ */
+/**
+ * Escucha una colección con filtros de igualdad y llama a `alCambiar(lista)` en cada cambio. Devuelve la función para dejar de escuchar.
+ * Firestore: onSnapshot (solo se cobra lo que cambia). Modo demo: revisa el almacenamiento local cada 700 ms.
+ */
+export function escucharColeccion(coleccion, { donde = [] } = {}, alCambiar, alError) {
+  let activo = true, baja = null, reloj = null;
+  (async () => {
+    if (usaNube()) {
+      try {
+        const F = await fb(); if (!activo) return;
+        const { query, collection, where, onSnapshot } = F.fs;
+        baja = onSnapshot(query(collection(F.db, ...partes(coleccion)), ...donde.map(([c, o, v]) => where(c, o, v))),
+          (s) => { if (activo) alCambiar(s.docs.map((d) => ({ id: d.id, ...normalizar(d.data({ serverTimestamps: 'estimate' })) }))); },
+          (e) => { if (activo) alError?.(e); });
+      } catch (e) { alError?.(e); }
+    } else {
+      let previo = null;
+      const tick = async () => { if (!activo) return; const r = await local.consultar(coleccion, { donde }); const j = JSON.stringify(r); if (j !== previo) { previo = j; alCambiar(r); } };
+      tick(); reloj = setInterval(tick, 700);
+    }
+  })();
+  return () => { activo = false; try { baja?.(); } catch { /* ya cerrado */ } clearInterval(reloj); };
+}
+
+/** Igual que escucharColeccion pero para un solo documento (`alCambiar(doc | null)`). */
+export function escucharDoc(ruta, alCambiar, alError) {
+  let activo = true, baja = null, reloj = null;
+  (async () => {
+    if (usaNube()) {
+      try {
+        const F = await fb(); if (!activo) return;
+        baja = F.fs.onSnapshot(refDoc(F, ruta),
+          (s) => { if (activo) alCambiar(s.exists() ? { id: s.id, ...normalizar(s.data({ serverTimestamps: 'estimate' })) } : null); },
+          (e) => { if (activo) alError?.(e); });
+      } catch (e) { alError?.(e); }
+    } else {
+      let previo = null;
+      const tick = async () => { if (!activo) return; const r = await local.leer(ruta); const j = JSON.stringify(r); if (j !== previo) { previo = j; alCambiar(r); } };
+      tick(); reloj = setInterval(tick, 700);
+    }
+  })();
+  return () => { activo = false; try { baja?.(); } catch { /* ya cerrado */ } clearInterval(reloj); };
+}
 
 /**
  * Escritura "sin esperar": en Firestore, una escritura sin red no resuelve hasta reconectar

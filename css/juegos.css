@@ -179,3 +179,46 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 
 .deco3d { display: block; line-height: 0; } .deco3d svg { display: block; width: 100%; height: auto; overflow: visible; }
 .tienda__mini .deco3d { width: 70%; }
+
+/* ───────── Duelos entre compañeros ───────── */
+.juego-duelo { display: flex; align-items: center; gap: 1rem; width: 100%; margin-bottom: var(--e4); padding: 1.1rem 1.3rem; border: 0; border-radius: var(--r-xl); cursor: pointer; text-align: left; color: #fff;
+  background: linear-gradient(120deg, #FF5C7A 0%, #8A4DFF 55%, #4F6BFF 100%); box-shadow: 0 14px 30px -14px rgba(138, 77, 255, .7); transition: transform .2s, box-shadow .2s; }
+.juego-duelo:hover { transform: translateY(-3px); box-shadow: 0 20px 36px -14px rgba(138, 77, 255, .8); }
+.juego-duelo__ic { display: grid; place-items: center; width: 4rem; height: 4rem; border-radius: 1.2rem; background: rgba(255, 255, 255, .22); flex: none; }
+.juego-duelo__txt { display: flex; flex-direction: column; gap: .15rem; flex: 1; min-width: 0; }
+.juego-duelo__txt strong { font: 700 1.3rem var(--fuente-titulo); }
+.juego-duelo__txt span { opacity: .92; }
+.juego-duelo__ir { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .9rem; border-radius: 99px; background: rgba(255, 255, 255, .25); font-weight: 700; flex: none; }
+@media (max-width: 40rem) { .juego-duelo { flex-wrap: wrap; } .juego-duelo__ir { width: 100%; justify-content: center; } }
+
+.dl { display: grid; gap: var(--e4); max-width: 54rem; margin-inline: auto; }
+.dl__zona { display: grid; gap: var(--e4); }
+.dl__cab { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--e3); }
+.dl__cab h1 { margin: 0 0 .2rem; }
+.dl-centro { display: grid; justify-items: center; gap: var(--e3); text-align: center; padding: var(--e6) var(--e4); }
+.dl-sala h2 { margin: 0 0 var(--e3); }
+.dl-lista { display: grid; gap: .6rem; list-style: none; margin: 0; padding: 0; }
+.dl-jugador { display: flex; align-items: center; gap: .9rem; padding: .7rem .9rem; border-radius: var(--r-lg); background: var(--superficie-2); }
+.dl-jugador--ocupado { opacity: .6; }
+.dl-jugador__datos { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.dl-jugador__datos strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dl-vacio { display: grid; justify-items: center; gap: .4rem; text-align: center; padding: var(--e4) 0; }
+.dl-invitacion { display: flex; align-items: center; flex-wrap: wrap; gap: .8rem; padding: .9rem 1.1rem; border: 2px solid var(--primario); animation: dl-pulso 1.6s ease-in-out infinite; }
+.dl-invitacion__txt { display: flex; flex-direction: column; flex: 1; min-width: 10rem; }
+@keyframes dl-pulso { 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--primario) 22%, transparent); } }
+.dl__nota { display: flex; align-items: center; gap: .3rem; justify-content: center; text-align: center; }
+.dl-vs { display: flex; align-items: center; gap: 1.2rem; }
+.dl-vs__vs { font: 800 1.8rem var(--fuente-titulo); color: var(--primario); }
+.dl-cuenta__n { font: 800 6rem/1 var(--fuente-titulo); color: var(--primario); animation: dl-cuenta 1s ease-out infinite; }
+@keyframes dl-cuenta { from { transform: scale(1.5); opacity: .2; } to { transform: scale(1); opacity: 1; } }
+.dl-carrera { display: grid; gap: var(--e3); }
+.dl-barras { display: grid; gap: .6rem; padding: .8rem 1rem; border-radius: var(--r-lg); background: var(--superficie); box-shadow: var(--sombra-1); }
+.dl-barra { display: flex; align-items: center; gap: .7rem; }
+.dl-barra__pista { flex: 1; display: grid; gap: .2rem; font-weight: 700; font-size: .85rem; }
+.dl-barra__riel { height: .8rem; border-radius: 99px; background: var(--superficie-2); overflow: hidden; }
+.dl-barra__riel i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--primario), var(--violeta-300)); transition: width .35s ease-out; }
+.dl-barra--rival .dl-barra__riel i { background: linear-gradient(90deg, #FF5C7A, #FFB347); }
+.dl-barra b { min-width: 2.6rem; text-align: right; font-variant-numeric: tabular-nums; }
+.dl__aviso { margin: 0; padding: .6rem .9rem; border-radius: var(--r-md); text-align: center; font-weight: 700; background: var(--aviso-fondo, #FEF3C7); color: var(--aviso-texto, #92400E); }
+.dl__aviso[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .dl-invitacion, .dl-cuenta__n { animation: none; } }

@@ -31,6 +31,7 @@ export function modalClase({ clase = null, alGuardar }) {
   const colores = h('div', { class: 'colores' }, C.COLORES_CLASE.map((c) => h('button', { type: 'button', class: 'color', style: { background: c }, 'aria-label': t('dm.colorAria', { c }), 'aria-pressed': String(c === color),
     onclick: (e) => { color = c; colores.querySelectorAll('.color').forEach((b) => b.setAttribute('aria-pressed', 'false')); e.currentTarget.setAttribute('aria-pressed', 'true'); } })));
   let ranking = clase?.config?.rankingVisible !== false;
+  let duelos = clase?.config?.duelos !== false;
   const meta = campo({ etiqueta: t('dm.meta'), type: 'number', min: 1000, max: 1000000, step: 1000, value: clase?.config?.metaClase || 20000, ayuda: t('dm.metaAyuda') });
   const mundos = new Set(clase?.config?.mundosBloqueados || []);
   const abiertos = new Set(clase?.config?.mundosAbiertos || []);
@@ -49,7 +50,7 @@ export function modalClase({ clase = null, alGuardar }) {
   const form = h('form', { class: 'pila', onsubmit: async (e) => {
     e.preventDefault();
     if (!nombre.input.value.trim()) { err.textContent = t('dm.errNombre'); err.hidden = false; return; }
-    const cfg = { rankingVisible: ranking, metaClase: Math.max(1000, Number(meta.input.value) || 20000), mundosBloqueados: [...mundos], mundosAbiertos: [...abiertos] };
+    const cfg = { rankingVisible: ranking, duelos, metaClase: Math.max(1000, Number(meta.input.value) || 20000), mundosBloqueados: [...mundos], mundosAbiertos: [...abiertos] };
     try {
       const datos = { nombre: nombre.input.value.trim(), grupo: grupo.input.value.trim(), grado: Number(grado.sel.value), color };
       const c = clase ? await C.actualizarClase(clase, { ...datos, config: { ...clase.config, ...cfg } }) : await C.crearClase(state.user, datos);
@@ -59,6 +60,7 @@ export function modalClase({ clase = null, alGuardar }) {
   } },
     nombre.nodo, h('div', { class: 'rejilla-campos' }, grado.nodo, grupo.nodo), h('div', { class: 'campo' }, h('span', { class: 'campo__etiqueta' }, t('dm.color')), colores),
     interruptor({ etiqueta: t('dm.ranking'), descripcion: t('dm.rankingDesc'), activo: ranking, alCambiar: (v) => { ranking = v; } }),
+    interruptor({ etiqueta: t('dm.duelos'), descripcion: t('dm.duelosDesc'), activo: duelos, alCambiar: (v) => { duelos = v; } }),
     meta.nodo,
     h('div', { class: 'campo' }, h('span', { class: 'campo__etiqueta' }, t('dm.mundos')), accionesMundos, chipsMundos, h('span', { class: 'campo__ayuda suave' }, t('dm.mundosAyuda'))),
     err, h('div', { class: 'fila fila--fin' }, h('button', { class: 'btn btn--primary', type: 'submit' }, clase ? t('dm.guardarCambios') : t('dm.crearClase'))));

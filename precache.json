@@ -1,5 +1,5 @@
 {
-  "version": "a1890edee4e3",
+  "version": "905255cb1b38",
   "archivos": [
     "assets/assets.json",
     "assets/img/apple-touch-icon.png",
@@ -73,6 +73,7 @@
     "js/db/admin.js",
     "js/db/analitica.js",
     "js/db/clases.js",
+    "js/db/duelos.js",
     "js/db/firebase.js",
     "js/db/progreso.js",
     "js/db/reto-clase.js",
@@ -80,6 +81,7 @@
     "js/db/tienda.js",
     "js/db/users.js",
     "js/game/captura.js",
+    "js/game/duelo.js",
     "js/game/insignias.js",
     "js/game/juegos.js",
     "js/game/reto-clase.js",
@@ -137,6 +139,7 @@
     "js/ui/views/docente-modales.js",
     "js/ui/views/docente-retos.js",
     "js/ui/views/docente.js",
+    "js/ui/views/duelos.js",
     "js/ui/views/entrar.js",
     "js/ui/views/inicio.js",
     "js/ui/views/introduccion.js",
