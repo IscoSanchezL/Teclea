@@ -196,6 +196,7 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 .dl__cab { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--e3); }
 .dl__cab h1 { margin: 0 0 .2rem; }
 .dl-centro { display: grid; justify-items: center; gap: var(--e3); text-align: center; padding: var(--e6) var(--e4); }
+.dl-niveles { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin: 0 0 var(--e3); }
 .dl-sala h2 { margin: 0 0 var(--e3); }
 .dl-lista { display: grid; gap: .6rem; list-style: none; margin: 0; padding: 0; }
 .dl-jugador { display: flex; align-items: center; gap: .9rem; padding: .7rem .9rem; border-radius: var(--r-lg); background: var(--superficie-2); }

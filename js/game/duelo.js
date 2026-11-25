@@ -4,7 +4,11 @@
  * Si el tiempo se acaba, gana quien lleve más letras correctas.
  */
 
-export const SEG_DUELO = 90;                 // tiempo máximo del duelo
+export const NIVELES = ['corto', 'medio', 'largo'];
+export const SEG_NIVEL = { corto: 90, medio: 120, largo: 150 };   // tiempo máximo según el largo del texto (las reglas aceptan 20–180 s)
+export const SEG_DUELO = SEG_NIVEL.medio;
+/** Nivel de un duelo ya creado, a partir de su tiempo. */
+export const nivelDeSeg = (seg) => NIVELES.find((n) => SEG_NIVEL[n] === seg) || 'medio';
 export const CUENTA_REGRESIVA = 3;           // 3-2-1
 export const LATIDO_MS = 30 * 1000;          // cada cuánto avisa "sigo aquí" mientras está en la sala
 export const VIGENCIA_LINEA_MS = 90 * 1000;  // sin latido en este tiempo = ya no está en línea
@@ -12,18 +16,25 @@ export const VIGENCIA_INVITACION_MS = 60 * 1000;
 export const GRACIA_MS = 15 * 1000;          // tiempo extra para quien aún no termina cuando el otro ya terminó
 export const MAX_LETRAS = 300;
 
-const PALABRAS = { 2: 6, 3: 8, 4: 10, 5: 12, 6: 14 };
+// Palabras por grado y nivel (largo ≈ 130–290 letras: las reglas aceptan hasta 300)
+const PALABRAS = {
+  corto: { 2: 6, 3: 8, 4: 10, 5: 12, 6: 14 },
+  medio: { 2: 12, 3: 16, 4: 20, 5: 24, 6: 28 },
+  largo: { 2: 20, 3: 26, 4: 32, 5: 38, 6: 44 },
+};
 
 /** Texto del duelo según el grado: palabras del vocabulario (con tildes desde 4.º). `azar` solo se cambia en las pruebas. */
-export function textoDuelo(grado, vocab, azar = Math.random) {
-  const n = PALABRAS[grado] || 10;
+export function textoDuelo(grado, vocab, azar = Math.random, nivel = 'corto') {
+  const n = (PALABRAS[nivel] || PALABRAS.corto)[grado] || 10;
   const base = [...(vocab?.sinTilde || [])];
   const conTilde = grado >= 4 ? [...(vocab?.conTilde || [])] : [];
   const piscina = [...base, ...conTilde].filter((p) => typeof p === 'string' && p.length >= 2 && p.length <= 8 && !/[üÜ]/.test(p));
   if (!piscina.length) return 'el sol sale por la manana y la luna por la noche';
   const salida = [];
   for (let i = 0; i < n; i++) salida.push(piscina[Math.floor(azar() * piscina.length)]);
-  return salida.join(' ').slice(0, MAX_LETRAS);
+  let texto = salida.join(' ');
+  if (texto.length > MAX_LETRAS) texto = texto.slice(0, MAX_LETRAS).replace(/\s+\S*$/, '');   // sin cortar una palabra a medias
+  return texto;
 }
 
 /** ¿Sigue en línea? `desfaseMs` corrige que el reloj del equipo no sea el del servidor. */

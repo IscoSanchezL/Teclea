@@ -5,8 +5,9 @@ const vocab = { sinTilde: ['sol', 'luna', 'mesa', 'casa', 'perro'], conTilde: ['
 let k = 0; const azar = () => (k++ % 7) / 7;
 
 console.log('Texto del duelo');
-t('2.º: 6 palabras, solo sin tilde', textoDuelo(2, vocab, azar).split(' ').length === 6 && !/[áéíóú]/.test(textoDuelo(2, vocab, azar)));
-t('6.º: 14 palabras', textoDuelo(6, vocab, azar).split(' ').length === 14);
+t('2.º largo: 20 palabras, solo sin tilde', textoDuelo(2, vocab, azar, 'largo').split(' ').length === 20 && !/[áéíóú]/.test(textoDuelo(2, vocab, azar)));
+t('6.º: texto largo y dentro del límite de las reglas', textoDuelo(6, vocab, azar, 'largo').length <= 300 && textoDuelo(6, vocab, azar, 'largo').split(' ').length >= 30);
+t('niveles: corto < medio < largo', (() => { const l = (n) => textoDuelo(5, vocab, azar, n).split(' ').length; return l('corto') < l('medio') && l('medio') < l('largo'); })());
 t('con vocabulario vacío no se rompe', textoDuelo(4, {}).length > 10);
 t('mismo azar → mismo texto (los dos jugadores reciben el mismo)', (() => { k = 0; const a = textoDuelo(3, vocab, azar); k = 0; return a === textoDuelo(3, vocab, azar); })());
 

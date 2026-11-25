@@ -8,7 +8,7 @@ import { h } from '../../core/utils.js';
 import { navegar } from '../../core/router.js';
 import * as D from '../../db/duelos.js';
 import { registrarActividad } from '../../db/progreso.js';
-import { textoDuelo, estaEnLinea, invitacionVigente, estadoDuelo, puntosDuelo, LATIDO_MS, CUENTA_REGRESIVA, GRACIA_MS } from '../../game/duelo.js';
+import { textoDuelo, NIVELES, nivelDeSeg, estaEnLinea, invitacionVigente, estadoDuelo, puntosDuelo, LATIDO_MS, CUENTA_REGRESIVA, GRACIA_MS } from '../../game/duelo.js';
 import { crearEjercicio } from '../../lessons/ejercicio-ui.js';
 import { panelResultado } from '../resultado.js';
 import { avatar } from '../avatar.js';
@@ -83,18 +83,23 @@ export async function render() {
   }, (e) => console.warn('[duelos] invitaciones', e?.code || e))));
 
   /* ───────── Sala ───────── */
+  let nivel = 'medio';   // largo del texto que se usa al retar
+  try { const g = localStorage.getItem('teclea.duelo.nivel'); if (NIVELES.includes(g)) nivel = g; } catch { /* sin almacenamiento */ }
+  const selectorNivel = () => h('div', { class: 'dl-niveles', role: 'group', 'aria-label': t('duelo.nivelAria') },
+    h('small', { class: 'suave' }, t('duelo.nivelTitulo')),
+    NIVELES.map((n) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(n === nivel), onclick: () => { nivel = n; try { localStorage.setItem('teclea.duelo.nivel', n); } catch { /* ok */ } pintarSala(); } }, t(`duelo.nivel.${n}`))));
   function tarjetaJugador(p) {
     const ocupado = p.estado === 'jugando';
     return h('li', { class: `dl-jugador ${ocupado ? 'dl-jugador--ocupado' : ''}` },
       avatar({ avatar: p.avatar }, { tam: 'md' }),
       h('div', { class: 'dl-jugador__datos' }, h('strong', {}, p.apodo), h('small', { class: 'suave' }, ocupado ? t('duelo.jugando') : (clases.length > 1 ? nombreClase(p.classId) : t('duelo.libre')))),
-      h('button', { class: 'btn btn--primary btn--sm', type: 'button', disabled: ocupado || null, onclick: () => retar(p) }, icono('bolt', { tam: 16 }), t('duelo.retar')));
+      h('button', { class: 'btn btn--primary btn--sm', type: 'button', disabled: ocupado || null, onclick: () => retar(p, nivel) }, icono('bolt', { tam: 16 }), t('duelo.retar')));
   }
   function pintarSala() {
     const lista = [...enLinea.values()].sort((a, b) => a.apodo.localeCompare(b.apodo, idioma()));
     const invs = invitaciones.map((d) => h('div', { class: 'dl-invitacion card', role: 'alert' },
       avatar({ avatar: d.deAv }, { tam: 'md' }),
-      h('div', { class: 'dl-invitacion__txt' }, h('strong', {}, t('duelo.teReta', { n: d.deApodo })), h('small', { class: 'suave' }, t('duelo.mismoTexto'))),
+      h('div', { class: 'dl-invitacion__txt' }, h('strong', {}, t('duelo.teReta', { n: d.deApodo })), h('small', { class: 'suave' }, `${t('duelo.mismoTexto')} · ${t('duelo.texto')} ${t(`duelo.nivel.${nivelDeSeg(d.seg)}`).toLowerCase()}`)),
       h('button', { class: 'btn btn--primary btn--sm', type: 'button', onclick: () => aceptar(d) }, t('duelo.acepto')),
       h('button', { class: 'btn btn--suave btn--sm', type: 'button', onclick: () => rechazar(d) }, t('duelo.ahoraNo'))));
     montar(
@@ -102,6 +107,7 @@ export async function render() {
       ...invs,
       h('section', { class: 'card dl-sala' },
         h('h2', {}, t('duelo.enLinea', { n: lista.length })),
+        selectorNivel(),
         lista.length
           ? h('ul', { class: 'dl-lista' }, lista.map(tarjetaJugador))
           : h('div', { class: 'dl-vacio' }, mascota('anima', { tam: 'md' }), h('p', {}, t('duelo.nadie')), h('small', { class: 'suave' }, t('duelo.nadieAyuda')))),
@@ -109,12 +115,12 @@ export async function render() {
   }
 
   /* ───────── Retar / responder ───────── */
-  async function retar(p) {
+  async function retar(p, nivelElegido = nivel) {
     if (modo !== 'sala') return;
     modo = 'espera';
     try {
-      const texto = textoDuelo(grado, await cargarVocab());
-      pendiente = await D.retar(u, { uid: p.uid, apodo: p.apodo, avatar: p.avatar }, p.classId, texto);
+      const texto = textoDuelo(grado, await cargarVocab(), Math.random, nivelElegido);
+      pendiente = await D.retar(u, { uid: p.uid, apodo: p.apodo, avatar: p.avatar }, p.classId, texto, nivelElegido);
     } catch (e) { console.warn('[duelos] retar', e?.code || e); modo = 'sala'; toast(t('duelo.noPudo'), { tipo: 'error' }); pintarSala(); return; }
     const desistir = async () => { if (!pendiente) return; clearTimeout(venc); bajar(); const d = pendiente; pendiente = null; await D.cancelar(d.classId, d.id).catch(() => {}); modo = 'sala'; pintarSala(); };
     const venc = setTimeout(() => { if (modo === 'espera') { toast(t('duelo.noRespondio', { n: p.apodo }), { tipo: 'info' }); desistir(); } }, 60000);
@@ -229,7 +235,7 @@ export async function render() {
     const rivalSigue = [...enLinea.values()].find((p) => p.uid === rival);
     montar(panelResultado({ titulo, subtitulo: sub, estrellas: null, resultado: res, resumen,
       acciones: [
-        rivalSigue ? { texto: t('duelo.revancha'), clase: 'btn--primary btn--lg', principal: true, icono: 'refresh', onclick: () => { modo = 'sala'; retar(rivalSigue); } } : null,
+        rivalSigue ? { texto: t('duelo.revancha'), clase: 'btn--primary btn--lg', principal: true, icono: 'refresh', onclick: () => { modo = 'sala'; retar(rivalSigue, nivelDeSeg(duelo.seg)); } } : null,
         { texto: t('duelo.volverSala'), onclick: () => { modo = 'sala'; partida = null; pintarSala(); } },
       ].filter(Boolean) }));
   }

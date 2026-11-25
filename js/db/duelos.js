@@ -7,7 +7,7 @@
 import * as store from './store.js';
 import { misClases } from './clases.js';
 import { nuevoId } from './progreso.js';
-import { SEG_DUELO } from '../game/duelo.js';
+import { SEG_NIVEL } from '../game/duelo.js';
 
 const ruta = (classId, ...r) => ['classes', classId, ...r].join('/');
 export const avatarMini = (u) => ({ emoji: u?.avatar?.emoji || '🦊', fondo: u?.avatar?.fondo || 'violeta', ...(u?.avatar?.mascota ? { mascota: u.avatar.mascota } : {}) });
@@ -27,10 +27,10 @@ export const salirDeSala = (user, classId) => store.borrar(ruta(classId, 'en_lin
 export const escucharSala = (classId, alCambiar, alError) => store.escucharColeccion(ruta(classId, 'en_linea'), {}, alCambiar, alError);
 
 /* ═════════ Duelos ═════════ */
-export async function retar(user, rival, classId, texto) {
+export async function retar(user, rival, classId, texto, nivel = 'medio') {
   const id = nuevoId();
   const datos = { de: user.uid, a: rival.uid, deApodo: apodoDe(user), aApodo: String(rival.apodo || '—').slice(0, 30), deAv: avatarMini(user), aAv: rival.avatar || { emoji: '🦊', fondo: 'violeta' },
-    estado: 'invitado', texto, seg: SEG_DUELO, creadoEn: store.ahora(), prog: {} };
+    estado: 'invitado', texto, seg: SEG_NIVEL[nivel] || SEG_NIVEL.medio, creadoEn: store.ahora(), prog: {} };
   await store.esperarMax(store.escribir(ruta(classId, 'duelos', id), datos));
   return { id, classId, ...datos, creadoEn: Date.now() };
 }
