@@ -457,6 +457,7 @@ export default {
   "xp.buenRitmo": "Good pace",
   "xp.primeraVez": "First time",
   "xp.minPractica": "{n} min of practice",
+  "xp.sinPrecision": "No points: too many mistakes",
   "xp.minijuego": "Minigame",
   // ── Retos del día ──
   "reto.minutos": "Practice for {n} minutes",

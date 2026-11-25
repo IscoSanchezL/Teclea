@@ -69,5 +69,11 @@ export function estadoDuelo(duelo, yo, { rivalAbandono = false } = {}) {
   return { fase: 'terminado', rival, mio, suyo, resultado: c > 0 ? 'gano' : c < 0 ? 'pierde' : 'empate' };
 }
 
-/** Puntos del duelo para XP/monedas (mismo cálculo de los minijuegos: puntos/12, entre 5 y 60 XP). */
-export const puntosDuelo = (resultado, ppm) => Math.round(Math.min(900, Math.max(100, ppm * 12)) + (resultado === 'gano' ? 150 : resultado === 'empate' ? 60 : 0));
+/**
+ * Puntos del duelo para XP/monedas (luego se aplica la precisión en xpJuego). Sin letras correctas no hay puntos:
+ * quien no escribe nada bien (por ejemplo, deja una tecla apretada) no gana ni por participar.
+ */
+export const puntosDuelo = (resultado, ppm) => {
+  if (!(ppm > 0)) return 0;
+  return Math.round(Math.min(900, Math.max(100, ppm * 12)) + (resultado === 'gano' ? 150 : resultado === 'empate' ? 60 : 0));
+};

@@ -29,14 +29,28 @@ export function xpLeccion({ estrellas, precision, ppm, primeraVez = false, grado
 /** XP de una práctica libre (1–5 min). */
 export function xpPractica({ segundos, precision, ppm, grado = 4 }) {
   const min = segundos / 60;
-  const d = [[t('xp.minPractica', { n: Math.max(1, Math.round(min)) }), Math.min(40, Math.round(min * 8))]];
+  const base = Math.min(40, Math.round(min * 8) * factorPrecision(precision));   // los minutos solo cuentan si hubo aciertos
+  if (base <= 0) return { total: 0, desglose: [[t('xp.sinPrecision'), 0]] };
+  const d = [[t('xp.minPractica', { n: Math.max(1, Math.round(min)) }), Math.round(base)]];
   if (precision >= 95) d.push([t('xp.granPrecision'), 10]);
   if (ppm >= perfilDeGrado(grado).ppmMin) d.push([t('xp.buenRitmo'), 10]);
   return { total: Math.min(70, d.reduce((s, [, x]) => s + x, 0)), desglose: d };
 }
 
 /** XP de un minijuego a partir de sus puntos (0–1000). */
-export const xpJuego = (puntos) => ({ total: Math.max(5, Math.min(60, Math.round(puntos / 12))), desglose: [[t('xp.minijuego'), Math.max(5, Math.min(60, Math.round(puntos / 12)))]] });
+/**
+ * Cuánto de los puntos se conserva según la precisión: con 95 % o más, todo; con 70 % o menos, nada.
+ * Así quien deja una tecla apretada o teclea al azar (muchos errores) no gana puntos.
+ */
+export const factorPrecision = (precision) => Math.max(0, Math.min(1, ((Number(precision) || 0) - 70) / 25));
+
+/** XP de un minijuego a partir de sus puntos (0–1000) y la precisión (0–100). Sin puntos o sin precisión: 0 XP. */
+export function xpJuego(puntos, precision = 100) {
+  const validos = Math.round((Number(puntos) || 0) * factorPrecision(precision));
+  if (validos <= 0) return { total: 0, desglose: [[t('xp.sinPrecision'), 0]] };
+  const xp = Math.max(5, Math.min(60, Math.round(validos / 12)));
+  return { total: xp, desglose: [[t('xp.minijuego'), xp]] };
+}
 
 /** Monedas ganadas: 1 por cada 4 XP (tope 300 por escritura, igual que las reglas). */
 export const monedasDeXP = (xp) => Math.min(300, Math.floor(xp / 4));

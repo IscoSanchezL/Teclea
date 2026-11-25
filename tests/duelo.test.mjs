@@ -4,6 +4,14 @@ const t = (n, c) => { c ? ok++ : mal++; console.log(`  ${c ? '✓' : '✗'} ${n}
 const vocab = { sinTilde: ['sol', 'luna', 'mesa', 'casa', 'perro'], conTilde: ['canción', 'árbol'] };
 let k = 0; const azar = () => (k++ % 7) / 7;
 
+import { xpJuego, xpPractica, factorPrecision } from '../js/game/xp.js';
+console.log('Puntos solo con aciertos');
+t('precisión 0 % (tecla apretada): 0 XP aunque haya puntos', xpJuego(500, 0).total === 0 && xpJuego(0, 0).total === 0);
+t('precisión baja (70 %): 0 XP', xpJuego(900, 70).total === 0);
+t('precisión alta (95 %+): puntos completos', xpJuego(600, 95).total === 50 && xpJuego(600, 100).total === 50);
+t('precisión media: puntos parciales', factorPrecision(82.5) === 0.5 && xpJuego(600, 82.5).total === 25);
+t('duelo sin letras correctas (ppm 0): 0 puntos, ni perdiendo ni ganando', puntosDuelo('gano', 0) === 0 && puntosDuelo('pierde', 0) === 0);
+t('práctica con 0 % de precisión: 0 XP; con buena precisión sí da', xpPractica({ segundos: 300, precision: 0, ppm: 0 }).total === 0 && xpPractica({ segundos: 300, precision: 96, ppm: 20 }).total >= 40);
 console.log('Texto del duelo');
 t('2.º largo: 20 palabras, solo sin tilde', textoDuelo(2, vocab, azar, 'largo').split(' ').length === 20 && !/[áéíóú]/.test(textoDuelo(2, vocab, azar)));
 t('6.º: texto largo y dentro del límite de las reglas', textoDuelo(6, vocab, azar, 'largo').length <= 300 && textoDuelo(6, vocab, azar, 'largo').split(' ').length >= 30);

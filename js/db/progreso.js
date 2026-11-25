@@ -124,7 +124,7 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
 
   // ── XP ──
   const calc = tipo === 'leccion' ? xpLeccion({ estrellas, precision: resultado.precision, ppm: resultado.ppm, primeraVez, grado })
-    : tipo === 'juego' ? xpJuego(puntos)
+    : tipo === 'juego' ? xpJuego(puntos, resultado.precision)
     : xpPractica({ segundos: resultado.duracionSeg, precision: resultado.precision, ppm: resultado.ppm, grado });
   const xpGanado = calc.total;
   const monedas = monedasDeXP(xpGanado);
