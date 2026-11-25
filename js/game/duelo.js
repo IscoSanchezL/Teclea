@@ -13,6 +13,7 @@ export const CUENTA_REGRESIVA = 3;           // 3-2-1
 export const LATIDO_MS = 30 * 1000;          // cada cuánto avisa "sigo aquí" mientras está en la sala
 export const VIGENCIA_LINEA_MS = 90 * 1000;  // sin latido en este tiempo = ya no está en línea
 export const VIGENCIA_INVITACION_MS = 60 * 1000;
+export const ESPERA_JUEGO_MS = 150 * 1000;   // en un reto de juego, cuánto se espera al rival que aún juega
 export const GRACIA_MS = 15 * 1000;          // tiempo extra para quien aún no termina cuando el otro ya terminó
 export const MAX_LETRAS = 300;
 
@@ -43,7 +44,7 @@ export const invitacionVigente = (duelo, ahoraMs, desfaseMs = 0) => duelo?.estad
 
 /** Datos comparables de un jugador a partir de su avance guardado. */
 export function puntaje(prog = {}) {
-  return { completo: Boolean(prog.fin && prog.completo), ms: Number.isFinite(prog.ms) ? prog.ms : Infinity, pos: prog.pos || 0, err: prog.err || 0, fin: Boolean(prog.fin) };
+  return { completo: Boolean(prog.fin && prog.completo), ms: Number.isFinite(prog.ms) ? prog.ms : Infinity, pos: prog.pos || 0, err: prog.err || 0, fin: Boolean(prog.fin), pts: Number.isFinite(prog.pts) ? prog.pts : 0 };
 }
 
 /** 1 si gana `a`, -1 si gana `b`, 0 si empatan. */
@@ -65,7 +66,7 @@ export function estadoDuelo(duelo, yo, { rivalAbandono = false } = {}) {
   const mio = puntaje(duelo.prog?.[yo]), suyo = puntaje(duelo.prog?.[rival]);
   if (!mio.fin) return { fase: 'jugando', rival, mio, suyo, rivalCompleto: suyo.completo };
   if (!suyo.fin && !rivalAbandono) return { fase: 'esperando-rival', rival, mio, suyo };
-  const c = comparar(mio, suyo);
+  const c = duelo.juego ? Math.sign(mio.pts - suyo.pts) : comparar(mio, suyo);   // reto en un juego: gana quien hizo más puntos
   return { fase: 'terminado', rival, mio, suyo, resultado: c > 0 ? 'gano' : c < 0 ? 'pierde' : 'empate' };
 }
 

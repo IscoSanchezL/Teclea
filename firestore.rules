@@ -243,12 +243,13 @@ service cloud.firestore {
         allow create: if request.auth.uid == request.resource.data.de && enrolled(classId) && duelosPermitidos(classId)
           && request.resource.data.a != request.auth.uid
           && exists(/databases/$(db)/documents/classes/$(classId)/en_linea/$(request.resource.data.a))
-          && request.resource.data.keys().hasOnly(['de','a','deApodo','aApodo','deAv','aAv','estado','texto','seg','creadoEn','prog'])
+          && request.resource.data.keys().hasOnly(['de','a','deApodo','aApodo','deAv','aAv','estado','texto','seg','creadoEn','prog','juego','semilla'])
           && isStr(request.resource.data.deApodo, 1, 30) && isStr(request.resource.data.aApodo, 1, 30)
           && avatarMini(request.resource.data.deAv) && avatarMini(request.resource.data.aAv)
           && request.resource.data.estado == 'invitado'
           && isStr(request.resource.data.texto, 5, 300) && isInt(request.resource.data.seg, 20, 180)
           && request.resource.data.creadoEn == request.time
+          && (!('juego' in request.resource.data) || (isStr(request.resource.data.juego, 3, 12) && isInt(request.resource.data.semilla, 0, 4294967295)))
           && request.resource.data.prog.size() == 0;
         allow update: if signedIn() && (resource.data.de == request.auth.uid || resource.data.a == request.auth.uid)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado','prog','aceptadoEn'])
@@ -256,8 +257,8 @@ service cloud.firestore {
         allow delete: if isAdmin() || resource.data.de == request.auth.uid || resource.data.a == request.auth.uid;
 
         function progOk(p) {
-          return p is map && p.keys().hasOnly(['pos','err','fin','completo','ms'])
-            && isInt(p.get('pos', 0), 0, 300) && isInt(p.get('err', 0), 0, 3000)
+          return p is map && p.keys().hasOnly(['pos','err','fin','completo','ms','pts'])
+            && isInt(p.get('pos', 0), 0, 300) && isInt(p.get('pts', 0), 0, 100000) && isInt(p.get('err', 0), 0, 3000)
             && p.get('fin', false) is bool && p.get('completo', false) is bool && isInt(p.get('ms', 0), 0, 400000);
         }
         function cambioDueloValido() {

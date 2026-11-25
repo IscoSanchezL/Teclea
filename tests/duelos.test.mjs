@@ -54,6 +54,15 @@ t('NO se puede retarse a uno mismo', await falla(fs.setDoc(duelo('ana', 'd5'), n
 t('NO nace ya aceptado ni con avance', await falla(fs.setDoc(duelo('ana', 'd6'), nuevoDuelo('ana', 'beto', { estado: 'aceptado' }))) && await falla(fs.setDoc(duelo('ana', 'd7'), nuevoDuelo('ana', 'beto', { prog: { ana: { pos: 40, fin: true, completo: true, ms: 1 } } }))));
 t('NO acepta un texto enorme', await falla(fs.setDoc(duelo('ana', 'd8'), nuevoDuelo('ana', 'beto', { texto: 'a'.repeat(500) }))));
 
+console.log('\nReto en un minijuego');
+t('se crea con juego y semilla', await pasa(fs.setDoc(duelo('ana', 'g0'), nuevoDuelo('ana', 'beto', { texto: 'juego:jefe', juego: 'jefe', semilla: 123456 }))));
+t('NO acepta semilla fuera de rango, juego sin semilla ni nombre larguísimo', await falla(fs.setDoc(duelo('ana', 'g1'), nuevoDuelo('ana', 'beto', { texto: 'juego:jefe', juego: 'jefe', semilla: -1 }))) && await falla(fs.setDoc(duelo('ana', 'g2'), nuevoDuelo('ana', 'beto', { texto: 'juego:jefe', juego: 'jefe' }))) && await falla(fs.setDoc(duelo('ana', 'g3'), nuevoDuelo('ana', 'beto', { texto: 'juego:jefe', juego: 'x'.repeat(30), semilla: 5 }))));
+t('NO acepta campos inventados', await falla(fs.setDoc(duelo('ana', 'g4'), nuevoDuelo('ana', 'beto', { juego: 'jefe', semilla: 5, trampa: 1 }))));
+t('el retado acepta el reto de juego', await pasa(fs.updateDoc(duelo('beto', 'g0'), { estado: 'aceptado', aceptadoEn: fs.serverTimestamp() })));
+t('cada uno guarda SUS puntos', await pasa(fs.updateDoc(duelo('ana', 'g0'), { 'prog.ana': { pts: 950, err: 1, fin: true, completo: true, ms: 60000 } })) && await pasa(fs.updateDoc(duelo('beto', 'g0'), { 'prog.beto': { pts: 700, err: 0, fin: true, completo: true, ms: 55000 } })));
+t('NO acepta puntos absurdos ni de otro tipo', await falla(fs.updateDoc(duelo('ana', 'g0'), { 'prog.ana': { pts: 9999999, fin: true } })) && await falla(fs.updateDoc(duelo('ana', 'g0'), { 'prog.ana': { pts: 'mil', fin: true } })));
+t('NO se escriben los puntos del rival', await falla(fs.updateDoc(duelo('ana', 'g0'), { 'prog.beto': { pts: 1, fin: true } })));
+
 console.log('\nPrivacidad del duelo');
 t('el retado lo ve', await pasa(fs.getDoc(duelo('beto', 'd1'))));
 t('un tercero de la misma clase NO lo ve', await falla(fs.getDoc(duelo('caro', 'd1'))));

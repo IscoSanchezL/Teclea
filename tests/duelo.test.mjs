@@ -12,6 +12,11 @@ t('precisión alta (95 %+): puntos completos', xpJuego(600, 95).total === 50 && 
 t('precisión media: puntos parciales', factorPrecision(82.5) === 0.5 && xpJuego(600, 82.5).total === 25);
 t('duelo sin letras correctas (ppm 0): 0 puntos, ni perdiendo ni ganando', puntosDuelo('gano', 0) === 0 && puntosDuelo('pierde', 0) === 0);
 t('práctica con 0 % de precisión: 0 XP; con buena precisión sí da', xpPractica({ segundos: 300, precision: 0, ppm: 0 }).total === 0 && xpPractica({ segundos: 300, precision: 96, ppm: 20 }).total >= 40);
+console.log('Reto en un juego');
+const dj = (a, b, extra = {}) => ({ de: 'x', a: 'y', juego: 'jefe', prog: { x: { fin: true, completo: true, pts: a, ms: 60000 }, y: { fin: true, completo: true, pts: b, ms: 30000 } }, ...extra });
+t('gana quien hace más puntos (aunque el otro tarde menos)', estadoDuelo(dj(900, 500), 'x').resultado === 'gano' && estadoDuelo(dj(900, 500), 'y').resultado === 'pierde');
+t('mismos puntos: empate', estadoDuelo(dj(700, 700), 'x').resultado === 'empate');
+t('si el rival no termina, se espera; si abandona, gana quien sí jugó', estadoDuelo({ ...dj(800, 0), prog: { x: { fin: true, completo: true, pts: 800 } } }, 'x').fase === 'esperando-rival' && estadoDuelo({ ...dj(800, 0), prog: { x: { fin: true, completo: true, pts: 800 } } }, 'x', { rivalAbandono: true }).resultado === 'gano');
 console.log('Texto del duelo');
 t('2.º largo: 20 palabras, solo sin tilde', textoDuelo(2, vocab, azar, 'largo').split(' ').length === 20 && !/[áéíóú]/.test(textoDuelo(2, vocab, azar)));
 t('6.º: texto largo y dentro del límite de las reglas', textoDuelo(6, vocab, azar, 'largo').length <= 300 && textoDuelo(6, vocab, azar, 'largo').split(' ').length >= 30);

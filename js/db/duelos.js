@@ -27,10 +27,11 @@ export const salirDeSala = (user, classId) => store.borrar(ruta(classId, 'en_lin
 export const escucharSala = (classId, alCambiar, alError) => store.escucharColeccion(ruta(classId, 'en_linea'), {}, alCambiar, alError);
 
 /* ═════════ Duelos ═════════ */
-export async function retar(user, rival, classId, texto, nivel = 'medio') {
+export async function retar(user, rival, classId, texto, nivel = 'medio', juego = null) {
   const id = nuevoId();
   const datos = { de: user.uid, a: rival.uid, deApodo: apodoDe(user), aApodo: String(rival.apodo || '—').slice(0, 30), deAv: avatarMini(user), aAv: rival.avatar || { emoji: '🦊', fondo: 'violeta' },
     estado: 'invitado', texto, seg: SEG_NIVEL[nivel] || SEG_NIVEL.medio, creadoEn: store.ahora(), prog: {} };
+  if (juego) Object.assign(datos, { texto: `juego:${juego}`, juego, semilla: Math.floor(Math.random() * 4294967295) });   // reto en un minijuego: los dos juegan lo mismo
   await store.esperarMax(store.escribir(ruta(classId, 'duelos', id), datos));
   return { id, classId, ...datos, creadoEn: Date.now() };
 }
