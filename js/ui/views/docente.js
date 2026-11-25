@@ -72,8 +72,8 @@ export async function render({ query }) {
         return h('tr', { class: 'fila-click', tabindex: 0, onclick: () => abrirEstudiante(i), onkeydown: (e) => { if (e.key === 'Enter') abrirEstudiante(i); } },
           h('th', { scope: 'row' }, i.alias, i.estado === 'pausado' ? h('small', { class: 'suave' }, ` · ${t('doc.pausado')}`) : null), h('td', {}, nombreClase(i.classId)), h('td', { class: 'num' }, String(i.stats?.lecciones || 0)), h('td', { class: 'num' }, String(i.stats?.xp || 0)),
           h('td', { class: 'num' }, i.stats?.mejorWpm ? Math.round(i.stats.mejorWpm) : '—'), h('td', { class: 'num' }, i.stats?.precisionProm ? `${i.stats.precisionProm} %` : '—'),
-          h('td', { class: 'num' }, t('doc.min', { n: Math.round(i.stats?.minutos || 0) })), h('td', { class: 'tabla__spark' }, mias.length > 1 ? sparkline(mias, { color: estado === 'atrasado' || estado === 'inactivo' ? 'var(--mal)' : 'var(--ok)', etiqueta: t('doc.evolucion', { n: i.alias }) }) : ''),
-          h('td', { class: 'num' }, celdaRacha(i)), h('td', {}, textoUltima(i.stats?.ultimaPractica)), h('td', {}, pill(estado)));
+          h('td', { class: 'num' }, t('doc.min', { n: Math.round(i.stats?.minutos || 0) })), h('td', { class: 'num' }, celdaRacha(i)), h('td', { class: 'tabla__spark' }, mias.length > 1 ? sparkline(mias, { color: estado === 'atrasado' || estado === 'inactivo' ? 'var(--mal)' : 'var(--ok)', etiqueta: t('doc.evolucion', { n: i.alias }) }) : ''),
+          h('td', {}, textoUltima(i.stats?.ultimaPractica)), h('td', {}, pill(estado)));
       }));
       if (!f.length) cuerpoTabla.append(h('tr', {}, h('td', { colspan: 11, class: 'tabla__vacio' }, inscs.length ? t('doc.ningunoCoincide') : t('doc.sinEstudiantes'))));
       contador.textContent = `${f.length} ${f.length === 1 ? t('doc.estudiante') : t('doc.estudiantes')}`;
