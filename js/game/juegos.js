@@ -11,7 +11,14 @@ import { MotorEscritura } from '../lessons/motor.js';
 import { vistaTexto } from '../lessons/texto-vista.js';
 import { t as tr, idioma } from '../i18n/index.js';
 
-const rnd = (a) => a[Math.floor(Math.random() * a.length)];
+// Azar de los juegos. Con semilla (retos entre compañeros) los dos jugadores reciben las mismas palabras.
+let azar = Math.random;
+export function usarSemilla(semilla) {
+  if (semilla == null) { azar = Math.random; return; }
+  let a = Number(semilla) >>> 0;
+  azar = () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const rnd = (a) => a[Math.floor(azar() * a.length)];
 const LARGO_MAX = { 2: 5, 3: 6, 4: 7, 5: 8, 6: 9 };
 
 /** Palabras adecuadas al grado. */
@@ -70,8 +77,8 @@ export function lluvia({ zona, grado, vocab, alFin }) {
       ultimoSpawn = t; const texto = rnd(pal);
       if (!activos.some((w) => w.texto === texto)) {
         const el = h('span', { class: 'jg__palabra' }, texto);
-        el.style.left = `${6 + Math.random() * 78}%`; campo.append(el);
-        activos.push({ texto, el, y: -30, v: vel + seg * 0.7 + Math.random() * 14 });
+        el.style.left = `${6 + azar() * 78}%`; campo.append(el);
+        activos.push({ texto, el, y: -30, v: vel + seg * 0.7 + azar() * 14 });
       }
     }
     for (const w of [...activos]) {
@@ -180,7 +187,7 @@ export function blanco({ zona, grado, alFin }) {
     const seg = (t - t0) / 1000; dT.b.textContent = String(Math.max(0, Math.ceil(DUR - seg)));
     if (t - ultimo > Math.max(520, 1100 - seg * 14) && dianas.length < 6) {
       ultimo = t; const letra = rnd(letras);
-      const el = h('span', { class: 'jg__diana' }, letra.toUpperCase()); el.style.left = `${6 + Math.random() * 84}%`; el.style.top = `${8 + Math.random() * 74}%`; campo.append(el);
+      const el = h('span', { class: 'jg__diana' }, letra.toUpperCase()); el.style.left = `${6 + azar() * 84}%`; el.style.top = `${8 + azar() * 74}%`; campo.append(el);
       dianas.push({ letra, el, nace: t, vive: Math.max(1500, 2800 - seg * 25) });
     }
     for (const d of [...dianas]) { if (t - d.nace > d.vive) { d.el.classList.add('jg__diana--fuera'); setTimeout(() => d.el.remove(), 200); dianas.splice(dianas.indexOf(d), 1); combo = 0; fallos++; dC.b.textContent = '×1'; } }
@@ -222,10 +229,173 @@ export function duelo({ zona, grado, vocab, alFin, mejorPrevio = 0 }) {
   return { destruir() { fin = true; cancelAnimationFrame(raf); cap.destruir(); } };
 }
 
+/* ═════════════ 6. Jefe final ═════════════ */
+export function jefe({ zona, grado, vocab, alFin }) {
+  const pal = palabrasDeGrado(vocab, grado);
+  const VIDA = 70 + grado * 14, ESPERA = grado <= 3 ? 10 : 7.5;   // vida del jefe (letras) y segundos antes de que ataque
+  const bicho = rnd(['👾', '🐉', '🦖', '🤖', '👹', '🦑']);
+  let vida = VIDA, corazones = 3, palabra = rnd(pal), buffer = '', carga = 0, combo = 0, chars = 0, errores = 0, fin = false, raf = 0, prev = 0;
+  const t0 = performance.now();
+  const dV = dato(tr('juego.vidas'), '❤️❤️❤️'), dK = dato(tr('juego.combo'), '×1');
+  const monstruo = h('div', { class: 'jefe__bicho', 'aria-hidden': 'true' }, bicho);
+  const vidaFill = h('i'), cargaFill = h('i');
+  const campo = h('div', { class: 'jg__campo jefe' }, monstruo,
+    h('div', { class: 'jefe__barras' }, h('div', { class: 'jefe__barra jefe__barra--vida', title: 'HP' }, vidaFill), h('div', { class: 'jefe__barra jefe__barra--ataque', title: tr('juego.jefe.ataque') }, cargaFill)));
+  const grande = h('div', { class: 'duelo__palabra' });
+  zona.append(hud(dV.nodo, dK.nodo), campo, grande);
+  const pintar = () => grande.replaceChildren(...[...palabra].map((c, i) => h('span', { class: i < buffer.length ? 't--ok' : i === buffer.length ? 't--act' : 't--pend' }, c)));
+  const anim = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const mult = () => 1 + Math.min(3, Math.floor(combo / 3)) * 0.5;
+  const cap = capturar(zona, {
+    alChar: (ch) => {
+      if (fin) return;
+      if (ch.toLowerCase() === palabra[buffer.length]) {
+        buffer += palabra[buffer.length]; sonido.tecla();
+        if (buffer === palabra) {
+          vida -= Math.round(palabra.length * mult()); chars += palabra.length; combo++; carga = 0; buffer = ''; palabra = rnd(pal); sonido.acierto();
+          anim(monstruo, 'jefe__bicho--golpe'); dK.b.textContent = `×${mult()}`;
+          if (vida <= 0) { vidaFill.style.width = '0%'; return terminar(true); }
+        }
+      } else { errores++; combo = 0; carga += 1; dK.b.textContent = '×1'; sonido.error(); anim(grande, 'jg__linea--mal'); }
+      pintar();
+    },
+  });
+  function terminar(gana) {
+    if (fin) return; fin = true; cancelAnimationFrame(raf);
+    const dur = Math.max(3, Math.round((performance.now() - t0) / 1000));
+    gana ? sonido.fin() : sonido.perder();
+    const puntos = gana ? Math.max(400, 1000 + corazones * 100 - dur * 4 - errores * 10) : Math.round((1 - Math.max(0, vida) / VIDA) * 600);
+    alFin({ puntos, chars, errores, duracionSeg: dur, gano: gana });
+  }
+  function cuadro(t) {
+    if (fin) return;
+    const dt = Math.min(0.05, (t - (prev || t)) / 1000); prev = t; carga += dt;
+    vidaFill.style.width = `${Math.max(0, (vida / VIDA) * 100)}%`; cargaFill.style.width = `${Math.min(100, (carga / ESPERA) * 100)}%`;
+    if (carga >= ESPERA) {
+      corazones--; carga = 0; buffer = ''; combo = 0; dK.b.textContent = '×1'; sonido.error(); anim(campo, 'jefe--ataca');
+      dV.b.textContent = '❤️'.repeat(Math.max(0, corazones)) || '💔'; pintar();
+      if (corazones <= 0) return terminar(false);
+    }
+    raf = requestAnimationFrame(cuadro);
+  }
+  pintar(); raf = requestAnimationFrame(cuadro); cap.enfocar();
+  return { destruir() { fin = true; cancelAnimationFrame(raf); cap.destruir(); } };
+}
+
+/* ═════════════ 7. Frenesí de oro ═════════════ */
+export function frenesi({ zona, grado, vocab, alFin }) {
+  const pal = palabrasDeGrado(vocab, grado);
+  const DUR = 40;
+  let resto = DUR, puntos = 0, chars = 0, errores = 0, combo = 0, buffer = '', fin = false, raf = 0, t0 = null, prev = 0;
+  const nueva = () => { const r = azar(); return { texto: rnd(pal), tipo: r < 0.14 ? 'oro' : r < 0.27 ? 'reloj' : 'normal' }; };
+  let actual = nueva();
+  const dT = dato(tr('juego.tiempo'), String(DUR)), dP = dato(tr('juego.puntos')), dC = dato(tr('juego.combo'), '×1');
+  const insignia = h('div', { class: 'frenesi__insignia' }), grande = h('div', { class: 'duelo__palabra' });
+  const aviso = h('div', { class: 'frenesi__aviso', 'aria-hidden': 'true' });
+  zona.append(hud(dT.nodo, dP.nodo, dC.nodo), h('div', { class: 'jg__campo frenesi' }, insignia, grande, aviso));
+  const mult = () => Math.min(5, 1 + Math.floor(combo / 3));
+  const pintar = () => {
+    grande.replaceChildren(...[...actual.texto].map((c, i) => h('span', { class: i < buffer.length ? 't--ok' : i === buffer.length ? 't--act' : 't--pend' }, c)));
+    insignia.textContent = actual.tipo === 'oro' ? '⭐ ×3' : actual.tipo === 'reloj' ? '⏱ +4 s' : '';
+    insignia.className = `frenesi__insignia frenesi__insignia--${actual.tipo}`;
+  };
+  const flash = (txt) => { aviso.textContent = txt; aviso.classList.remove('frenesi__aviso--ya'); void aviso.offsetWidth; aviso.classList.add('frenesi__aviso--ya'); };
+  const cap = capturar(zona, {
+    alChar: (ch) => {
+      if (fin) return; t0 ??= performance.now();
+      if (ch.toLowerCase() === actual.texto[buffer.length]) {
+        buffer += actual.texto[buffer.length]; sonido.tecla();
+        if (buffer === actual.texto) {
+          const ganado = actual.texto.length * 10 * mult() * (actual.tipo === 'oro' ? 3 : 1);
+          puntos += ganado; chars += actual.texto.length; combo++; sonido.acierto(); flash(`+${ganado}`);
+          if (actual.tipo === 'reloj') resto += 4;
+          dP.b.textContent = String(puntos); dC.b.textContent = `×${mult()}`;
+          buffer = ''; actual = nueva();
+        }
+      } else { errores++; combo = 0; resto -= 1; dC.b.textContent = '×1'; sonido.error(); grande.classList.remove('jg__linea--mal'); void grande.offsetWidth; grande.classList.add('jg__linea--mal'); flash('−1 s'); }
+      pintar();
+    },
+  });
+  function cuadro(t) {
+    if (fin) return;
+    const dt = Math.min(0.05, (t - (prev || t)) / 1000); prev = t;
+    if (t0) resto -= dt;
+    dT.b.textContent = String(Math.max(0, Math.ceil(resto)));
+    if (resto <= 0) { fin = true; sonido.fin(); return alFin({ puntos, chars, errores, duracionSeg: Math.max(3, Math.round((performance.now() - t0) / 1000)) }); }
+    raf = requestAnimationFrame(cuadro);
+  }
+  pintar(); raf = requestAnimationFrame(cuadro); cap.enfocar();
+  return { destruir() { fin = true; cancelAnimationFrame(raf); cap.destruir(); } };
+}
+
+/* ═════════════ 8. Ninja de frutas (¡no escribas las bombas!) ═════════════ */
+export function ninja({ zona, grado, vocab, alFin }) {
+  const cortas = palabrasDeGrado(vocab, grado).filter((w) => w.length <= (grado <= 3 ? 4 : 6));
+  const pal = cortas.length > 12 ? cortas : palabrasDeGrado(vocab, grado);
+  const FRUTAS = ['🍉', '🍎', '🍌', '🍇', '🍓', '🍍', '🥝', '🍊'];
+  const DUR = 60;
+  let vidas = 3, puntos = 0, chars = 0, errores = 0, combo = 0, buffer = '', fin = false, raf = 0, ultimo = 0, prev = 0;
+  const t0 = performance.now(), activos = [];
+  const campo = h('div', { class: 'jg__campo jg__campo--ninja' });
+  const linea = h('div', { class: 'jg__linea', 'aria-live': 'off' }, h('span', { class: 'jg__buffer' }), h('i', { class: 'jg__cursor' }));
+  const buf = linea.querySelector('.jg__buffer');
+  const dV = dato(tr('juego.vidas'), '❤️❤️❤️'), dP = dato(tr('juego.puntos')), dT = dato(tr('juego.tiempo'), String(DUR)), dC = dato(tr('juego.combo'), '×1');
+  zona.append(hud(dV.nodo, dT.nodo, dP.nodo, dC.nodo), campo, linea);
+  const mult = () => Math.min(5, 1 + Math.floor(combo / 4));
+  const perder = () => { vidas--; combo = 0; dC.b.textContent = '×1'; dV.b.textContent = '❤️'.repeat(Math.max(0, vidas)) || '💔'; sonido.error(); };
+  const quitar = (it, cls) => { it.el.classList.add(cls); setTimeout(() => it.el.remove(), 260); activos.splice(activos.indexOf(it), 1); };
+  const cap = capturar(zona, {
+    alChar: (ch) => {
+      if (fin) return;
+      const nuevo = buffer + ch.toLowerCase();
+      const cand = activos.filter((w) => w.texto.startsWith(nuevo));
+      if (!cand.length) { errores++; combo = 0; dC.b.textContent = '×1'; sonido.error(); linea.classList.remove('jg__linea--mal'); void linea.offsetWidth; linea.classList.add('jg__linea--mal'); return; }
+      buffer = nuevo; sonido.tecla(); buf.textContent = buffer;
+      activos.forEach((w) => w.el.classList.toggle('ninja__item--sel', w.texto.startsWith(buffer)));
+      const exacta = activos.find((w) => w.texto === buffer);
+      if (!exacta) return;
+      buffer = ''; buf.textContent = ''; activos.forEach((w) => w.el.classList.remove('ninja__item--sel'));
+      if (exacta.bomba) { quitar(exacta, 'ninja__item--boom'); perder(); if (vidas <= 0) terminar(); return; }   // ¡era una bomba!
+      chars += exacta.texto.length; combo++; puntos += exacta.texto.length * 10 * mult(); sonido.acierto();
+      quitar(exacta, 'ninja__item--corte'); dP.b.textContent = String(puntos); dC.b.textContent = `×${mult()}`;
+    },
+    alBorrar: () => { buffer = buffer.slice(0, -1); buf.textContent = buffer; activos.forEach((w) => w.el.classList.toggle('ninja__item--sel', Boolean(buffer) && w.texto.startsWith(buffer))); },
+  });
+  function terminar() {
+    if (fin) return; fin = true; cancelAnimationFrame(raf);
+    const sobrevive = vidas > 0; sobrevive ? sonido.fin() : sonido.perder();
+    alFin({ puntos: puntos + (sobrevive && chars > 0 ? vidas * 50 : 0), chars, errores, duracionSeg: Math.max(3, Math.round((performance.now() - t0) / 1000)) });
+  }
+  function cuadro(t) {
+    if (fin) return;
+    prev = t; const seg = (t - t0) / 1000; dT.b.textContent = String(Math.max(0, Math.ceil(DUR - seg)));
+    if (t - ultimo > Math.max(750, 1700 - seg * 14) && activos.length < 6) {
+      ultimo = t;
+      const bomba = seg > 5 && azar() < 0.22;
+      let texto = rnd(pal), intentos = 0; while (activos.some((w) => w.texto[0] === texto[0]) && intentos++ < 8) texto = rnd(pal);   // primeras letras distintas: no se confunden
+      const el = h('div', { class: `ninja__item ${bomba ? 'ninja__item--bomba' : ''}` }, h('span', { class: 'ninja__emoji' }, bomba ? '💣' : rnd(FRUTAS)), h('b', { class: 'ninja__palabra' }, texto));
+      campo.append(el);
+      activos.push({ texto, bomba, el, x: 8 + azar() * 70, dx: (azar() - 0.5) * 30, nace: t, dura: Math.max(2300, 3600 - seg * 25) });
+    }
+    for (const w of [...activos]) {
+      const f = (t - w.nace) / w.dura;
+      if (f >= 1) { quitar(w, 'ninja__item--cae'); if (!w.bomba) { perder(); buffer = ''; buf.textContent = ''; if (vidas <= 0) return terminar(); } continue; }
+      w.el.style.left = `${w.x + (f - 0.5) * w.dx}%`; w.el.style.bottom = `${4 * f * (1 - f) * 62 + 2}%`;
+    }
+    if (seg >= DUR) return terminar();
+    raf = requestAnimationFrame(cuadro);
+  }
+  raf = requestAnimationFrame(cuadro); cap.enfocar();
+  return { destruir() { fin = true; cancelAnimationFrame(raf); cap.destruir(); } };
+}
+
 export const JUEGOS = [
   { id: 'carrera', get nombre() { return tr('juego.carrera.nombre'); }, icono: 'rocket', color: ['#8A70FA', '#4F6BFF'], get texto() { return tr('juego.carrera.texto'); }, crear: carrera },
   { id: 'lluvia', get nombre() { return tr('juego.lluvia.nombre'); }, icono: 'sparkle', color: ['#4FB6FF', '#1E78C8'], get texto() { return tr('juego.lluvia.texto'); }, crear: lluvia },
   { id: 'rescate', get nombre() { return tr('juego.rescate.nombre'); }, icono: 'heart', color: ['#FF8A7A', '#E84F3F'], get texto() { return tr('juego.rescate.texto'); }, crear: rescate },
   { id: 'blanco', get nombre() { return tr('juego.blanco.nombre'); }, icono: 'target', color: ['#3DDBB0', '#0B8F6D'], get texto() { return tr('juego.blanco.texto'); }, crear: blanco },
   { id: 'duelo', get nombre() { return tr('juego.duelo.nombre'); }, icono: 'clock', color: ['#FFD04A', '#E39A00'], get texto() { return tr('juego.duelo.texto'); }, crear: duelo },
+  { id: 'jefe', get nombre() { return tr('juego.jefe.nombre'); }, icono: 'shield', color: ['#C026D3', '#7C3AED'], get texto() { return tr('juego.jefe.texto'); }, crear: jefe },
+  { id: 'frenesi', get nombre() { return tr('juego.frenesi.nombre'); }, icono: 'flame', color: ['#FF9F1C', '#F15A24'], get texto() { return tr('juego.frenesi.texto'); }, crear: frenesi },
+  { id: 'ninja', get nombre() { return tr('juego.ninja.nombre'); }, icono: 'star', color: ['#22C55E', '#15803D'], get texto() { return tr('juego.ninja.texto'); }, crear: ninja },
 ];
