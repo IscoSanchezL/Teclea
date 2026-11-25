@@ -117,7 +117,9 @@ export function carrera({ zona, grado, vocab, alFin }) {
     if (prog[3] >= 1 || prog.slice(0, 3).some((p) => p >= 1) || seg > 180) {
       terminado = true; motor.terminar();
       const r = motor.resultado(); const pos = prog[3] >= 1 ? orden.filter((o) => o.p >= 1).findIndex((o) => o.i === 3) + 1 || 1 : puesto;
-      const puntos = [0, 1000, 700, 450, 250][pos] + Math.round(r.precision * 2);
+      // Los puntos del puesto solo cuentan según lo que escribió bien: si no avanzó (p. ej. dejó una tecla apretada), 0
+      const avance = Math.max(0, Math.min(1, (motor.pos - motor.sinCorregir) / objetivoChars));
+      const puntos = Math.round(([0, 1000, 700, 450, 250][pos] + Math.round(r.precision * 2)) * avance);
       sonido.fin(); alFin({ puntos, chars: Math.max(0, motor.pos - motor.sinCorregir), errores: motor.errores, duracionSeg: r.duracionSeg, puesto: pos });
       return;
     }
