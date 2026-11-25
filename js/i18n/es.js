@@ -1025,6 +1025,7 @@ export default {
   "duelo.retoJuego": "Reto en «{j}»: los dos juegan lo mismo y gana quien haga más puntos.",
   "duelo.rivalYaJuego": "¡{n} ya terminó con {p} puntos! Supéralo.",
   "duelo.puntosVs": "Tú {a} puntos · {n} {b} puntos",
+  "duelo.nivelSoloTexto": "Solo para la carrera de escritura: elígela arriba para escoger corto, medio o largo.",
   "duelo.retar": "Retar",
   "duelo.nadie": "Nadie más de tu clase está en la sala ahora.",
   "duelo.nadieAyuda": "Avísales que entren a Juegos → Duelos. Esta pantalla se actualiza sola.",

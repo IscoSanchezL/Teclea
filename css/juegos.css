@@ -264,3 +264,4 @@ html[data-theme="dark"]:not([data-estilo="staff"])[data-tema-color="neon"]     {
 .frenesi .duelo__palabra .t--pend { color: rgba(255,255,255,.55); }
 .frenesi .duelo__palabra .t--ok { color: #7CF5C8; }
 .frenesi .duelo__palabra .t--act { color: #fff; background: rgba(255,255,255,.2); border-bottom-color: #FFD04A; }
+.dl-niveles .filtro:disabled { opacity: .45; cursor: not-allowed; }

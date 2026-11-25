@@ -1025,6 +1025,7 @@ export default {
   "duelo.retoJuego": "Challenge in “{j}”: you both play the same game and whoever scores more wins.",
   "duelo.rivalYaJuego": "{n} already finished with {p} points! Beat them.",
   "duelo.puntosVs": "You {a} points · {n} {b} points",
+  "duelo.nivelSoloTexto": "Only for the typing race: pick it above to choose short, medium or long.",
   "duelo.retar": "Challenge",
   "duelo.nadie": "Nobody else from your class is in the lobby right now.",
   "duelo.nadieAyuda": "Tell them to open Games → Duels. This screen updates by itself.",

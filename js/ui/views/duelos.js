@@ -94,7 +94,8 @@ export async function render() {
     [{ id: 'texto', nombre: t('duelo.juegoEscribir') }, ...JUEGOS].map((j) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(j.id === juego), onclick: () => { juego = j.id; try { localStorage.setItem('teclea.duelo.juego', j.id); } catch { /* ok */ } pintarSala(); } }, j.nombre)));
   const selectorNivel = () => h('div', { class: 'dl-niveles', role: 'group', 'aria-label': t('duelo.nivelAria') },
     h('small', { class: 'suave' }, t('duelo.nivelTitulo')),
-    NIVELES.map((n) => h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(n === nivel), onclick: () => { nivel = n; try { localStorage.setItem('teclea.duelo.nivel', n); } catch { /* ok */ } pintarSala(); } }, t(`duelo.nivel.${n}`))));
+    NIVELES.map((n) => h('button', { class: 'filtro', type: 'button', disabled: juego !== 'texto' || null, 'aria-pressed': String(juego === 'texto' && n === nivel), onclick: () => { nivel = n; try { localStorage.setItem('teclea.duelo.nivel', n); } catch { /* ok */ } pintarSala(); } }, t(`duelo.nivel.${n}`))),
+    juego !== 'texto' ? h('small', { class: 'suave' }, t('duelo.nivelSoloTexto')) : null);
   function tarjetaJugador(p) {
     const ocupado = p.estado === 'jugando';
     return h('li', { class: `dl-jugador ${ocupado ? 'dl-jugador--ocupado' : ''}` },
@@ -115,7 +116,7 @@ export async function render() {
       h('section', { class: 'card dl-sala' },
         h('h2', {}, t('duelo.enLinea', { n: lista.length })),
         selectorJuego(),
-        juego === 'texto' ? selectorNivel() : null,
+        selectorNivel(),
         lista.length
           ? h('ul', { class: 'dl-lista' }, lista.map(tarjetaJugador))
           : h('div', { class: 'dl-vacio' }, mascota('anima', { tam: 'md' }), h('p', {}, t('duelo.nadie')), h('small', { class: 'suave' }, t('duelo.nadieAyuda')))),
