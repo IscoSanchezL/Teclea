@@ -5,7 +5,7 @@ import { state } from '../../core/state.js';
 import { textoVersion } from '../../core/version.js';
 import { h } from '../../core/utils.js';
 import * as C from '../../db/clases.js';
-import { conSesiones, estadoDe, textoUltima, aCSV, descargar, ETIQUETAS, sembrarEjemplo, sesionesDocente } from '../../db/analitica.js';
+import { conSesiones, rachaDe, estadoDe, textoUltima, aCSV, descargar, ETIQUETAS, sembrarEjemplo, sesionesDocente } from '../../db/analitica.js';
 import { icono } from '../icons.js';
 import { sparkline } from '../graficas.js';
 import { toast, confirmar } from '../overlay.js';
@@ -48,13 +48,18 @@ export async function render({ query }) {
 
   /* ── Estudiantes ── */
   function exportarCSV() {
-    const filas = filtrados().map((i) => [i.alias, nombreClase(i.classId), Math.round(i.stats?.mejorWpm || 0), i.stats?.precisionProm || 0, Math.round(i.stats?.minutos || 0), i.stats?.lecciones || 0, textoUltima(i.stats?.ultimaPractica), ETIQUETAS[estadoDe(i, claseDe(i.classId)?.grado)]]);
-    descargar('estudiantes-teclea.csv', aCSV([t('doc.csv.cabecera.est'), t('doc.csv.cabecera.clase'), t('doc.csv.cabecera.ppm'), t('doc.csv.cabecera.pre'), t('doc.csv.cabecera.min'), t('doc.csv.cabecera.lec'), t('doc.csv.cabecera.ult'), t('doc.csv.cabecera.estado')], filas));
+    const filas = filtrados().map((i) => [i.alias, nombreClase(i.classId), Math.round(i.stats?.mejorWpm || 0), i.stats?.precisionProm || 0, Math.round(i.stats?.minutos || 0), i.stats?.lecciones || 0, rachaDe(i, sesiones).dias, textoUltima(i.stats?.ultimaPractica), ETIQUETAS[estadoDe(i, claseDe(i.classId)?.grado)]]);
+    descargar('estudiantes-teclea.csv', aCSV([t('doc.csv.cabecera.est'), t('doc.csv.cabecera.clase'), t('doc.csv.cabecera.ppm'), t('doc.csv.cabecera.pre'), t('doc.csv.cabecera.min'), t('doc.csv.cabecera.lec'), t('doc.th.racha'), t('doc.csv.cabecera.ult'), t('doc.csv.cabecera.estado')], filas));
     toast(t('doc.csvOk'));
   }
-  const valorOrden = (i, c) => ({ alias: i.alias.toLowerCase(), clase: nombreClase(i.classId), lec: i.stats?.lecciones || 0, xp: i.stats?.xp || 0, prog: (i.stats?.lecciones || 0) * 100000 + (i.stats?.xp || 0), ppm: i.stats?.mejorWpm || 0, pre: i.stats?.precisionProm || 0, min: i.stats?.minutos || 0, ult: i.stats?.ultimaPractica || 0 })[c];
+  const valorOrden = (i, c) => ({ alias: i.alias.toLowerCase(), clase: nombreClase(i.classId), lec: i.stats?.lecciones || 0, xp: i.stats?.xp || 0, prog: (i.stats?.lecciones || 0) * 100000 + (i.stats?.xp || 0), ppm: i.stats?.mejorWpm || 0, pre: i.stats?.precisionProm || 0, min: i.stats?.minutos || 0, ult: i.stats?.ultimaPractica || 0, racha: rachaDe(i, sesiones).dias })[c];
   const filtrados = () => inscs.filter((i) => (claseSel === 'todas' || i.classId === claseSel) && i.alias.toLowerCase().includes(texto.toLowerCase()))
     .sort((a, b) => { const x = valorOrden(a, orden.campo), y = valorOrden(b, orden.campo); const r = typeof x === 'number' ? x - y : String(x).localeCompare(String(y), idioma()); return orden.asc ? r : -r; });
+
+  const celdaRacha = (i) => {
+    const r = rachaDe(i, sesiones);
+    return h('span', { title: t('doc.rachaTitulo', { m: r.max }) }, r.dias > 0 ? `🔥 ${r.dias}` : '—');
+  };
 
   function vistaEstudiantes() {
     if (!clases.length) return vacio(t('doc.sinClases'), t('doc.sinClasesTexto'), [h('button', { class: 'btn btn--primary', type: 'button', onclick: () => modalClase({ alGuardar: refrescar }) }, t('doc.crearPrimera')), ...(state.modo === 'demo' ? [ejemploBtn()] : [])]);
@@ -68,9 +73,9 @@ export async function render({ query }) {
           h('th', { scope: 'row' }, i.alias, i.estado === 'pausado' ? h('small', { class: 'suave' }, ` · ${t('doc.pausado')}`) : null), h('td', {}, nombreClase(i.classId)), h('td', { class: 'num' }, String(i.stats?.lecciones || 0)), h('td', { class: 'num' }, String(i.stats?.xp || 0)),
           h('td', { class: 'num' }, i.stats?.mejorWpm ? Math.round(i.stats.mejorWpm) : '—'), h('td', { class: 'num' }, i.stats?.precisionProm ? `${i.stats.precisionProm} %` : '—'),
           h('td', { class: 'num' }, t('doc.min', { n: Math.round(i.stats?.minutos || 0) })), h('td', { class: 'tabla__spark' }, mias.length > 1 ? sparkline(mias, { color: estado === 'atrasado' || estado === 'inactivo' ? 'var(--mal)' : 'var(--ok)', etiqueta: t('doc.evolucion', { n: i.alias }) }) : ''),
-          h('td', {}, textoUltima(i.stats?.ultimaPractica)), h('td', {}, pill(estado)));
+          h('td', { class: 'num' }, celdaRacha(i)), h('td', {}, textoUltima(i.stats?.ultimaPractica)), h('td', {}, pill(estado)));
       }));
-      if (!f.length) cuerpoTabla.append(h('tr', {}, h('td', { colspan: 10, class: 'tabla__vacio' }, inscs.length ? t('doc.ningunoCoincide') : t('doc.sinEstudiantes'))));
+      if (!f.length) cuerpoTabla.append(h('tr', {}, h('td', { colspan: 11, class: 'tabla__vacio' }, inscs.length ? t('doc.ningunoCoincide') : t('doc.sinEstudiantes'))));
       contador.textContent = `${f.length} ${f.length === 1 ? t('doc.estudiante') : t('doc.estudiantes')}`;
     };
     const th = (campo, etq, num) => h('th', { scope: 'col', class: num ? 'num' : '', 'aria-sort': orden.campo === campo ? (orden.asc ? 'ascending' : 'descending') : 'none' },
@@ -80,7 +85,7 @@ export async function render({ query }) {
     return h('section', { class: 'panel panel--tabla' },
       h('div', { class: 'tabla-herr' }, h('div', { class: 'filtros', role: 'group', 'aria-label': t('doc.filtrarClase') }, chips),
         h('div', { class: 'fila' }, h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(orden.campo === 'prog' && !orden.asc), onclick: () => { orden = { campo: 'prog', asc: false }; pintar(); } }, t('doc.ordMas')), h('button', { class: 'filtro', type: 'button', 'aria-pressed': String(orden.campo === 'prog' && orden.asc), onclick: () => { orden = { campo: 'prog', asc: true }; pintar(); } }, t('doc.ordApoyo')), contador, h('input', { class: 'input input--sm', type: 'search', placeholder: t('doc.buscarPh'), 'aria-label': t('doc.buscarAria'), value: texto, oninput: (e) => { texto = e.target.value; pintarTabla(); } }))),
-      h('div', { class: 'tabla-scroll tabla-scroll--fija' }, h('table', { class: 'tabla tabla--lista' }, h('thead', {}, h('tr', {}, th('alias', t('doc.th.est')), th('clase', t('doc.th.clase')), th('lec', t('doc.th.lecciones'), true), th('xp', 'XP', true), th('ppm', t('doc.th.ppm'), true), th('pre', t('doc.th.pre'), true), th('min', t('doc.th.tiempo'), true), h('th', { scope: 'col' }, t('doc.th.evolucion')), th('ult', t('doc.th.ult')), h('th', { scope: 'col' }, t('doc.th.estado')))), cuerpoTabla)));
+      h('div', { class: 'tabla-scroll tabla-scroll--fija' }, h('table', { class: 'tabla tabla--lista' }, h('thead', {}, h('tr', {}, th('alias', t('doc.th.est')), th('clase', t('doc.th.clase')), th('lec', t('doc.th.lecciones'), true), th('xp', 'XP', true), th('ppm', t('doc.th.ppm'), true), th('pre', t('doc.th.pre'), true), th('min', t('doc.th.tiempo'), true), th('racha', t('doc.th.racha'), true), h('th', { scope: 'col' }, t('doc.th.evolucion')), th('ult', t('doc.th.ult')), h('th', { scope: 'col' }, t('doc.th.estado')))), cuerpoTabla)));
   }
   const abrirEstudiante = (i) => modalEstudiante({ insc: i, clase: claseDe(i.classId), sesiones, alCambiar: refrescar });
 

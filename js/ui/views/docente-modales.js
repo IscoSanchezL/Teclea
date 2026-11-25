@@ -7,7 +7,7 @@ import { t, locale } from '../../i18n/index.js';
 import { h, imprimir } from '../../core/utils.js';
 import { GRADOS, perfilDeGrado } from '../../core/grados.js';
 import * as C from '../../db/clases.js';
-import { estadoDe, textoUltima, resumenClase, ETIQUETAS } from '../../db/analitica.js';
+import { estadoDe, rachaDe, textoUltima, resumenClase, ETIQUETAS } from '../../db/analitica.js';
 import { cargarIndice } from '../../lessons/curriculo.js';
 import { JUEGOS } from '../../game/juegos.js';
 import { icono } from '../icons.js';
@@ -160,7 +160,7 @@ export async function modalEstudiante({ insc, clase, sesiones, alCambiar }) {
   const dato = (etq, v) => h('div', { class: 'dato' }, h('small', {}, etq), h('strong', {}, v));
   const capa = abrirCapa({ titulo: insc.alias, tipo: 'dialogo', contenido: h('div', { class: 'pila' },
     h('div', { class: 'fila fila--entre' }, pill(est), h('span', { class: 'suave' }, t('dm.ultima', { c: clase?.nombre || '', u: textoUltima(s.ultimaPractica) }))),
-    h('div', { class: 'datos' }, dato(t('dm.mejorPpm'), s.mejorWpm ? Math.round(s.mejorWpm) : '—'), dato(t('dm.precision'), s.precisionProm ? `${s.precisionProm} %` : '—'), dato(t('dm.minutos'), Math.round(s.minutos || 0)), dato(t('dm.lecciones'), s.lecciones || 0), dato('XP', s.xp || 0), dato(t('dm.medallas'), s.medallas || 0)),
+    h('div', { class: 'datos' }, dato(t('dm.mejorPpm'), s.mejorWpm ? Math.round(s.mejorWpm) : '—'), dato(t('dm.precision'), s.precisionProm ? `${s.precisionProm} %` : '—'), dato(t('dm.minutos'), Math.round(s.minutos || 0)), dato(t('dm.lecciones'), s.lecciones || 0), dato('XP', s.xp || 0), dato(t('dm.medallas'), s.medallas || 0), dato(t('dm.racha'), `🔥 ${rachaDe(insc, sesiones).dias}`), dato(t('dm.rachaMax'), rachaDe(insc, sesiones).max)),
     h('p', { class: 'suave' }, t('dm.metaDe', { g: insc.grado || clase?.grado || 4, a: p.ppmMin, b: p.ppmMax, c: p.precision })),
     serie.length > 1 ? h('div', {}, h('small', { class: 'suave' }, t('dm.evolPpm')), h('div', {}, sparkline(serie, { ancho: 320, alto: 56, etiqueta: t('dm.ppm') }))) : null,
     Object.keys(calor).length ? h('div', {}, h('small', { class: 'suave' }, t('dm.teclasErrores')), tecladoCalor(calor)) : null,

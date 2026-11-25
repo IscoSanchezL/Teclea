@@ -29,6 +29,24 @@ export function estadoDe(insc, grado = insc.grado || 4) {
   return 'ok';
 }
 
+/**
+ * Días de racha que ve el docente. Usa la racha guardada en la inscripción (vence si no practicó ayer u hoy);
+ * si aún no existe (estudiante que no ha practicado desde esta mejora), la cuenta con las sesiones de los últimos días.
+ * @returns {{dias:number, max:number, aprox:boolean}}
+ */
+export function rachaDe(insc, sesiones = []) {
+  const s = insc.stats || {};
+  const ayer = hoyISO(new Date(Date.now() - DIA)), hoy = hoyISO();
+  if (s.ultimoDia) {
+    const vigente = s.ultimoDia >= ayer && s.ultimoDia <= hoy;
+    return { dias: vigente ? (s.racha || 0) : 0, max: s.rachaMax || s.racha || 0, aprox: false };
+  }
+  const dias = new Set(sesiones.filter((x) => x.uid === insc.uid).map((x) => x.dia || hoyISO(new Date(Number(x.creadoEn) || 0))));
+  let n = 0, d = dias.has(hoy) ? 0 : 1;
+  while (dias.has(hoyISO(new Date(Date.now() - d * DIA)))) { n++; d++; }
+  return { dias: n, max: n, aprox: true };
+}
+
 const media = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
 const r1 = (n) => Math.round(n * 10) / 10;
 

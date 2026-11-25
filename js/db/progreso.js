@@ -184,6 +184,7 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
       'stats.mejorWpm': Math.max(s.mejorWpm || 0, resultado.ppm),
       'stats.precisionProm': Math.round((((s.precisionProm || 0) * (sesiones - 1)) + resultado.precision) / sesiones * 10) / 10,
       'stats.ultimaPractica': store.ahora(), ultimaConexion: store.ahora(),
+      'stats.racha': r.racha, 'stats.rachaMax': r.rachaMax, 'stats.ultimoDia': r.ultimoDia,   // para que el docente vea los días de racha
     };
     if (leccion && estrellas >= 1 && !prev?.completada) datos['stats.lecciones'] = store.sumar(1);
     if (leccion) datos['stats.mundo'] = leccion.mundo;
@@ -211,6 +212,7 @@ export async function registrarActividad({ user, tipo, refId, resultado, leccion
     if (s.ppmInicial == null) s.ppmInicial = resultado.ppm;
     s.caracteres = (s.caracteres || 0) + Math.min(5000, resultado.caracteres || 0);
     s.mejorWpm = Math.max(s.mejorWpm || 0, resultado.ppm);
+    s.racha = r.racha; s.rachaMax = r.rachaMax; s.ultimoDia = r.ultimoDia;
     if (leccion && estrellas >= 1 && !prev?.completada) s.lecciones = (s.lecciones || 0) + 1;
   }
   const userNuevo = { ...user, xp: xpNuevo, monedas: (user.monedas || 0) + monedas, nivel: nivelDespues.nivel };
